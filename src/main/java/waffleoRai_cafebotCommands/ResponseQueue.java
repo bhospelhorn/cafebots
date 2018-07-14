@@ -1,0 +1,444 @@
+package waffleoRai_cafebotCommands;
+
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
+
+import net.dv8tion.jda.core.entities.MessageChannel;
+import net.dv8tion.jda.core.entities.User;
+
+/*
+ * UPDATES
+ * 
+ * Creation | June 9, 2018
+ * Version 1.0.0 Documentation | July 1, 2018
+ * 
+ */
+
+/**
+ * A deque/map wrapper for management of user responses. Bots may prompt for confirmation
+ * or cancellation of a particular action and will require a response from the user who
+ * issued the initial command to continue. This queue records pending responses, handles
+ * timeouts, and queues responses for processing once they are received.
+ * <br><br><b>Background Threads:</b>
+ * <br>- Timer Thread (<i>ResponseQueue.TimerThread</i>)
+ * <br>Instantiated at Construction: N
+ * <br>Started at Construction: N
+ * <br>- Cleaner Thread (<i>ResponseQueue.CleanerThread</i>)
+ * <br>Instantiated at Construction: N
+ * <br>Started at Construction: N
+ * <br><br><b>I/O Options:</b>
+ * <br>[None]
+ * <br><br><i>Outstanding Issues:</i>
+ * <br>
+ * @author Blythe Hospelhorn
+ * @version 1.0.0
+ * @since July 1, 2018
+ */
+public class ResponseQueue {
+	
+	/* ----- Constants ----- */
+	
+	/**
+	 * Default number of seconds until a prompt for user confirmation times out.
+	 */
+	public static final int TIMEOUT_APPR_SECONDS = 90;
+
+	/* ----- Instance Variables ----- */
+	
+	private Map<Long, ResponseCard> pending;
+	private Deque<Response> queue;
+	
+	private TimerThread timer;
+	private CleanerThread sweeper;
+	
+	/* ----- Inner Classes ----- */
+	
+	private class TimerThread extends Thread
+	{
+		private boolean killMe;
+		
+		public TimerThread()
+		{
+			killMe = false;
+			this.setDaemon(true);
+			Random r = new Random();
+			this.setName("ResponseQueueTimerThread_" + Integer.toHexString(r.nextInt()));
+		}
+		
+		public void run()
+		{
+			while(!killMe())
+			{
+				Set<Long> pkeys = getAllUIDs();
+				for (Long l : pkeys)
+				{
+					ResponseCard card = getCard(l);
+					card.incrementTime();
+				}
+				try 
+				{
+					Thread.sleep(900);
+				} 
+				catch (InterruptedException e) 
+				{
+					e.printStackTrace();
+				}
+			}
+		}
+		
+		public synchronized boolean killMe()
+		{
+			return killMe;
+		}
+		
+		public synchronized void kill()
+		{
+			killMe = true;
+		}
+		
+	}
+	
+	private class CleanerThread extends Thread
+	{
+		private boolean killMe;
+		
+		public CleanerThread()
+		{
+			killMe = false;
+			this.setDaemon(true);
+			Random r = new Random();
+			this.setName("ResponseQueueCleanerThread_" + Integer.toHexString(r.nextInt()));	
+		}
+		
+		public void run()
+		{
+			while(!killMe())
+			{
+				Set<Long> pkeys = getAllUIDs();
+				if (pkeys.size() < 1)
+				{
+					try 
+					{
+						Thread.sleep(900 * TIMEOUT_APPR_SECONDS);
+					} 
+					catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+				else
+				{
+					for (Long l : pkeys)
+					{
+						ResponseCard card = getCard(l);
+						if (card.checkTime() >= TIMEOUT_APPR_SECONDS)
+						{
+							removeCard(l);
+							Response r = new Response(card.getCommand(), Response.RESPONSE_TIMEOUT);
+							addToQueue(r);
+						}
+					}	
+				}
+			}
+		}
+		
+		public synchronized boolean killMe()
+		{
+			return killMe;
+		}
+		
+		public synchronized void kill()
+		{
+			killMe = true;
+		}
+		
+	}
+	
+	/* ----- Construction ----- */
+	
+	/**
+	 * Construct an empty ResponseQueue. ResponseCard map is implemented as a HashMap, 
+	 * Response queue is implemented as a LinkedList.
+	 * <br>Background threads are neither instantiated nor started by this constructor!
+	 */
+	public ResponseQueue()
+	{
+		pending = new HashMap<Long, ResponseCard>();
+		queue = new LinkedList<Response>();
+	}
+	
+	/* ----- Getters ----- */
+	
+	/**
+	 * Pop the first Response off the response queue. If there are no Responses when this
+	 * method is called, it will return null.
+	 * @return The first Response in the queue, or null if the queue is empty.
+	 */
+	public synchronized Response popQueue()
+	{
+		try
+		{
+			return queue.pop();
+		}
+		catch (Exception e)
+		{
+			return null;
+		}
+	}
+	
+	/**
+	 * Get the number of Responses currently in the response queue.
+	 * @return The size of the response queue.
+	 */
+	public synchronized int queueSize()
+	{
+		return queue.size();
+	}
+	
+	/**
+	 * Get whether the response queue is currently empty.
+	 * @return True if the queue is empty, False if it is not empty.
+	 */
+	public synchronized boolean queueEmpty()
+	{
+		return queue.isEmpty();
+	}
+	
+	/**
+	 * Get whether there is a response currently pending for the given user.
+	 * @param u User to look up.
+	 * @return True if the bot using this response queue is currently waiting for a user
+	 * response to a prompt, False otherwise.
+	 */
+	public synchronized boolean responsePending(User u)
+	{
+		long uid = u.getIdLong();
+		return (pending.get(uid) != null);
+	}
+	
+	/**
+	 * Get whether there is a response currently pending for the given user.
+	 * @param uid Discord long UID of user to look up.
+	 * @return True if the bot using this response queue is currently waiting for a user
+	 * response to a prompt, False otherwise.
+	 */
+	public synchronized boolean responsePending(long uid)
+	{
+		return (pending.get(uid) != null);
+	}
+	
+	/**
+	 * Get the UID of the channel on which the response pending from a given user is.
+	 * @param u User response is pending on.
+	 * @return Long UID of the Discord channel the response is expected on.
+	 */
+	public synchronized long getPendingChannel(User u)
+	{
+		long uid = u.getIdLong();
+		ResponseCard c = pending.get(uid);
+		if (c == null) return -1;
+		else return c.getChannelID();
+	}
+	
+	/**
+	 * Get the UID of the channel on which the response pending from a given user is.
+	 * @param uid Long ID of user response is pending on.
+	 * @return Long UID of the Discord channel the response is expected on.
+	 */
+	public synchronized long getPendingChannel(long uid)
+	{
+		ResponseCard c = pending.get(uid);
+		if (c == null) return -1;
+		else return c.getChannelID();
+	}
+	
+	/**
+	 * Get the Discord long UIDs of all users the bot brain is waiting on a 
+	 * response from.
+	 * @return Set view of all long user UIDs pending response.
+	 */
+	public synchronized Set<Long> getAllUIDs()
+	{
+		return pending.keySet();
+	}
+	
+	/* ----- Setters ----- */
+	
+	/**
+	 * Queue a user response so that the pending bot can execute the rest of its
+	 * command accordingly.
+	 * @param r Response to add.
+	 */
+	public synchronized void addToQueue(Response r)
+	{
+		queue.addLast(r);
+	}
+	
+	/* ----- Responding ----- */
+	
+	/**
+	 * Send a response (as a pseudo enum) from a user and channel. The bot will check
+	 * for any pending responses and reply accordingly.
+	 * @param response Int correlating to response to send. See <i>Response</i> class constants.
+	 * @param u User that sent the response.
+	 * @param c Channel the response was sent from.
+	 */
+	public synchronized void respond(int response, User u, MessageChannel c)
+	{
+		long chanid = getPendingChannel(u);
+		if (chanid != c.getIdLong())
+		{
+			forceTimeout(u);
+			return;
+		}
+		switch(response)
+		{
+		case Response.RESPONSE_YES:
+			respondYes(u);
+			break;
+		case Response.RESPONSE_NO:
+			respondNo(u);
+			break;
+		case Response.RESPONSE_INVALID:
+			respondInvalid(u);
+			break;
+		case Response.RESPONSE_TIMEOUT:
+			forceTimeout(u);
+			break;
+		}
+	}
+	
+	/**
+	 * Send a "yes" response from User u to the bot. If there is a pending request
+	 * for that user, the bot will reply accordingly.
+	 * @param u User sending response.
+	 */
+	public synchronized void respondYes(User u)
+	{
+		long uid = u.getIdLong();
+		ResponseCard c = pending.remove(uid);
+		if (c == null) return;
+		Response r = new Response(c.getCommand(), Response.RESPONSE_YES);
+		addToQueue(r);
+	}
+	
+	/**
+	 * Send a "no" response from User u to the bot. If there is a pending request
+	 * for that user, the bot will reply accordingly.
+	 * @param u User sending response.
+	 */
+	public synchronized void respondNo(User u)
+	{
+		long uid = u.getIdLong();
+		ResponseCard c = pending.remove(uid);
+		if (c == null) return;
+		Response r = new Response(c.getCommand(), Response.RESPONSE_NO);
+		addToQueue(r);
+	}
+	
+	/**
+	 * Induce a "response invalid" reply from the bot from User u.
+	 * Like a proper response, this method also removes the response card from the queue.
+	 * @param u User sending response.
+	 */
+	public synchronized void respondInvalid(User u)
+	{
+		long uid = u.getIdLong();
+		ResponseCard c = pending.remove(uid);
+		if (c == null) return;
+		Response r = new Response(c.getCommand(), Response.RESPONSE_INVALID);
+		addToQueue(r);
+	}
+	
+	/**
+	 * Induce a "timeout" reply from the bot from User u.
+	 * Like a proper response, this method also removes the response card from the queue.
+	 * @param u User sending response.
+	 */
+	public synchronized void forceTimeout(User u)
+	{
+		long uid = u.getIdLong();
+		ResponseCard c = pending.remove(uid);
+		if (c == null) return;
+		Response r = new Response(c.getCommand(), Response.RESPONSE_TIMEOUT);
+		addToQueue(r);
+	}
+	
+	/* ----- Thread Management ----- */
+	
+	/**
+	 * Instantiate and start the thread for this queue that simply increments
+	 * the time since submission count for each response card every second - essentially
+	 * counting seconds since a response card was added.
+	 */
+	public synchronized void startTimer()
+	{
+		timer = new TimerThread();
+		timer.start();
+	}
+	
+	/**
+	 * Kill the timer thread for this response queue. If this thread is inactive,
+	 * time after response card submission will not be counted.
+	 * <br>This method does nothing if the timer thread is null or not running.
+	 */
+	public synchronized void stopTimer()
+	{
+		if (timer == null) return;
+		if (!timer.isAlive()) return;
+		timer.kill();
+	}
+	
+	/**
+	 * Instantiate and start the thread that monitors the current response cards and
+	 * removes any that have been queued for too long (have timed out). 
+	 * <br>The time since submission for response cards is incremented by the Timer Thread,
+	 * so if the Timer is not running, then 
+	 */
+	public synchronized void startCleaner()
+	{
+		sweeper = new CleanerThread();
+		sweeper.start();
+	}
+	
+	public synchronized void killCleaner()
+	{
+		if (sweeper == null) return;
+		if (!sweeper.isAlive()) return;
+		sweeper.kill();
+	}
+	
+	public synchronized void startThreads()
+	{
+		startTimer();
+		startCleaner();
+	}
+	
+	public synchronized void killThreads()
+	{
+		stopTimer();
+		killCleaner();
+	}
+
+	/* ----- Response Requesting ----- */
+	
+	public synchronized ResponseCard getCard(long uid)
+	{
+		return pending.get(uid);
+	}
+	
+	public synchronized ResponseCard removeCard(long uid)
+	{
+		return pending.remove(uid);
+	}
+	
+	public synchronized void requestResponse(Command cmd, User u, MessageChannel ch)
+	{
+		ResponseCard card = new ResponseCard(cmd, ch.getIdLong());
+		pending.put(u.getIdLong(), card);
+	}
+	
+}

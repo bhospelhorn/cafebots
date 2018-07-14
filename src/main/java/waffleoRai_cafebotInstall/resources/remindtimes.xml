@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<reminders>
+	<onetime>
+		<reminder_1>"0Y0M0W0D0H30N"</reminder_1>
+		<reminder_2>"0Y0M0W0D8H0N"</reminder_2>
+		<reminder_3>"0Y0M1W0D0H0N"</reminder_3>
+		<reminder_4>"0Y0M2W0D0H0N"</reminder_4>
+		<reminder_5>"0Y1M0W0D0H0N"</reminder_5>
+	</onetime>
+	<deadline>
+		<reminder_1>"0Y0M0W0D4H0N"</reminder_1>
+		<reminder_2>"0Y0M0W1D0H0N"</reminder_2>
+		<reminder_3>"0Y0M1W0D0H0N"</reminder_3>
+		<reminder_4>"0Y0M2W0D0H0N"</reminder_4>
+		<reminder_5>"0Y1M0W0D0H0N"</reminder_5>
+	</deadline>
+	<weekly>
+		<reminder_1>"0Y0M0W0D0H30N"</reminder_1>
+		<reminder_2>"0Y0M0W0D4H0N"</reminder_2>
+		<reminder_3>"0Y0M0W1D0H0N"</reminder_3>
+		<reminder_4>"0Y0M0W0D0H0N"</reminder_4>
+		<reminder_5>"0Y0M0W0D0H0N"</reminder_5>
+	</weekly>
+	<biweekly>
+		<reminder_1>"0Y0M0W0D0H30N"</reminder_1>
+		<reminder_2>"0Y0M0W0D4H0N"</reminder_2>
+		<reminder_3>"0Y0M0W1D0H0N"</reminder_3>
+		<reminder_4>"0Y0M1W0D0H0N"</reminder_4>
+		<reminder_5>"0Y0M0W0D0H0N"</reminder_5>
+	</biweekly>
+	<monthlya>
+		<reminder_1>"0Y0M0W0D0H30N"</reminder_1>
+		<reminder_2>"0Y0M0W0D4H0N"</reminder_2>
+		<reminder_3>"0Y0M0W1D0H0N"</reminder_3>
+		<reminder_4>"0Y0M1W0D0H0N"</reminder_4>
+		<reminder_5>"0Y0M0W0D0H0N"</reminder_5>
+	</monthlya>
+	<monthlyb>
+		<reminder_1>"0Y0M0W0D0H30N"</reminder_1>
+		<reminder_2>"0Y0M0W0D4H0N"</reminder_2>
+		<reminder_3>"0Y0M0W1D0H0N"</reminder_3>
+		<reminder_4>"0Y0M1W0D0H0N"</reminder_4>
+		<reminder_5>"0Y0M0W0D0H0N"</reminder_5>
+	</monthlyb>
+</reminders>

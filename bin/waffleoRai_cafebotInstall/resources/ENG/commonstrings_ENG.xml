@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<commonstrings>
+	<type>
+		<onetime>one-time</onetime>
+		<deadline>deadline</deadline>
+		<weekly>weekly</weekly>
+		<biweekly>biweekly</biweekly>
+		<monthlyday>monthly (fixed day)</monthlyday>
+		<monthlydow>monthly (moving day)</monthlydow>
+		<birthday>birthday</birthday>
+	</type>
+	<timeframe>
+		<year>year</year>
+		<year_pl>years</year_pl>
+		<month>month</month>
+		<month_pl>months</month_pl>
+		<week>week</week>
+		<week_pl>weeks</week_pl>
+		<day>day</day>
+		<day_pl>days</day_pl>
+		<hour>hour</hour>
+		<hour_pl>hours</hour_pl>
+		<minute>minute</minute>
+		<minute_pl>minutes</minute_pl>
+	</timeframe>
+	<daysofweek>
+		<day1>monday</day1>
+		<day2>tuesday</day2>
+		<day3>wednesday</day3>
+		<day4>thursday</day4>
+		<day5>friday</day5>
+		<day6>saturday</day6>
+		<day7>sunday</day7>
+	</daysofweek>
+	<daysofweekabb>
+		<day1>mon</day1>
+		<day2>tue</day2>
+		<day3>wed</day3>
+		<day4>thu</day4>
+		<day5>fri</day5>
+		<day6>sat</day6>
+		<day7>sun</day7>
+	</daysofweekabb>
+	<timestrings>
+		<onetime>%M %d, %y %i %z</onetime>
+		<deadline>%M %d, %y %i %z</deadline>
+		<weekly>%D %i %z</weekly>
+		<biweekly>%D %i %z</biweekly>
+		<monthlyday>%I of every month</monthlyday>
+		<monthlydow>%I %D of every month</monthlydow>
+		<birthday>%M %d</birthday>
+	</timestrings>
+	<misc>
+		<empty>None</empty>
+	</misc>
+</commonstrings>
