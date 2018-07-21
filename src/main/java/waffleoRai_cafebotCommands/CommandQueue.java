@@ -38,6 +38,7 @@ public class CommandQueue {
 	 */
 	public synchronized void addCommand(Command c)
 	{
+		//System.err.println(Thread.currentThread().getName() + " || CommandQueue.addCommand || DEBUG - queuing command...");
 		queue.addLast(c);
 	}
 	

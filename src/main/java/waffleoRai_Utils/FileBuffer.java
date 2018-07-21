@@ -3408,7 +3408,7 @@ public class FileBuffer
   	{
   		if (charset == null) throw new NullPointerException();
   		if (stPos < 0) throw new IndexOutOfBoundsException();
-  		if (edPos >= this.getFileSize()) throw new IndexOutOfBoundsException();
+  		if (edPos > this.getFileSize()) throw new IndexOutOfBoundsException();
   		if (stPos >= edPos) throw new IndexOutOfBoundsException();
   		Charset mySet = Charset.forName(charset);
   		CharBuffer cb = mySet.decode(this.toByteBuffer(stPos, edPos));

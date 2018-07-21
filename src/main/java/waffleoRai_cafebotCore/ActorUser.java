@@ -31,6 +31,7 @@ public class ActorUser {
 	
 	private boolean admin;
 	private boolean pingGreetings;
+	private boolean pingFarewells;
 	private long pingGreetingsChannel;
 	
 	private Set<CalendarEvent> requested_events;
@@ -53,12 +54,16 @@ public class ActorUser {
 		{
 			int ct = GuildSettings.REMINDER_COUNT;
 			Boolean[] barr = new Boolean[ct];
-			for (int j = 0; j < ct; j++) barr[j] = true;
+			for (int j = 0; j < ct; j++){
+				if (j < 2) barr[j] = true;
+				else barr[j] = false;
+			}
 			rswitches.put(EventType.getEventType(i), barr);
 		}
 		
 		admin = mem.isOwner();
 		pingGreetings = false;
+		pingFarewells = false;
 		pingGreetingsChannel = mem.getDefaultChannel().getIdLong();
 		audioConfirmed = false;
 		
@@ -101,6 +106,8 @@ public class ActorUser {
 			line = userfile.readLine();
 			if (line.equals("1")) pingGreetings = true;
 			else pingGreetings = false;
+			if (line.equals("1")) pingFarewells = true;
+			else pingFarewells = false;
 			
 			line = userfile.readLine();
 			pingGreetingsChannel = Long.parseUnsignedLong(line);
@@ -159,6 +166,11 @@ public class ActorUser {
 		return pingGreetings;
 	}
 
+	public boolean pingFarewellsOn()
+	{
+		return this.pingFarewells;
+	}
+	
 	public long getPingGreetingsChannel()
 	{
 		return pingGreetingsChannel;
@@ -217,6 +229,11 @@ public class ActorUser {
 	public void setGreetingPings(boolean b)
 	{
 		pingGreetings = b;
+	}
+	
+	public void setFarewellPings(boolean b)
+	{
+		this.pingFarewells = b;
 	}
 	
 	public void setGreetingPingsChannel(long channelID)
@@ -299,6 +316,8 @@ public class ActorUser {
 		else bw.write("0\n");
 		
 		if (pingGreetings) bw.write("1\n");
+		else bw.write("0\n");
+		if (pingFarewells) bw.write("1\n");
 		else bw.write("0\n");
 		
 		bw.write(Long.toUnsignedString(pingGreetingsChannel) + "\n");

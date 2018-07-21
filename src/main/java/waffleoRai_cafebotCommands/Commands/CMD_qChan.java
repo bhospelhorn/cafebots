@@ -11,6 +11,9 @@ import waffleoRai_cafebotCore.AbstractBot;
  * Creation | June 27, 2018
  * Version 1.0.0 Documentation | July 1, 2018
  * 
+ * 1.0.0 -> 1.1.0 | July 20, 2018
+ * 	Added command message ID notes
+ * 
  */
 
 
@@ -21,8 +24,8 @@ import waffleoRai_cafebotCore.AbstractBot;
  * <br>qchan birthday
  * <br>qchan greeting
  * @author Blythe Hospelhorn
- * @version 1.0.0
- * @since July 1, 2018
+ * @version 1.1.0
+ * @since July 20, 2018
  */
 public class CMD_qChan extends CommandAdapter{
 	
@@ -37,12 +40,14 @@ public class CMD_qChan extends CommandAdapter{
 	 * @param birthday
 	 * <br>True - If user wants to check the birthday channel
 	 * <br>False - If user wants to check the greeting channel
+	 * @param cmdID Long UID of the message the command was sent in.
 	 */
-	public CMD_qChan(MessageChannel ch, Guild g, boolean birthday)
+	public CMD_qChan(MessageChannel ch, Guild g, boolean birthday, long cmdID)
 	{
 		cmd_channel = ch;
 		guild = g;
 		bday = birthday;
+		super.setCommandMessageID(cmdID);
 	}
 	
 	@Override

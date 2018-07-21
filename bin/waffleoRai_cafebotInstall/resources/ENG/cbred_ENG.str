@@ -563,5 +563,41 @@ EVENTID	TYPE	NAME	TIME	CREATOR	ATTENDEES
 Hello, %r. Below are all of the events you have created:
 EVENTID	TYPE	NAME	TIME	CREATOR	ATTENDEES
 %E
+
+#Member leaves server
+It seems that %U has left the server... I hope everything is alright!
+
+#Member leave ping
+Hello %R . I am sorry to tell you that %u has left the server...
+
+#Set farewell on
+Farewell messages have been turned on for this server!
+
+#Set farewell off
+Farewell messages have been turned off for this server.
+
+#Set farewell fail
+[ERROR] Farewell message settings could not be changed!
+
+#Set farewell ping on
+Understood, %r . You will be notified whenever a member leaves the server.
+
+#Set farewell ping off
+Understood, %r . You will no longer be notified whenever a member leaves the server.
+
+#Set farewell ping fail
+[ERROR] Farewell ping setting could not be changed.
+
+#Check farewell setting - on
+Farewell messages are set to ON
+
+#Check farewell setting - off
+Farewell messages are set to OFF
+
+#Check farewell ping setting - on
+Farewell ping setting for user %r : ON
+
+#Check farewell ping setting - off
+Farewell ping setting for user %r : OFF
 	
 #ADD HERE...

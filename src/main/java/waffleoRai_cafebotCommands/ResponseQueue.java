@@ -396,7 +396,7 @@ public class ResponseQueue {
 	 * Instantiate and start the thread that monitors the current response cards and
 	 * removes any that have been queued for too long (have timed out). 
 	 * <br>The time since submission for response cards is incremented by the Timer Thread,
-	 * so if the Timer is not running, then 
+	 * so if the Timer is not running, then the cleaner won't be cleaning anything.
 	 */
 	public synchronized void startCleaner()
 	{
@@ -404,6 +404,11 @@ public class ResponseQueue {
 		sweeper.start();
 	}
 	
+	/**
+	 * Kill the cleaner thread either for the purposes of shutting down the
+	 * program or to stop timeouts from occurring.
+	 * <br>If the cleaner thread is null or not running, this method will do nothing.
+	 */
 	public synchronized void killCleaner()
 	{
 		if (sweeper == null) return;
@@ -411,12 +416,20 @@ public class ResponseQueue {
 		sweeper.kill();
 	}
 	
+	/**
+	 * Instantiate and start both background threads (timer and cleaner) 
+	 * for this response queue.
+	 */
 	public synchronized void startThreads()
 	{
 		startTimer();
 		startCleaner();
 	}
 	
+	/**
+	 * Kill both background threads (timer and cleaner) for this response queue
+	 * if they are running.
+	 */
 	public synchronized void killThreads()
 	{
 		stopTimer();
@@ -425,16 +438,36 @@ public class ResponseQueue {
 
 	/* ----- Response Requesting ----- */
 	
+	/**
+	 * Get information about a pending response in the form of a ResponseCard object.
+	 * @param uid Long UID of the user to look up a response card for.
+	 * @return ResponseCard of pending command if there is one for that user. Null if
+	 * there is no response pending for the given user.
+	 */
 	public synchronized ResponseCard getCard(long uid)
 	{
 		return pending.get(uid);
 	}
 	
+	/**
+	 * Get information about a pending response for a given user and remove the
+	 * response request from the ResponseQueue.
+	 * @param uid Long UID of the user to look up a response card for.
+	 * @return ResponseCard of pending command if there is one for that user. Null if
+	 * there is no response pending for the given user.
+	 */
 	public synchronized ResponseCard removeCard(long uid)
 	{
 		return pending.remove(uid);
 	}
 	
+	/**
+	 * Request a user response to a command (such as confirmation or cancellation)
+	 * from User u as should be expected on the channel the command was originally sent on.
+	 * @param cmd Command the bot requires a response to complete.
+	 * @param u User that sent the original command and who needs to provide response.
+	 * @param ch Channel the original command was sent on and the response is expected on.
+	 */
 	public synchronized void requestResponse(Command cmd, User u, MessageChannel ch)
 	{
 		ResponseCard card = new ResponseCard(cmd, ch.getIdLong());

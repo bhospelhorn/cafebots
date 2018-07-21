@@ -6,13 +6,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.MessageChannel;
 import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.events.guild.member.GuildMemberJoinEvent;
+import net.dv8tion.jda.core.events.guild.member.GuildMemberLeaveEvent;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import waffleoRai_Utils.BitStreamer;
 import waffleoRai_cafebotCommands.BotScheduler.Position;
 import waffleoRai_cafebotCommands.Commands.CMD_BadCommandMessage;
+import waffleoRai_cafebotCommands.Commands.CMD_IssueReminder;
+import waffleoRai_cafebotCommands.Commands.CMD_MemberFarewell;
 import waffleoRai_cafebotCommands.Commands.CMD_NewMemberNotify;
 import waffleoRai_cafebotCommands.Commands.CMD_OtherBotHandledMessage;
 import waffleoRai_cafebotCommands.Commands.CMD_ParserBlockWarn;
@@ -20,6 +24,7 @@ import waffleoRai_cafebotCommands.Commands.CMD_WishBirthday;
 import waffleoRai_cafebotCore.AbstractBot;
 import waffleoRai_cafebotRoles.ActorRole;
 import waffleoRai_schedulebot.Birthday;
+import waffleoRai_schedulebot.EventAdapter;
 
 /*
  * UPDATES
@@ -27,6 +32,13 @@ import waffleoRai_schedulebot.Birthday;
  * Creation | June 10, 2018
  * Version 1.0.0 Documentation | July 1, 2018
  * 
+ * 1.0.0 -> 1.1.0 | July 14, 2018
+ * 	Added user leave farewell message framework
+ * 1.1.0 -> 1.1.1 | July 15, 2018
+ * 	Altered default perm map set to revolve around 7 bots instead of 9.
+ * 	Added methods to access information
+ * 1.1.1 -> 1.2.0 | July 20, 2018
+ * 	Initial update for command ID compatibility
  */
 
 /**
@@ -40,8 +52,8 @@ import waffleoRai_schedulebot.Birthday;
  * <br><br><i>Outstanding Issues:</i>
  * <br>
  * @author Blythe Hospelhorn
- * @version 1.0.0
- * @since July 1, 2018
+ * @version 1.2.0
+ * @since July 20, 2018
  */
 public class ParseCore {
 	
@@ -50,6 +62,10 @@ public class ParseCore {
 	public static final String CMD_WISHBIRTHDAY = "wishbday";
 	public static final String CMD_GREETNEWMEMBER = "greetnewb";
 	public static final String CMD_PINGARRIVAL = "pingarrival";
+	public static final String CMD_FAREWELLMEMBER = "farewelljerk";
+	public static final String CMD_PINGDEPARTURE = "pingdepart";
+	
+	public static final String CMD_AUTOCLEAN = "doautoclean";
 	
 	public static final String CMD_REM_ONETIME = "remonetime";
 	public static final String CMD_REM_WEEKLY = "remweekly";
@@ -75,6 +91,7 @@ public class ParseCore {
 	
 	private MessageQueue mqueue;
 	private GreetingQueue gqueue;
+	private FarewellQueue fqueue;
 	private ParserThread parserthread;
 	
 	private boolean block;
@@ -99,6 +116,7 @@ public class ParseCore {
 		block = false;
 		mqueue = new MessageQueue();
 		gqueue = new GreetingQueue();
+		fqueue = new FarewellQueue();
 	}
 	
 	/* ----- Getters ----- */
@@ -197,17 +215,20 @@ public class ParseCore {
 	
 	/* ----- Command Formatting ----- */
 	
-	private String removeMentions(String rawmsg, List<User> mentioned)
+	private String removeMentions(String rawmsg, List<Member> mentioned)
 	{
-		for (User u : mentioned)
+		//System.err.println("DEBUG ParseCore.removeMentions || Raw message: " + rawmsg);
+		//System.err.println("DEBUG ParseCore.removeMentions || Number of mentions: " + mentioned.size());
+		for (Member u : mentioned)
 		{
 			String mstr = u.getAsMention();
-			System.out.println("DEBUG ParseCore.removeMentions || Mention string generated for user " + u.getName() + ": " + mstr);
-			rawmsg = rawmsg.replace((CharSequence)rawmsg, "");
+			//System.out.println("DEBUG ParseCore.removeMentions || Mention string generated for user " + u.getUser().getName() + ": " + mstr);
+			rawmsg = rawmsg.replace(mstr, "");
 		}
+		//System.err.println("DEBUG ParseCore.removeMentions || Raw message after mention removal: " + rawmsg);
 		//Clean up any white space at the beginning and end.
 		rawmsg = rawmsg.trim();
-		System.out.println("DEBUG ParseCore.removeMentions || Output: " + rawmsg);
+		//System.out.println("DEBUG ParseCore.removeMentions || Output: " + rawmsg);
 		return rawmsg;
 	}
 	
@@ -280,7 +301,7 @@ public class ParseCore {
 		 */
 		public ParserThread()
 		{
-			killMe = true;
+			killMe = false;
 			this.setDaemon(true);
 			Random r = new Random();
 			this.setName("CafebotsParserDaemon_" + Integer.toHexString(r.nextInt()));
@@ -302,6 +323,12 @@ public class ParseCore {
 				{
 					GuildMemberJoinEvent e = gqueue.pop();
 					memberJoined(e);
+				}
+				//Check farewell queue
+				while (!fqueue.isEmpty())
+				{
+					GuildMemberLeaveEvent e = fqueue.pop();
+					memberLeft(e);
 				}
 				//We assume there's nothing left until interrupted
 				if (!Thread.interrupted())
@@ -378,6 +405,16 @@ public class ParseCore {
 		}
 	}
 	
+	/**
+	 * Check to see if the parser thread is running.
+	 * @return True if the parser thread is running, false if it is not.
+	 */
+	public boolean parserThreadRunning()
+	{
+		if (parserthread == null) return false;
+		return parserthread.isAlive();
+	}
+	
 	/* ----- Command Handling ----- */
 	
 	/**
@@ -387,7 +424,10 @@ public class ParseCore {
 	 */
 	public void queueMessage(MessageReceivedEvent event)
 	{
+		//System.err.println(Thread.currentThread().getName() + " || ParseCore.queueMessage || DEBUG - Queuing message event!");
 		mqueue.add(event);
+		parserthread.interruptMe();
+		//System.err.println(Thread.currentThread().getName() + " || ParseCore.queueMessage || DEBUG - Parser thread interrupt sent!");
 	}
 	
 	/**
@@ -398,6 +438,18 @@ public class ParseCore {
 	public void queueGreeting(GuildMemberJoinEvent event)
 	{
 		gqueue.add(event);
+		parserthread.interruptMe();
+	}
+	
+	/**
+	 * Queue a GuildMemberLeaveEvent (an event fired by Discord when a user leaves a guild/server)
+	 * for processing by the ParserThread, or any external thread written to process such events.
+	 * @param event Event to queue
+	 */
+	public void queueFarewell(GuildMemberLeaveEvent event)
+	{
+		fqueue.add(event);
+		parserthread.interruptMe();
 	}
 	
 	/**
@@ -431,6 +483,7 @@ public class ParseCore {
 	 */
 	public void parseMessage(MessageReceivedEvent event)
 	{
+		//System.err.println(Thread.currentThread().getName() + " || ParseCore.parseMessage || DEBUG - Message parse requested.");
 		if (block)
 		{
 			//Tell bot 1 to warn that channel that this command will not be executed since
@@ -444,7 +497,7 @@ public class ParseCore {
 		//See if sender is currently blocked due to pending requests
 		boolean b = blacklist.isBlacklisted(event.getAuthor());
 		//Extract any mentions
-		List<User> mentioned = event.getMessage().getMentionedUsers();
+		List<Member> mentioned = event.getMessage().getMentionedMembers();
 		if (b)
 		{
 			//Response from at least one bot is pending...
@@ -454,9 +507,9 @@ public class ParseCore {
 			{
 				//Mask vector to not send message to any bots not mentioned.
 				int mask = 0;
-				for (User u : mentioned)
+				for (Member u : mentioned)
 				{
-					int bi = getBotIndex(u);
+					int bi = getBotIndex(u.getUser());
 					if (bi >= 0)
 					{
 						//User match!
@@ -484,6 +537,7 @@ public class ParseCore {
 		}
 		else
 		{
+			//System.err.println(Thread.currentThread().getName() + " || ParseCore.parseMessage || DEBUG - No user block.");
 			String command = event.getMessage().getContentRaw();
 			if (!mentioned.isEmpty())
 			{
@@ -500,7 +554,7 @@ public class ParseCore {
 			String[] args = splitArgs(command);
 			Parser p = parserMap.get(args[0]);
 			Command c = null;
-			if (p == null) c = new CMD_BadCommandMessage(event.getChannel());
+			if (p == null) c = new CMD_BadCommandMessage(event.getChannel(), event.getMessageIdLong());
 			else c = p.generateCommand(args, event);
 			//Determine which bot(s) to send command to.
 			if (!mentioned.isEmpty())
@@ -509,9 +563,9 @@ public class ParseCore {
 				int bot = scheduler.sendCommandTo(args[0]);
 				//Make a list of the bot indices mentioned
 				List<Integer> mbotlist = new ArrayList<Integer>(mentioned.size());
-				for (User u : mentioned)
+				for (Member u : mentioned)
 				{
-					int bi = getBotIndex(u);
+					int bi = getBotIndex(u.getUser());
 					if (bi > 0 && bi < 10) mbotlist.add(bi);
 				}
 				
@@ -523,12 +577,14 @@ public class ParseCore {
 					{
 						if (i == bot)
 						{
+							//System.err.println(Thread.currentThread().getName() + " || ParseCore.parseMessage || DEBUG - Sending command to bot " + i);
 							mybots[bot].getCommandQueue().addCommand(c);
 						}
 						else
 						{
 							if (mybots[i] != null)
 							{
+								//System.err.println(Thread.currentThread().getName() + " || ParseCore.parseMessage || DEBUG - Sending command to bot " + i);
 								mybots[i].getCommandQueue().addCommand(new CMD_OtherBotHandledMessage(event.getChannel()));
 							}
 						}
@@ -586,6 +642,21 @@ public class ParseCore {
 	}
 	
 	/**
+	 * Issue a command to the appropriate bot to print a farewell message and 
+	 * notify any requesting admins of a member leaving the guild.
+	 * @param e Event fired by the Discord API when a member left.
+	 */
+	public void memberLeft(GuildMemberLeaveEvent e)
+	{
+		Command c = new CMD_MemberFarewell(e.getMember());
+		int bot = scheduler.sendCommandTo(CMD_FAREWELLMEMBER);
+		if (bot < 0) return;
+		if (bot >= mybots.length) return;
+		if (mybots[bot] == null) return;
+		mybots[bot].getCommandQueue().addCommand(c);
+	}
+	
+	/**
 	 * Issue an explicit command to a specific bot. This method is public, but its primary
 	 * expected use is by other bots for passing along commands they cannot understand.
 	 * @param botIndex Index of bot (as linked to this ParseCore) to send command to.
@@ -600,6 +671,47 @@ public class ParseCore {
 		bot.getCommandQueue().addCommand(cmd);
 	}
 
+	public void command_EventReminder(EventAdapter e, int level, long guildID)
+	{
+		int bot = 1;
+		switch (e.getType())
+		{
+		case BIRTHDAY:
+			bot = scheduler.sendCommandTo(CMD_WISHBIRTHDAY);
+			break;
+		case BIWEEKLY:
+			bot = scheduler.sendCommandTo(CMD_REM_BIWEEKLY);
+			break;
+		case DEADLINE:
+			bot = scheduler.sendCommandTo(CMD_REM_DEADLINE);
+			break;
+		case MONTHLYA:
+			bot = scheduler.sendCommandTo(CMD_REM_MONTHLYA);
+			break;
+		case MONTHLYB:
+			bot = scheduler.sendCommandTo(CMD_REM_MONTHLYB);
+			break;
+		case ONETIME:
+			bot = scheduler.sendCommandTo(CMD_REM_ONETIME);
+			break;
+		case WEEKLY:
+			bot = scheduler.sendCommandTo(CMD_REM_WEEKLY);
+			break;
+		default:
+			break;
+		}
+		
+		Command cmd = new CMD_IssueReminder(e, level, guildID);
+		AbstractBot b = mybots[bot];
+		if (b == null)
+		{
+			System.err.println("ParseCore.command_EventReminder || Bot " + bot + " does not exist!");
+			return;
+		}
+		b.getCommandQueue().addCommand(cmd);
+		
+	}
+	
 	/* ----- Response Handling ----- */
 	
 	/**
@@ -689,6 +801,8 @@ public class ParseCore {
 		greeter.addCommand(CMD_PINGARRIVAL);
 		greeter.addCommand(CMD_WISHBIRTHDAY);
 		greeter.addCommand("qchan");
+		greeter.addCommand(CMD_FAREWELLMEMBER);
+		greeter.addCommand(CMD_PINGDEPARTURE);
 		
 		Position helpdesk = new Position(1);
 		helpdesk.addCommand("help");
@@ -706,6 +820,9 @@ public class ParseCore {
 		cleaner.addCommand("cleanme");
 		cleaner.addCommand("cleanmeday");
 		cleaner.addCommand("cleanday");
+		cleaner.addCommand("cmdclean");
+		//cleaner.addCommand("autocmdclean");
+		cleaner.addCommand(CMD_AUTOCLEAN);
 		
 		List<Position> plist = new ArrayList<Position>(4);
 		plist.add(greeter);
@@ -723,8 +840,11 @@ public class ParseCore {
 	 */
 	public static Map<String, Integer> getDefaultPermPositionMap()
 	{
+		//Note - moving 9 to 3 and 8 to 4
+		
 		Map<String, Integer> map = new HashMap<String, Integer>();
-		map.put("myevents", 9);
+		//map.put("myevents", 9);
+		map.put("myevents", 3);
 		map.put("ecancel", 1);
 		map.put("onetime", 1);
 		map.put("deadline", 1);
@@ -733,7 +853,8 @@ public class ParseCore {
 		map.put("monthlyday", 1);
 		map.put("monthlydow", 1);
 		map.put("birthday", 1);
-		map.put("listroles", 9);
+		//map.put("listroles", 9);
+		map.put("listroles", 4);
 		map.put("addperm", 1);
 		map.put("remperm", 1);
 		map.put("chchan", 1);
@@ -745,17 +866,24 @@ public class ParseCore {
 		map.put("setGreetings", 1);
 		map.put("pingGreetings", 1);
 		map.put("audconf", 2);
+		map.put("autocmdclean", 1);
 		
-		map.put(CMD_REM_DEADLINE, 8);
+		//map.put(CMD_REM_DEADLINE, 8);
+		map.put(CMD_REM_MONTHLYB, 3);
+		map.put(CMD_REM_DEADLINE, 4);
 		map.put(CMD_REM_WEEKLY, 7);
 		map.put(CMD_REM_BIWEEKLY, 6);
 		map.put(CMD_REM_MONTHLYA, 5);
-		map.put(CMD_REM_ONETIME, 4);
-		map.put(CMD_REM_MONTHLYB, 3);
+		map.put(CMD_REM_ONETIME, 5);
+		//map.put(CMD_REM_ONETIME, 4);
+		//map.put(CMD_REM_MONTHLYB, 3);
 		
-		map.put(CMD_ROLE_EXTRA + ActorRole.ROLETYPE_EXT_SCHOOLGIRL, 9);
-		map.put(CMD_ROLE_EXTRA + ActorRole.ROLETYPE_EXT_SCHOOLGIRL_CROWD, 9);
-		map.put(CMD_ROLE_EXTRA + ActorRole.ROLETYPE_EXT_ANNOUNCE, 8);
+		//map.put(CMD_ROLE_EXTRA + ActorRole.ROLETYPE_EXT_SCHOOLGIRL, 9);
+		//map.put(CMD_ROLE_EXTRA + ActorRole.ROLETYPE_EXT_SCHOOLGIRL_CROWD, 9);
+		//map.put(CMD_ROLE_EXTRA + ActorRole.ROLETYPE_EXT_ANNOUNCE, 8);
+		map.put(CMD_ROLE_EXTRA + ActorRole.ROLETYPE_EXT_SCHOOLGIRL, 3);
+		map.put(CMD_ROLE_EXTRA + ActorRole.ROLETYPE_EXT_SCHOOLGIRL_CROWD, 3);
+		map.put(CMD_ROLE_EXTRA + ActorRole.ROLETYPE_EXT_ANNOUNCE, 4);
 		map.put(CMD_ROLE_EXTRA + ActorRole.ROLETYPE_EXT_SCHOOLBOY, 7);
 		map.put(CMD_ROLE_EXTRA + ActorRole.ROLETYPE_EXT_SCHOOLBOY_CROWD, 7);
 		map.put(CMD_ROLE_EXTRA + ActorRole.ROLETYPE_EXT_STUDENT, 7);
@@ -764,10 +892,14 @@ public class ParseCore {
 		map.put(CMD_ROLE_EXTRA + ActorRole.ROLETYPE_EXT_MONSTER_CROWD, 6);
 		map.put(CMD_ROLE_EXTRA + ActorRole.ROLETYPE_EXT_ADULT, 5);
 		map.put(CMD_ROLE_EXTRA + ActorRole.ROLETYPE_EXT_ADULT_CROWD, 5);
-		map.put(CMD_ROLE_EXTRA + ActorRole.ROLETYPE_EXT_CHILD, 4);
-		map.put(CMD_ROLE_EXTRA + ActorRole.ROLETYPE_EXT_CHILD_CROWD, 4);
-		map.put(CMD_ROLE_EXTRA + ActorRole.ROLETYPE_EXT_ANIMAL, 3);
-		map.put(CMD_ROLE_EXTRA + ActorRole.ROLETYPE_EXT_ADULT_CROWD, 3);
+		//map.put(CMD_ROLE_EXTRA + ActorRole.ROLETYPE_EXT_CHILD, 4);
+		//map.put(CMD_ROLE_EXTRA + ActorRole.ROLETYPE_EXT_CHILD_CROWD, 4);
+		//map.put(CMD_ROLE_EXTRA + ActorRole.ROLETYPE_EXT_ANIMAL, 3);
+		//map.put(CMD_ROLE_EXTRA + ActorRole.ROLETYPE_EXT_ANIMAL_CROWD, 3);
+		map.put(CMD_ROLE_EXTRA + ActorRole.ROLETYPE_EXT_CHILD, 6);
+		map.put(CMD_ROLE_EXTRA + ActorRole.ROLETYPE_EXT_CHILD_CROWD, 6);
+		map.put(CMD_ROLE_EXTRA + ActorRole.ROLETYPE_EXT_ANIMAL, 7);
+		map.put(CMD_ROLE_EXTRA + ActorRole.ROLETYPE_EXT_ANIMAL_CROWD, 7);
 		map.put(CMD_ROLE_MINOR, 2);
 		map.put(CMD_ROLE_MAJOR, 1);
 		

@@ -11,6 +11,9 @@ import waffleoRai_cafebotCore.AbstractBot;
  * Creation | June 24, 2018
  * Version 1.0.0 Documentation | July 1, 2018
  * 
+ * 1.0.0 -> 1.1.0 | July 20, 2018
+ * 	Added command message ID note
+ * 
  */
 
 
@@ -19,8 +22,8 @@ import waffleoRai_cafebotCore.AbstractBot;
  * <br><br><b>Standard Command:</b>
  * <br>gettz
  * @author Blythe Hospelhorn
- * @version 1.0.0
- * @since July 1, 2018
+ * @version 1.1.0
+ * @since July 20, 2018
  */
 public class CMD_GetTZ extends CommandAdapter{
 
@@ -31,11 +34,13 @@ public class CMD_GetTZ extends CommandAdapter{
 	 * Construct a GetTZ (Get TimeZone) command.
 	 * @param c Channel command was issued on and reply should be sent to.
 	 * @param m User who issued the command, as a JDA Member object.
+	 * @param cmdID Long UID of the message the command was sent in.
 	 */
-	public CMD_GetTZ(MessageChannel c, Member m)
+	public CMD_GetTZ(MessageChannel c, Member m, long cmdID)
 	{
 		channel = c;
 		user = m;
+		super.setCommandMessageID(cmdID);
 	}
 	
 	@Override

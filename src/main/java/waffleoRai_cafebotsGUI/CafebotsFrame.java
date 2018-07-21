@@ -27,12 +27,12 @@ import waffleoRai_cafebotCore.BotBrain;
 import waffleoRai_cafebotCore.LaunchCore;
 import javax.swing.JButton;
 import java.awt.Font;
+import javax.swing.JLabel;
 
 public class CafebotsFrame extends JFrame {
 
 	private static final long serialVersionUID = -503878424307955804L;
-	
-	
+
 	private BotPanel botpnl1;
 	private BotPanel botpnl2;
 	private BotPanel botpnl3;
@@ -48,6 +48,16 @@ public class CafebotsFrame extends JFrame {
 	
 	private BotBrain core;
 	private JButton btnLogin;
+	
+	private RefresherThread refresher;
+	
+	private JLabel lblGreeter;
+	private JLabel lblHelpDesk;
+	private JLabel lblAssistant;
+	private JLabel lblCleaner;
+	
+	private JLabel lblThread_scheduler;
+	private JLabel lblThread_parser;
 	
 	public CafebotsFrame()
 	{
@@ -183,6 +193,46 @@ public class CafebotsFrame extends JFrame {
 		btnLogin.setFont(new Font("Tahoma", Font.PLAIN, 11));
 		btnLogin.setBounds(10, 3, 89, 23);
 		ctrlpnl.add(btnLogin);
+		
+		JLabel lblShifts = new JLabel("Shifts:");
+		lblShifts.setFont(new Font("Tahoma", Font.BOLD, 11));
+		lblShifts.setBounds(10, 32, 46, 14);
+		ctrlpnl.add(lblShifts);
+			
+		lblGreeter = new JLabel("Greeter: #");
+		lblGreeter.setFont(new Font("Tahoma", Font.PLAIN, 11));
+		lblGreeter.setBounds(20, 48, 63, 14);
+		ctrlpnl.add(lblGreeter);
+		
+		lblHelpDesk = new JLabel("Help Desk: #");
+		lblHelpDesk.setFont(new Font("Tahoma", Font.PLAIN, 11));
+		lblHelpDesk.setBounds(20, 65, 63, 14);
+		ctrlpnl.add(lblHelpDesk);
+		
+		lblAssistant = new JLabel("Assistant: #");
+		lblAssistant.setFont(new Font("Tahoma", Font.PLAIN, 11));
+		lblAssistant.setBounds(100, 48, 63, 14);
+		ctrlpnl.add(lblAssistant);
+		
+		lblCleaner = new JLabel("Cleaner: #");
+		lblCleaner.setFont(new Font("Tahoma", Font.PLAIN, 11));
+		lblCleaner.setBounds(100, 65, 63, 14);
+		ctrlpnl.add(lblCleaner);
+		
+		JLabel lblThreads = new JLabel("Threads:");
+		lblThreads.setFont(new Font("Tahoma", Font.BOLD, 11));
+		lblThreads.setBounds(191, 7, 63, 14);
+		ctrlpnl.add(lblThreads);
+		
+		lblThread_scheduler = new JLabel("Scheduler: [Stopped]");
+		lblThread_scheduler.setFont(new Font("Tahoma", Font.PLAIN, 11));
+		lblThread_scheduler.setBounds(200, 45, 116, 14);
+		ctrlpnl.add(lblThread_scheduler);
+		
+		lblThread_parser = new JLabel("Parser: [Stopped]");
+		lblThread_parser.setFont(new Font("Tahoma", Font.PLAIN, 11));
+		lblThread_parser.setBounds(200, 25, 97, 14);
+		ctrlpnl.add(lblThread_parser);
 		btnLogin.addActionListener(new ActionListener(){
 
 			@Override
@@ -234,12 +284,88 @@ public class CafebotsFrame extends JFrame {
 		btnLogin.setEnabled(true);
 	}
 	
+	public class RefresherThread extends Thread
+	{
+		private boolean kill;
+		
+		public RefresherThread()
+		{
+			kill = false;
+			this.setDaemon(true);
+			this.setName("CafebotsGUIRefresherDaemon");
+		}
+		
+		public void run()
+		{
+			while (!killed())
+			{
+				updatePanels();
+				try 
+				{
+					Thread.sleep(1000 * 600);
+				} catch (InterruptedException e) {
+					Thread.interrupted();
+					//e.printStackTrace();
+				}
+			}
+		}
+		
+		private synchronized boolean killed()
+		{
+			return kill;
+		}
+		
+		public synchronized void killMe()
+		{
+			kill = true;
+			this.interrupt();
+		}
+		
+	}
+	
+	private void updateControlPanel()
+	{
+		if (core == null)
+		{
+			lblGreeter.setText("Greeter: #");
+			lblHelpDesk.setText("Help Desk: #");
+			lblAssistant.setText("Assistant: #");
+			lblCleaner.setText("Cleaner: #");
+			lblThread_scheduler.setText("Scheduler: [Stopped]");
+			lblThread_parser.setText("Parser: [Stopped]");
+			repaintLabels();
+			return;
+		}
+		lblGreeter.setText("Greeter: " + core.getIndexOfBotAtPosition(0));
+		lblHelpDesk.setText("Help Desk: " + core.getIndexOfBotAtPosition(1));
+		lblAssistant.setText("Assistant: " + core.getIndexOfBotAtPosition(2));
+		lblCleaner.setText("Cleaner: " + core.getIndexOfBotAtPosition(3));
+		if (core.schedulerThreadRunning()) lblThread_scheduler.setText("Scheduler: [Running!]");
+		else lblThread_scheduler.setText("Scheduler: [Stopped]");
+		if (core.schedulerThreadRunning()) lblThread_parser.setText("Parser: [Running!]");
+		else lblThread_parser.setText("Parser: [Stopped]");
+		
+		repaintLabels();
+	}
+	
+	private void repaintLabels()
+	{
+		lblGreeter.repaint();
+		lblHelpDesk.repaint();
+		lblAssistant.repaint();
+		lblCleaner.repaint();
+		lblThread_scheduler.repaint();
+		lblThread_parser.repaint();
+	}
+	
 	public void updatePanels()
 	{
 		for (BotPanel p : panels)
 		{
+			//System.err.println("CafebotsFrame.updatePanels || DEBUG - Updating panel " + p.getName());
 			p.updatePanel();
 		}
+		updateControlPanel();
 	}
 	
 	public void loadBots()
@@ -283,6 +409,7 @@ public class CafebotsFrame extends JFrame {
 			protected Void doInBackground() throws Exception {
 				try
 				{
+					//core = LaunchCore.loadCore(true);
 					core = LaunchCore.loadCore(false);
 					AbstractBot[] barr = core.getBots();
 					for (int i = 1; i < 10; i++)
@@ -308,7 +435,10 @@ public class CafebotsFrame extends JFrame {
 			{
 				try 
 				{
+					//core.start(true);
 					core.start(false);
+					refresher = new RefresherThread();
+					refresher.start();
 				} 
 				catch (LoginException e) 
 				{
@@ -318,17 +448,27 @@ public class CafebotsFrame extends JFrame {
 					showError("ERROR: One or more bots could not log in. See stderr for details.");
 					System.exit(1);
 				}
-				updatePanels();
+				catch (Exception e)
+				{
+					e.printStackTrace();
+					loading = false;
+					dialog.setVisible(false);
+					showError("ERROR: Unknown exception during core boot or GUI refresh occurred...");
+					System.exit(1);
+				}
+				//updatePanels();
 				unsetWait();
 				loading = false;
+				btnLogin.setEnabled(false);
+				dialog.setVisible(false);
 			}
 			
 		};
 		System.err.println("CafebotsFrame.loadBots || Executing load routine in worker thread...");
 		myTask.execute();
 		System.err.println("CafebotsFrame.loadBots || Opening dialog...");
+		dialog.pack();
 		dialog.setVisible(true);
-		
 		
 		//unsetWait();
 		//loading = false;
@@ -343,5 +483,4 @@ public class CafebotsFrame extends JFrame {
 	{
 		return core;
 	}
-	
 }

@@ -23,6 +23,7 @@ import net.dv8tion.jda.core.entities.Role;
 import waffleoRai_Utils.FileBuffer;
 
 import waffleoRai_Utils.FileBuffer.UnsupportedFileTypeException;
+import waffleoRai_cafebotCommands.LongQueue;
 import waffleoRai_cafebotCommands.ParseCore;
 import waffleoRai_cafebotRoles.ActingManager;
 import waffleoRai_schedulebot.Schedule;
@@ -40,6 +41,8 @@ public class GuildSettings {
 	
 	public static final int REMINDER_COUNT = 5;
 	
+	public static final int MAX_SAVED_COMMANDS = 50000;
+	
 	/* ----- Instance Variables ----- */
 	
 	//private Guild guild;
@@ -50,6 +53,10 @@ public class GuildSettings {
 	private long birthdayChannel;
 	private long greetingChannel;
 	private boolean greetingsOn;
+	private boolean farewellsOn;
+	
+	private boolean auto_cmd_clear;
+	private LongQueue recentCommands;
 	
 	private UserBank users;
 	private Schedule schedule;
@@ -71,12 +78,15 @@ public class GuildSettings {
 		birthdayChannel = g.getDefaultChannel().getIdLong();
 		greetingChannel = g.getDefaultChannel().getIdLong();
 		greetingsOn = true;
+		farewellsOn = true;
 		schedule = new Schedule(users, guild, parser);
 		//Get all the members in the guild currently and add to user bank
 		List<Member> memlist = g.getMembers();
 		for (Member m : memlist) users.addUser(new ActorUser(m));
 		dataDir = gdirPath;
 		adminRoles = new LinkedList<Long>();
+		recentCommands = new LongQueue(MAX_SAVED_COMMANDS);
+		auto_cmd_clear = false;
 	}
 	
 	public GuildSettings(String gdirPath, ParseCore parser) throws IOException, UnsupportedFileTypeException
@@ -107,6 +117,10 @@ public class GuildSettings {
 			String line = br.readLine();
 			if (line.equals("1")) greetingsOn = true;
 			else greetingsOn = false;
+			if (line.equals("1")) farewellsOn = true;
+			else farewellsOn = false;
+			if (line.equals("1")) auto_cmd_clear = true;
+			else auto_cmd_clear = false;
 			
 			//Comma delimited list of admin roles
 			adminRoles = new LinkedList<Long>();
@@ -117,6 +131,14 @@ public class GuildSettings {
 				for (String s : roles) adminRoles.add(Long.parseUnsignedLong(s));
 			}
 			
+			//Comma delimited list of recent command message IDs
+			recentCommands = new LongQueue(MAX_SAVED_COMMANDS);
+			String reccom = br.readLine();
+			if (reccom != null && !reccom.isEmpty())
+			{
+				String[] cmds = reccom.split(",");
+				for (String s : cmds) recentCommands.add(Long.parseUnsignedLong(s));
+			}
 		}
 		catch (Exception e)
 		{
@@ -132,6 +154,8 @@ public class GuildSettings {
 		loadUserInfo(gdirPath);
 		loadSchedule(gdirPath, parser);
 		loadRoles(gdirPath);
+		
+		
 	}
 	
 	private void loadUserInfo(String gdirPath) throws IOException, UnsupportedFileTypeException
@@ -230,6 +254,11 @@ public class GuildSettings {
 		return users.getAllUsersWithGreetingPing();
 	}
 	
+	public List<ActorUser> getAllLeavingPingUsers()
+	{
+		return users.getAllUsersWithFarewellPing();
+	}
+	
 	public boolean memberShouldBeAdmin(Member m)
 	{
 		if (m.isOwner()) return true;
@@ -251,6 +280,21 @@ public class GuildSettings {
 	public boolean greetingsOn()
 	{
 		return greetingsOn;
+	}
+	
+	public boolean farewellsOn()
+	{
+		return this.farewellsOn;
+	}
+	
+	public boolean autoCommandClear()
+	{
+		return auto_cmd_clear;
+	}
+	
+	public LongQueue getRecentCommandList()
+	{
+		return recentCommands;
 	}
 	
 	/* ----- Setters ----- */
@@ -295,6 +339,16 @@ public class GuildSettings {
 	public synchronized void setGreetings(boolean on)
 	{
 		greetingsOn = on;
+	}
+	
+	public synchronized void setFarewells(boolean on)
+	{
+		this.farewellsOn = on;
+	}
+	
+	public synchronized void setAutoCommandClear(boolean on)
+	{
+		auto_cmd_clear = on;
 	}
 	
 	/* ----- Data Backup ----- */
@@ -417,19 +471,23 @@ public class GuildSettings {
 	public void forceBackup() throws IOException
 	{
 		//If backup thread is alive, kill it and wait for it to die
-		boolean balive = backup.isAlive();
-		if (balive)
+		boolean balive = false;
+		if (backup != null)
 		{
-			terminateBackupThread();
-			while (backup.isAlive())
+			balive = backup.isAlive();
+			if (balive)
 			{
-				try 
+				terminateBackupThread();
+				while (backup.isAlive())
 				{
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
+					try 
+					{
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
 				}
-			}
+			}	
 		}
 		
 		//Backup
@@ -470,6 +528,10 @@ public class GuildSettings {
 		bw.write(Long.toUnsignedString(greetingChannel) + "\n");
 		if (greetingsOn) bw.write("1\n");
 		else bw.write("0\n");
+		if (farewellsOn) bw.write("1\n");
+		else bw.write("0\n");
+		if (auto_cmd_clear) bw.write("1\n");
+		else bw.write("0\n");
 		String rolelist = "";
 		boolean first = true;
 		for (Long l : adminRoles)
@@ -478,7 +540,18 @@ public class GuildSettings {
 			rolelist += Long.toUnsignedString(l);
 			first = false;
 		}
-		bw.write(rolelist);
+		bw.write(rolelist + "\n");
+		
+		String cmdlist = "";
+		first = true;
+		List<Long> cmds = recentCommands.getQueueCopy();
+		for (Long l : cmds)
+		{
+			if (!first) cmdlist += ",";
+			cmdlist += Long.toUnsignedString(l);
+			first = false;
+		}
+		bw.write(cmdlist);
 		
 		bw.close();
 		fw.close();

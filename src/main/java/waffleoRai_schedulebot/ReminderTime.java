@@ -27,12 +27,16 @@ public class ReminderTime {
 	
 	public ReminderTime(String xmlRecord) throws UnsupportedFileTypeException
 	{
+		//System.err.println("ReminderTime.<init> || xmlRecord = " + xmlRecord);
+		if (xmlRecord.charAt(0) == '\"') xmlRecord = xmlRecord.substring(1, xmlRecord.length() - 1);
+		//System.err.println("ReminderTime.<init> || xmlRecord = " + xmlRecord);
 		int y = xmlRecord.indexOf('Y');
 		int m = xmlRecord.indexOf('M');
 		int w = xmlRecord.indexOf('W');
 		int d = xmlRecord.indexOf('D');
 		int h = xmlRecord.indexOf('H');
 		int n = xmlRecord.indexOf('N');
+		//System.err.println("ReminderTime.<init> || indices: " + y + " " + m + " " + w + " " + d + " " + h + " " + n);
 		try
 		{
 			years = Integer.parseInt(xmlRecord.substring(0, y));

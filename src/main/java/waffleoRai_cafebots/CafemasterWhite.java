@@ -14,6 +14,7 @@ public class CafemasterWhite extends AbstractBot{
 		super.setVersionString(VERSION);
 		super.setXMLInitKey(InitKey);
 		super.instantiateListenerList();
+		super.instantiateQueues();
 		super.brain = core;
 		super.setLocalIndex(localIndex);
 	}

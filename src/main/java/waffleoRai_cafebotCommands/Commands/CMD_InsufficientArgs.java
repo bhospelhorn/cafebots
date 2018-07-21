@@ -24,16 +24,18 @@ public class CMD_InsufficientArgs extends CommandAdapter{
 	
 	private long chid;
 	private EventType type;
-
+	private String username;
+	
 	/**
 	 * Construct an InsufficientArgs command.
 	 * @param channelID Discord long UID of channel command was issued on and reply should be sent to.
 	 * @param et EventType of event creation attempt.
 	 */
-	public CMD_InsufficientArgs(long channelID, EventType et)
+	public CMD_InsufficientArgs(long channelID, EventType et, String uname)
 	{
 		chid = channelID;
 		type = et;
+		username = uname;
 	}
 
 	/**
@@ -45,7 +47,7 @@ public class CMD_InsufficientArgs extends CommandAdapter{
 		switch(type)
 		{
 		case BIRTHDAY:
-			bot.insufficientArgsMessage_birthday(chid);
+			bot.insufficientArgsMessage_birthday(chid, username);
 			break;
 		case BIWEEKLY:
 			break;

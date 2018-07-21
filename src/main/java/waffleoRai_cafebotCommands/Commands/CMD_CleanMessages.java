@@ -11,6 +11,8 @@ import waffleoRai_cafebotCore.AbstractBot;
  * Creation | June 24, 2018
  * Version 1.0.0 Documentation | July 1, 2018
  * 
+ * 1.0.0 -> 1.1.0 | July 20, 2018
+ * 	Added command message ID note
  */
 
 /**
@@ -21,8 +23,8 @@ import waffleoRai_cafebotCore.AbstractBot;
  * <br><br><i>Admin Only:</i>
  * <br>cleanday
  * @author Blythe Hospelhorn
- * @version 1.0.0
- * @since July 1, 2018
+ * @version 1.1.0
+ * @since July 20, 2018
  */
 public class CMD_CleanMessages extends CommandAdapter{
 
@@ -30,7 +32,7 @@ public class CMD_CleanMessages extends CommandAdapter{
 	private Member user;
 	private boolean userOnly;
 	private boolean dayOnly;
-	
+
 	/**
 	 * Construct a new CleanMessages command.
 	 * @param ch Channel command was sent to. Bot should also clean messages from this channel
@@ -38,13 +40,15 @@ public class CMD_CleanMessages extends CommandAdapter{
 	 * @param u User sending the command as a JDA Member object.
 	 * @param useronly Whether messages deleted should only include messages sent by the requesting user.
 	 * @param dayonly Whether messages deleted should only include messages sent in the last 24 hours.
+	 * @param cmdID Long UID of the message the command was sent in.
 	 */
-	public CMD_CleanMessages(MessageChannel ch, Member u, boolean useronly, boolean dayonly)
+	public CMD_CleanMessages(MessageChannel ch, Member u, boolean useronly, boolean dayonly, long cmdID)
 	{
 		channel = ch;
 		user = u;
 		userOnly = useronly;
 		dayOnly = dayonly;
+		super.setCommandMessageID(cmdID);
 	}
 
 	@Override
@@ -109,5 +113,6 @@ public class CMD_CleanMessages extends CommandAdapter{
 		else if (userOnly && !dayOnly) return "cleanme";
 		return "";
 	}
+
 	
 }

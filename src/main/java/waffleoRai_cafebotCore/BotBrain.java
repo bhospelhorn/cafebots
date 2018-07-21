@@ -26,6 +26,7 @@ import waffleoRai_cafebotCommands.MessageListener;
 import waffleoRai_cafebotCommands.ParseCore;
 import waffleoRai_schedulebot.CalendarEvent;
 import waffleoRai_schedulebot.EventType;
+import waffleoRai_schedulebot.ReminderMap;
 import waffleoRai_schedulebot.ReminderTime;
 import waffleoRai_schedulebot.Schedule;
 
@@ -35,6 +36,7 @@ public class BotBrain {
 	//TODO: !!!!! Change all disk saving parsers/serializers to read/write UNSIGNED long!!
 	
 	/* ----- Constants ----- */
+	
 	
 	/* ----- Instance Variables ----- */
 	
@@ -49,25 +51,29 @@ public class BotBrain {
 	private ParseCore parser;
 	
 	private StringMap commonStrings;
-	private ReminderMap remindertimes;
+	//private ReminderMap remindertimes;
 	
 	private GuildDataAdder userdataThread;
 	
+	private boolean on;
+	
 	/* ----- Construction ----- */
 	
- 	public BotBrain(String basedir, Language l)
+  	public BotBrain(String basedir, Language l)
 	{
+ 		AbstractBot.setOffdutyBotsOffline(true);
+ 		
 		programDirectory = basedir;	
 		userdata = null;
 		bots = new AbstractBot[10];
 		shiftManager = null;
 		commonStrings = null;
-		remindertimes = null;
+		//remindertimes = null;
 		parser = null;
 		commonStrings = new StringMap();
-		remindertimes = new ReminderMap();
+		//remindertimes = new ReminderMap();
 		language = l;
-		userdataThread = new GuildDataAdder();
+		on = false;
 	}
 	
 	/* ----- Boot/Shutdown ----- */
@@ -99,7 +105,8 @@ public class BotBrain {
 		}
 		
 		//Start user data manager
-		this.userdataThread.start();
+		userdataThread = new GuildDataAdder();
+		userdataThread.start();
 		
 		//Start parser core
 		parser.startParserThread();
@@ -125,7 +132,9 @@ public class BotBrain {
 			}
 		}
 		l.resetLoginCounter();
+		System.out.println("BotBrain.start || All bots have logged in!");
 		
+		on = true;
 		parser.unblock();
 	}
 	
@@ -154,6 +163,7 @@ public class BotBrain {
 		//Kill user data manager
 		this.userdataThread.terminate();
 		
+		on = false;
 		parser.unblock();
 		
 		saveUserData();
@@ -187,32 +197,6 @@ public class BotBrain {
 		
 	}
 	
-	public static class ReminderMap
-	{
-		private Map<EventType, ReminderTime[]> map;
-		
-		public ReminderMap()
-		{
-			map = new HashMap<EventType, ReminderTime[]>();
-		}
-		
-		public synchronized ReminderTime[] get(EventType key)
-		{
-			return map.get(key);
-		}
-		
-		public synchronized void put(EventType key, ReminderTime[] value)
-		{
-			map.put(key, value);
-		}
-		
-		public synchronized void replaceMap(Map<EventType, ReminderTime[]> newmap)
-		{
-			map = newmap;
-		}
-		
-	}
-	
 	/* ----- Getters ----- */
 	
 	public GuildMap getUserData()
@@ -222,23 +206,25 @@ public class BotBrain {
 	
 	public long getReminderTime(EventType eventType, int reminderlevel, long eventtime_millis)
 	{
-		if (remindertimes == null) return -1;
+		/*if (remindertimes == null) return -1;
 		ReminderTime[] tarr = remindertimes.get(eventType);
 		if (tarr == null) return -1;
 		if (reminderlevel < 0) return -1;
 		if (reminderlevel > tarr.length) return -1;
 		if (tarr[reminderlevel] == null) return -1;
-		return tarr[reminderlevel].calculateReminderTime(eventtime_millis);
+		return tarr[reminderlevel].calculateReminderTime(eventtime_millis);*/
+		return Schedule.getReminderTime(eventType, reminderlevel).calculateReminderTime(eventtime_millis);
 	}
 
 	public ReminderTime getReminderTime(EventType eventType, int reminderlevel)
 	{
-		if (remindertimes == null) return null;
+		/*if (remindertimes == null) return null;
 		ReminderTime[] tarr = remindertimes.get(eventType);
 		if (tarr == null) return null;
 		if (reminderlevel < 0) return null;
 		if (reminderlevel > tarr.length) return null;
-		return tarr[reminderlevel];
+		return tarr[reminderlevel];*/
+		return Schedule.getReminderTime(eventType, reminderlevel);
 	}
 	
 	public String getCommonString(String key)
@@ -280,6 +266,12 @@ public class BotBrain {
 		GuildSettings gs = userdata.getGuildSettings(g.getIdLong());
 		if (gs != null) return;
 		userdata.newGuild(g, parser, programDirectory + File.separator + LaunchCore.DIR_USERDATA);
+		if (on){
+			gs = userdata.getGuildSettings(g.getIdLong());
+			gs.startBackupThread();
+			gs.startScheduleThreads();
+		}
+		
 	}
 	
 	public void registerNewUser(Member m)
@@ -304,9 +296,14 @@ public class BotBrain {
 		return eubank.getUser(userID);
 	}
 	
+	public int getIndexOfBotAtPosition(int pindex)
+	{
+		return this.shiftManager.getBotAtPosition(pindex);
+	}
+	
 	/* ----- Setters ----- */
 	
- 	public void setUserDataMap(GuildMap data)
+  	public void setUserDataMap(GuildMap data)
 	{
 		userdata = data;
 	}
@@ -330,6 +327,7 @@ public class BotBrain {
 	
 	public void generateReminderTimeMap(Map<String, String> xmlmap) throws UnsupportedFileTypeException
 	{
+		ReminderMap rm = new ReminderMap();
 		EventType[] all = EventType.values(); //Get all event types...
 		final String keystem = "reminder_";
 		for (EventType t : all)
@@ -344,13 +342,17 @@ public class BotBrain {
 				if (rt == null) rts[i] = new ReminderTime();
 				else rts[i] = new ReminderTime(rt);
 			}
+			rm.put(t, rts);
 		}
+		Schedule.loadReminderTimes(rm);
 	}
 	
 	public void regenerateParserCore()
 	{
 		parser = new ParseCore(shiftManager);
 		for (int i = 1; i < 10; i++) parser.linkBot(bots[i], i);
+		shiftManager.setParseCore(parser);
+		shiftManager.setCurrentShift();
 	}
 	
 	public void loadUserData() throws IOException, UnsupportedFileTypeException, IllegalStateException
@@ -450,15 +452,14 @@ public class BotBrain {
 	public String getTimeString(CalendarEvent event, EventType type, TimeZone tz)
 	{
 		String rawstr = commonStrings.get("commonstrings.timestrings." + event.getType().getCommonKey());
-		rawstr = rawstr.replace(AbstractBot.REPLACE_YEAR, Integer.toString(event.getYear(tz)));
-		rawstr = rawstr.replace(AbstractBot.REPLACE_MONTH, Integer.toString(event.getMonth(tz)));
-		rawstr = rawstr.replace(AbstractBot.REPLACE_MONTH_NAME, capitalize(Schedule.getMonthName(event.getMonth(tz)).substring(0, 3)));
-		rawstr = rawstr.replace(AbstractBot.REPLACE_MONTH, Integer.toString(event.getMonth(tz)));
-		rawstr = rawstr.replace(AbstractBot.REPLACE_DAYOFMONTH, Integer.toString(event.getDayOfMonth(tz)));
-		rawstr = rawstr.replace(AbstractBot.REPLACE_DAYOFWEEK, capitalize(getDayOfWeekAbbreviation(event.getDayOfWeek(tz))));
-		rawstr = rawstr.replace(AbstractBot.REPLACE_TIMEONLY, String.format("%02d:%02d", event.getHour(tz), event.getMinute(tz)));
-		rawstr = rawstr.replace(AbstractBot.REPLACE_TIMEZONE, tz.getDisplayName());
-		rawstr = rawstr.replace(AbstractBot.REPLACE_NTH, Language.formatNumber(language, event.getWeekOfMonth(tz)));
+		rawstr = rawstr.replace(ReplaceStringType.YEAR.getString(), Integer.toString(event.getYear(tz)));
+		rawstr = rawstr.replace(ReplaceStringType.MONTH.getString(), Integer.toString(event.getMonth(tz)));
+		rawstr = rawstr.replace(ReplaceStringType.MONTH_NAME.getString(), capitalize(Schedule.getMonthName(event.getMonth(tz)).substring(0, 3)));
+		rawstr = rawstr.replace(ReplaceStringType.DAYOFMONTH.getString(), Integer.toString(event.getDayOfMonth(tz)));
+		rawstr = rawstr.replace(ReplaceStringType.DAYOFWEEK.getString(), capitalize(getDayOfWeekAbbreviation(event.getDayOfWeek(tz))));
+		rawstr = rawstr.replace(ReplaceStringType.TIMEONLY.getString(), String.format("%02d:%02d", event.getHour(tz), event.getMinute(tz)));
+		rawstr = rawstr.replace(ReplaceStringType.TIMEZONE.getString(), tz.getDisplayName());
+		rawstr = rawstr.replace(ReplaceStringType.NTH.getString(), Language.formatNumber(language, event.getWeekOfMonth(tz)));
 		return rawstr;
 	}
 	
@@ -508,6 +509,32 @@ public class BotBrain {
 		gs.setGreetingChannel(channelID);
 		
 		return true;
+	}
+	
+	public String formatTimeString_clocktime(int hours, int minutes)
+	{
+		return String.format("%02d:%02d", hours, minutes);
+	}
+	
+	public String formatTimeString_clocktime(int hours, int minutes, TimeZone tz)
+	{
+		String time = String.format("%02d:%02d", hours, minutes);
+		time += " " + tz.getDisplayName();
+		return time;
+	}
+	
+	public String getReminderTimeString_eventtime(long eventTime, TimeZone tz)
+	{
+		DateFormatter df = Language.getDateFormatter(language);
+		if (df == null) return "";
+		return df.getTimeRelative(eventTime, tz);
+	}
+	
+	public String getReminderTimeString_timeleft(long eventTime, TimeZone tz)
+	{
+		DateFormatter df = Language.getDateFormatter(language);
+		if (df == null) return "";
+		return df.getTimeLeft(eventTime, tz);
 	}
 	
 	/* ----- Schedule ----- */
@@ -779,4 +806,19 @@ public class BotBrain {
 	{
 		userdata.forceBackups();
 	}
+
+	/* ----- Threads ----- */
+	
+	public boolean schedulerThreadRunning()
+	{
+		if (this.shiftManager == null) return false;
+		return shiftManager.timerRunning();
+	}
+	
+	public boolean parserThreadRunning()
+	{
+		if (this.parser == null) return false;
+		return parser.parserThreadRunning();
+	}
+
 }

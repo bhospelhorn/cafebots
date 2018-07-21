@@ -1,0 +1,163 @@
+package waffleoRai_cafebotCore;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+import net.dv8tion.jda.core.MessageBuilder;
+import net.dv8tion.jda.core.entities.IMentionable;
+import net.dv8tion.jda.core.entities.Message;
+
+public class BotMessage {
+	
+	//private MessageBuilder builder;
+	private MessageComp rootcomp;
+	
+	private static class MessageComp
+	{
+		private boolean ismention;
+		
+		private String str;
+		private IMentionable mentioned;
+		
+		public List<MessageComp> subcomps;
+		
+		public MessageComp(String rootstr)
+		{
+			ismention = false;
+			str = rootstr;
+		}
+		
+		public MessageComp(IMentionable rootobj)
+		{
+			ismention = true;
+			mentioned = rootobj;
+		}
+		
+		public void substituteString(ReplaceStringType t, String s)
+		{
+			if (ismention) return; //Can't split
+			if (subcomps == null)
+			{
+				String[] sarr = str.split(t.getString().toString());
+				if (sarr != null && sarr.length > 1)
+				{
+					subcomps = new ArrayList<MessageComp>(sarr.length + (sarr.length - 1));
+					for (int i = 0; i < sarr.length; i++)
+					{
+						if (i > 0) subcomps.add(new MessageComp(s));
+						subcomps.add(new MessageComp(sarr[i]));
+					}
+				}	
+			}
+			else
+			{
+				for (MessageComp c : subcomps) c.substituteString(t, s);
+			}
+		}
+		
+		public void substituteMention(ReplaceStringType t, IMentionable o)
+		{
+			if (ismention) return; //Can't split
+			if (subcomps == null)
+			{
+				String[] sarr = str.split(t.getString().toString());
+				if (sarr != null && sarr.length > 1)
+				{
+					subcomps = new ArrayList<MessageComp>(sarr.length + (sarr.length - 1));
+					for (int i = 0; i < sarr.length; i++)
+					{
+						if (i > 0) subcomps.add(new MessageComp(o));
+						subcomps.add(new MessageComp(sarr[i]));
+					}
+				}
+			}
+			else
+			{
+				for (MessageComp c : subcomps) c.substituteMention(t, o);
+			}
+			
+		}
+		
+		public void substituteMentions(ReplaceStringType t, Collection<IMentionable> olist)
+		{
+			if (ismention) return; //Can't split
+			if (subcomps == null)
+			{
+				int mentions = olist.size();
+				String[] sarr = str.split(t.getString().toString());
+				if (sarr != null && sarr.length > 1)
+				{
+					subcomps = new ArrayList<MessageComp>(sarr.length + ((sarr.length - 1)*mentions));
+					for (int i = 0; i < sarr.length; i++)
+					{
+						if (i > 0){
+							for (IMentionable o : olist) subcomps.add(new MessageComp(o));
+						};
+						subcomps.add(new MessageComp(sarr[i]));
+					}
+				}
+			}
+			else
+			{
+				for (MessageComp c : subcomps) c.substituteMentions(t, olist);
+			}
+		}
+		
+		public void addToBuilder(MessageBuilder builder)
+		{
+			if (subcomps == null)
+			{
+				if (ismention) builder.append(mentioned);
+				else builder.append(str);
+			}
+			else
+			{
+				for (MessageComp c : subcomps) c.addToBuilder(builder);
+			}
+		}
+		
+		public void tackOnToEnd(String str)
+		{
+			subcomps.add(new MessageComp(str));
+		}
+	}
+	
+	public BotMessage(String sourceString)
+	{
+		rootcomp = new MessageComp(sourceString);
+	}
+	
+	public void substituteString(ReplaceStringType target, String str)
+	{
+		rootcomp.substituteString(target, str);
+	}
+	
+	public void substituteMention(ReplaceStringType target, IMentionable obj)
+	{
+		rootcomp.substituteMention(target, obj);
+	}
+	
+	public void substituteMentions(ReplaceStringType target, Collection<IMentionable> olist)
+	{
+		rootcomp.substituteMentions(target, olist);
+	}
+	
+	public void addToEnd(String str)
+	{
+		rootcomp.tackOnToEnd(str);
+	}
+	
+	public Message buildMessage()
+	{
+		MessageBuilder builder = new MessageBuilder();
+		rootcomp.addToBuilder(builder);
+		return builder.build();
+	}
+	
+	public String toString()
+	{
+		return this.buildMessage().toString();
+	}
+
+}

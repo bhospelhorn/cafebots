@@ -10,6 +10,8 @@ import waffleoRai_cafebotCore.AbstractBot;
  * Creation | June 9, 2018
  * Version 1.0.0 Documentation | July 1, 2018
  * 
+ * 1.0.0 -> 1.1.0 | July 20, 2018
+ * 	Added command message ID note
  */
 
 
@@ -18,8 +20,8 @@ import waffleoRai_cafebotCore.AbstractBot;
  * <br><br><b>Standard Command:</b>
  * <br>saysomething
  * @author Blythe Hospelhorn
- * @version 1.0.0
- * @since July 1, 2018
+ * @version 1.1.0
+ * @since July 20, 2018
  */
 public class CMD_SaySomething extends CommandAdapter{
 
@@ -30,10 +32,12 @@ public class CMD_SaySomething extends CommandAdapter{
 	/**
 	 * Construct a SaySomething command.
 	 * @param cmdChan Channel command was issued on and reply should be sent to.
+	 * @param cmdID Long UID of the message the command was sent in.
 	 */
-	public CMD_SaySomething(MessageChannel cmdChan)
+	public CMD_SaySomething(MessageChannel cmdChan, long cmdID)
 	{
 		targetChannel = cmdChan.getIdLong();
+		super.setCommandMessageID(cmdID);
 	}
 	
 	@Override

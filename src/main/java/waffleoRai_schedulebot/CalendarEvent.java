@@ -5,9 +5,12 @@ import java.util.TimeZone;
 
 public interface CalendarEvent extends Comparable<CalendarEvent>{
 
-	public static int[] DAYS_IN_MONTH = {31, 29, 31, 30,
+	public static final int[] DAYS_IN_MONTH = {31, 29, 31, 30,
 										 31, 30, 31, 31,
 										 30, 31, 30, 31};
+	
+	public static final long INVALID_MILLIS = 0xFFFFFFFFFFFFFFFFL;
+	public static final int STD_REMINDER_COUNT = 5;
 	
 	public long getRequestingUser();
 	public List<Long> getTargetUsers();
@@ -25,4 +28,8 @@ public interface CalendarEvent extends Comparable<CalendarEvent>{
 	
 	public long getTimeUntil();
 	//public String printRecord(Language l, TimeZone tz);
+	public int nextReminderLevel();
+	public long untilNextReminder();
+	
+	public CalendarEvent spawnSequel();
 }

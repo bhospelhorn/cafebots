@@ -1,10 +1,8 @@
 package waffleoRai_cafebotCore;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -64,16 +62,20 @@ public class StringImporter {
 		{
 			if(reader.getEventType() == XMLStreamReader.START_ELEMENT)
 			{
-				if(reader.getLocalName().equals(KEY_FILEINFO)){
+				String str = reader.getLocalName();
+				//System.err.println("StringImporter.parseXML || START_ELEMENT: " + str);
+				if(str.equals(KEY_FILEINFO)){
 					fileinfo = true;
 					reader.next();
 					continue;
 				}
-				elements.addLast(reader.getLocalName());
+				elements.addLast(str);
 			}
 			else if(reader.getEventType() == XMLStreamReader.END_ELEMENT)
 			{
-				if(reader.getLocalName().equals(KEY_FILEINFO)){
+				String str = reader.getLocalName();
+				//System.err.println("StringImporter.parseXML || END_ELEMENT: " + str);
+				if(str.equals(KEY_FILEINFO)){
 					fileinfo = false;
 					reader.next();
 					continue;
@@ -82,16 +84,23 @@ public class StringImporter {
 			}
 			else if(reader.getEventType() == XMLStreamReader.CHARACTERS)
 			{
+				String str = reader.getText();
+				//System.err.println("StringImporter.parseXML || CHARACTERS: " + str);
 				if(fileinfo)
 				{
 					String el = elements.getLast();
-					if (el.equals(KEY_BOTNAME)) botName = reader.getText();
+					if (el.equals(KEY_BOTNAME)) botName = str;
 					if (el.equals(KEY_PATH)) filePath = dir + File.separator + reader.getText();
 				}
 				else
 				{
-					String[] fields = reader.getText().split(",");
-					if (fields.length != 2) throw new FileBuffer.UnsupportedFileTypeException();
+					String[] fields = str.split(",");
+					if (fields.length != 2){
+						//System.err.println("StringImporter.parseXML || Non-record encountered: " + str);
+						reader.next();
+						continue;
+						//throw new FileBuffer.UnsupportedFileTypeException();
+					}
 					StrRecord r = new StrRecord();
 					try
 					{
@@ -113,11 +122,12 @@ public class StringImporter {
 	
 	private void parseStringFile(Map<String, StrRecord> map) throws IOException
 	{
-		FileReader fr = new FileReader(filePath);
+		/*FileReader fr = new FileReader(filePath);
 		BufferedReader br = new BufferedReader(fr);
 		
 		LinkedList<String> allstr = new LinkedList<String>(); //A bit sketch, but whatever.
 		String line = null;
+
 		while ((line = br.readLine()) != null)
 		{
 			allstr.add(line);
@@ -127,21 +137,35 @@ public class StringImporter {
 		smap = new HashMap<String, String>();
 		
 		String[] sarr = new String[allstr.size()];
-		sarr = allstr.toArray(sarr);
+		sarr = allstr.toArray(sarr);*/
+		
+		
+		//Charset mySet = Charset.forName("UTF8");
+		FileBuffer strfile = FileBuffer.createBuffer(filePath);
+		String file = strfile.readEncoded_string("UTF8", 0, strfile.getFileSize());
+		
+		String[] sarr = file.split("\n"); //Still not great. Whatever.
+		//System.err.println("StringImporter.parseStringFromFile || sarr.length = " + sarr.length);
+		Set<String> keyset = map.keySet();
+		smap = new HashMap<String, String>();
 		for(String k : keyset)
 		{
+			//System.err.println("StringImporter.parseStringFromFile || key: " + k);
 			StrRecord r = map.get(k);
 			String s = "";
-			for (int l = 0; l < r.nlines; l++)
+			//System.err.println("\tr.line: " + r.line);
+			//System.err.println("\tr.nlines: " + r.nlines);
+			for (int l = -1; l < r.nlines - 1; l++)
 			{
 				s += sarr[r.line + l];
 				if (l < (r.nlines - 1)) s += "\n";
 			}
+			//System.err.println("\tOutput string: " + s);
 			smap.put(k, s);
 		}
 		
-		br.close();
-		fr.close();
+		//br.close();
+		//fr.close();
 	}
 
 	public String getBotName()

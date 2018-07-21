@@ -196,15 +196,20 @@ public class LaunchCore {
 	public static Bot getInitialBotInfo(String datadir, String botxml) throws FileNotFoundException, XMLStreamException
 	{
 		//https://stackoverflow.com/questions/5059224/which-is-the-best-library-for-xml-parsing-in-java
+		//System.err.println("LaunchCore.getInitialBotInfo || Called!");
+		//System.err.println("LaunchCore.getInitialBotInfo || datadir = " + datadir);
+		//System.err.println("LaunchCore.getInitialBotInfo || botxml = " + botxml);
 		String initxml = datadir + File.separator + botinitXML;
+		//System.err.println("LaunchCore.getInitialBotInfo || initxml = " + initxml);
 		FileInputStream fis = new FileInputStream(initxml);
 		XMLInputFactory xif = XMLInputFactory.newInstance();
 		XMLStreamReader reader = xif.createXMLStreamReader(fis);
+		//System.err.println("LaunchCore.getInitialBotInfo || XML stream opened!");
 		String t = null;
 		String v = null;
 		String c = null;
 		boolean mybot = false;
-		String lastelement = null;
+		String lastelement = "";
 		while(reader.hasNext())
 		{
 			if(mybot)
@@ -216,7 +221,7 @@ public class LaunchCore {
 				else if(reader.getEventType() == XMLStreamReader.END_ELEMENT)
 				{
 					if(reader.getLocalName().equals(botxml))break;
-					else lastelement = null;
+					else lastelement = "";
 				}
 				else if(reader.getEventType() == XMLStreamReader.CHARACTERS)
 				{
@@ -233,6 +238,9 @@ public class LaunchCore {
 			reader.next();
 		}
 		reader.close();
+		//System.err.println("LaunchCore.getInitialBotInfo || t = " + t);
+		//System.err.println("LaunchCore.getInitialBotInfo || v = " + v);
+		//System.err.println("LaunchCore.getInitialBotInfo || c = " + c);
 		if (t == null) return null;
 		if (v == null) return null;
 		if (c == null) return null;
@@ -398,13 +406,17 @@ public class LaunchCore {
 		System.out.println("LaunchCore.loadCore || Loading language settings...");
 		String lanini = cdatdir + File.separator + lan.getCode() + ".ini";
 		inimap = mapINIFile(lanini);
-		String landir = inimap.get(LANINI_KEY_DIR);
+		String landir = cdatdir + File.separator + inimap.get(LANINI_KEY_DIR);
 		String commonstrfile = landir + File.separator + inimap.get(LANINI_KEY_CMN);
 		String monthnamesfile = landir + File.separator + inimap.get(LANINI_KEY_MTH);
 		String[] botstringxml = new String[10];
-		for (int i = 0; i < 10; i++)
+		
+		for (int i = 1; i < 10; i++)
 		{
-			botstringxml[i] = inimap.get(LANINI_KEY_BOTSTEM + i);
+			String key = LANINI_KEY_BOTSTEM + i;
+			//System.err.println("LaunchCore.loadCore || lanini key: " + key);
+			botstringxml[i] = inimap.get(key);
+			if (botstringxml[i] == null) break;
 			if (botstringxml[i].equals("null")) botstringxml[i] = null;
 		}
 		System.out.println("LaunchCore.loadCore || Loading common strings xml...");
@@ -431,7 +443,7 @@ public class LaunchCore {
 		for (int i = 1; i < 10; i++)
 		{
 			System.out.println("LaunchCore.loadCore || Loading BOT" + i);
-			Bot binit = getInitialBotInfo(datadir, "bot" + i);
+			Bot binit = getInitialBotInfo(datadir, "bot_" + i);
 			if (binit != null) bots[i] = BotConstructor.makeBot(binit, core, i);
 			else System.out.println("LaunchCore.loadCore || No data for BOT" + i);
 			System.out.println("LaunchCore.loadCore || BOT" + i + " constructed...");

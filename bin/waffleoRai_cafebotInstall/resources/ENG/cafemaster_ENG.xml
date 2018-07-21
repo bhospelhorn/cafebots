@@ -7,6 +7,8 @@
 	<generalbotstrings>
 		<servergreeting>2,2</servergreeting>
 		<newmemberping>6,1</newmemberping>
+		<serverfarewell>197,1</serverfarewell>
+		<memberleaveping>197,1</memberleaveping>
 		<helpmessage1>92,2</helpmessage1>
 		<helpmessage2>96,1</helpmessage2>
 		<helpmessage3>99,45</helpmessage3>
@@ -61,6 +63,16 @@
 		<checkgsettingoff>239,1</checkgsettingoff>
 		<checkpsettingon>242,1</checkpsettingon>
 		<checkpsettingoff>245,1</checkpsettingoff>
+		<setfarewellon>197,1</setfarewellon>
+		<setfarewelloff>197,1</setfarewelloff>
+		<setfarewellfail>197,1</setfarewellfail>
+		<setfarewellpingon>197,1</setfarewellpingon>
+		<setfarewellpingoff>197,1</setfarewellpingoff>
+		<setfarewellpingfail>197,1</setfarewellpingfail>
+		<checkfsettingon>197,1</checkfsettingon>
+		<checkfsettingoff>197,1</checkfsettingoff>
+		<checkfpsettingon>197,1</checkfpsettingon>
+		<checkfpsettingoff>197,1</checkfpsettingoff>
 	</greetings>
 	<eventmanage>
 		<viewuserevents1>197,1</viewuserevents1>

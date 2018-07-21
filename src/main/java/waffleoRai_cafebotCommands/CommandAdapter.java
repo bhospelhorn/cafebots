@@ -8,6 +8,9 @@ import waffleoRai_cafebotCore.AbstractBot;
  * Creation | June 21, 2018
  * Version 1.0.0 Documentation | July 1, 2018
  * 
+ * 1.0.0 -> 1.1.0 | July 20, 2018
+ * 	Added command message ID note
+ * 
  */
 
 /**
@@ -16,10 +19,12 @@ import waffleoRai_cafebotCore.AbstractBot;
  * <br>Command classes that don't prompt for user input would be well suited for CommandAdapter
  * extension.
  * @author Blythe Hospelhorn
- * @version 1.0.0
- * @since July 1, 2018
+ * @version 1.1.0
+ * @since July 20, 2018
  */
 public abstract class CommandAdapter implements Command{
+	
+	private long command_message_ID = -1;
 	
 	/**
 	 * Get the raw Long Integer UID of the channel this command is set to send messages to.
@@ -66,6 +71,16 @@ public abstract class CommandAdapter implements Command{
 	 */
 	public void execute_rerequest(AbstractBot bot) {
 		bot.displayRerequestMessage(getChannelID());
+	}
+	
+	protected void setCommandMessageID(long cmdID)
+	{
+		command_message_ID = cmdID;
+	}
+	
+	public long getCommandMessageID() 
+	{
+		return command_message_ID;
 	}
 
 }

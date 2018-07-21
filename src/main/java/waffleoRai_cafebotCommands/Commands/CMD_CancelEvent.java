@@ -11,6 +11,8 @@ import waffleoRai_cafebotCore.AbstractBot;
  * Creation | June 26, 2018
  * Version 1.0.0 Documentation | July 1, 2018
  * 
+ * 1.0.0 -> 1.1.0 | July 20, 2018
+ * 	Added command message ID note
  */
 
 /**
@@ -18,8 +20,8 @@ import waffleoRai_cafebotCore.AbstractBot;
  * <br><br><b>Standard Command:</b>
  * <br>ecancel [eventID]
  * @author Blythe Hospelhorn
- * @version 1.0.0
- * @since July 1, 2018
+ * @version 1.1.0
+ * @since July 20, 2018
  */
 public class CMD_CancelEvent extends CommandAdapter{
 	
@@ -33,12 +35,14 @@ public class CMD_CancelEvent extends CommandAdapter{
 	 * to.
 	 * @param u User that sent the command as a JDA Member object.
 	 * @param eventID UID of the event to cancel.
+	 * @param cmdID Long UID of the message the command was sent in.
 	 */
-	public CMD_CancelEvent(MessageChannel ch, Member u, long eventID)
+	public CMD_CancelEvent(MessageChannel ch, Member u, long eventID, long cmdID)
 	{
 		channel = ch;
 		user = u;
 		event = eventID;
+		super.setCommandMessageID(cmdID);
 	}
 
 	@Override
@@ -83,5 +87,6 @@ public class CMD_CancelEvent extends CommandAdapter{
 	{
 		return "ecancel";
 	}
+	
 
 }

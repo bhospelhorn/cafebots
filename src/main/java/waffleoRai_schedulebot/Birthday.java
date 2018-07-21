@@ -48,6 +48,7 @@ public class Birthday implements CalendarEvent{
 	
 	@Override
 	public int compareTo(CalendarEvent o) {
+		if (o == null) return 1;
 		if (o == this) return 0;
 		EventType ot = o.getType();
 		if (ot.getSerial() != EventType.BIRTHDAY.getSerial()){
@@ -177,5 +178,19 @@ public class Birthday implements CalendarEvent{
 		username = name;
 	}
 	
+	public int nextReminderLevel()
+	{
+		return 0;
+	}
+	
+	public long untilNextReminder()
+	{
+		return getTimeUntil();
+	}
+	
+	public CalendarEvent spawnSequel()
+	{
+		return this;
+	}
 	
 }

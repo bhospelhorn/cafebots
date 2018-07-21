@@ -12,6 +12,8 @@ import waffleoRai_schedulebot.EventType;
  * Creation | June 24, 2018
  * Version 1.0.0 Documentation | July 1, 2018
  * 
+ * 1.0.0 -> 1.1.0 | July 20, 2018
+ * 	Added command message ID note
  */
 
 /**
@@ -21,8 +23,8 @@ import waffleoRai_schedulebot.EventType;
  * <br>sor alloff
  * <br>sor allon
  * @author Blythe Hospelhorn
- * @version 1.0.0
- * @since July 1, 2018
+ * @version 1.1.0
+ * @since July 20, 2018
  */
 public class CMD_SOR extends CommandAdapter {
 	
@@ -39,8 +41,9 @@ public class CMD_SOR extends CommandAdapter {
 	 * @param ch Channel command was issued on and reply should be sent to.
 	 * @param u User who issued the command, as a JDA Member object.
 	 * @param direction True if turning all reminders on, False if turning all reminders off.
+	 * @param cmdID Long UID of the message the command was sent in.
 	 */
-	public CMD_SOR(MessageChannel ch, Member u, boolean direction)
+	public CMD_SOR(MessageChannel ch, Member u, boolean direction, long cmdID)
 	{
 		//All	
 		channel = ch;
@@ -49,6 +52,7 @@ public class CMD_SOR extends CommandAdapter {
 		all = true;
 		type = null;
 		level = -1;
+		super.setCommandMessageID(cmdID);
 	}
 	
 	/**
@@ -58,8 +62,9 @@ public class CMD_SOR extends CommandAdapter {
 	 * @param u User who issued the command, as a JDA Member object.
 	 * @param t Type of event to switch reminder on or off.
 	 * @param l Reminder level to switch on or off.
+	 * @param cmdID Long UID of the message the command was sent in.
 	 */
-	public CMD_SOR(MessageChannel ch, Member u, EventType t, int l)
+	public CMD_SOR(MessageChannel ch, Member u, EventType t, int l, long cmdID)
 	{
 		//One
 		channel = ch;
@@ -68,6 +73,7 @@ public class CMD_SOR extends CommandAdapter {
 		all = false;
 		type = t;
 		level = l;
+		super.setCommandMessageID(cmdID);
 	}
 	
 	@Override

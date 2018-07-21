@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <botstrings>
 	<fileinfo>
-		<botname>Mimi</botname>
-		<filename>cbblue_ENG.str</filename>
+		<botname>VanillaBot</botname>
+		<filename>vanillabot_ENG.str</filename>
 	</fileinfo>
 	<generalbotstrings>
 		<servergreeting>5,2</servergreeting>
 		<newmemberping>9,1</newmemberping>
+		<serverfarewell>568,1</serverfarewell>
+		<memberleaveping>571,1</memberleaveping>
 		<helpmessage1>95,2</helpmessage1>
 		<helpmessage2>99,1</helpmessage2>
 		<helpmessage3>102,45</helpmessage3>
@@ -61,6 +63,16 @@
 		<checkgsettingoff>239,1</checkgsettingoff>
 		<checkpsettingon>242,1</checkpsettingon>
 		<checkpsettingoff>245,1</checkpsettingoff>
+		<setfarewellon>574,1</setfarewellon>
+		<setfarewelloff>577,1</setfarewelloff>
+		<setfarewellfail>580,1</setfarewellfail>
+		<setfarewellpingon>583,1</setfarewellpingon>
+		<setfarewellpingoff>586,1</setfarewellpingoff>
+		<setfarewellpingfail>589,1</setfarewellpingfail>
+		<checkfsettingon>592,1</checkfsettingon>
+		<checkfsettingoff>595,1</checkfsettingoff>
+		<checkfpsettingon>598,1</checkfpsettingon>
+		<checkfpsettingoff>601,1</checkfpsettingoff>
 	</greetings>
 	<eventmanage>
 		<viewuserevents1>552,4</viewuserevents1>

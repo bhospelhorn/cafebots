@@ -39,8 +39,14 @@ public class GuildMap {
 	
 	public GuildMap(String installdir, ParseCore parser) throws IOException, UnsupportedFileTypeException
 	{
+		this();
 		String gpath = installdir + File.separator + GUILD_DIRNAME;
 		String inipath = gpath + File.separator + GUILD_INIT_FILENAME;
+		if (!FileBuffer.fileExists(inipath))
+		{
+			System.out.println("GuildMap.<init> || Guild info init file does not exist! Nothing to read...");
+			return;
+		}
 		
 		FileReader fr = new FileReader(inipath);
 		BufferedReader br = new BufferedReader(fr);

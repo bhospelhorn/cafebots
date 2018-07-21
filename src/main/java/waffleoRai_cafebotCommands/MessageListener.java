@@ -54,9 +54,11 @@ public class MessageListener extends ListenerAdapter{
 		if(verbose)
 		{
 			System.out.println("Message received || Guild: " + event.getGuild().getName() + " | Channel: " + event.getChannel().getName());
-			System.out.println(event.getMember().getNickname() + " says:" + event.getMessage().getContentDisplay());	
+			System.out.println(event.getMember().getEffectiveName() + " says: " + event.getMessage().getContentDisplay());	
 		}
 		parser.queueMessage(event);
 	}
 
+	
+	
 }

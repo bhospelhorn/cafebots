@@ -11,6 +11,9 @@ import waffleoRai_cafebotCore.AbstractBot;
  * Creation | June 24, 2018
  * Version 1.0.0 Documentation | July 1, 2018
  * 
+ * 1.0.0 -> 1.1.0 | July 20, 2018
+ * 	Added command message ID note
+ * 
  */
 
 
@@ -20,8 +23,8 @@ import waffleoRai_cafebotCore.AbstractBot;
  * <br>eventhelp arghelp
  * <br>eventhelp sorhelp
  * @author Blythe Hospelhorn
- * @version 1.0.0
- * @since July 1, 2018
+ * @version 1.1.0
+ * @since July 20, 2018
  */
 public class CMD_Eventhelp extends CommandAdapter{
 
@@ -35,12 +38,14 @@ public class CMD_Eventhelp extends CommandAdapter{
 	 * @param u User who issued the command, as a JDA User object.
 	 * @param sor True if help on the sor command was requested. False if help on the
 	 * event creation command arguments was requested.
+	 * @param cmdID Long UID of the message the command was sent in.
 	 */
-	public CMD_Eventhelp(MessageChannel ch, User u, boolean sor)
+	public CMD_Eventhelp(MessageChannel ch, User u, boolean sor, long cmdID)
 	{
 		channel = ch;
 		user = u;
 		useSOR = sor;
+		super.setCommandMessageID(cmdID);
 	}
 	
 	@Override

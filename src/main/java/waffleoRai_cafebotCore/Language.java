@@ -56,4 +56,10 @@ public enum Language {
 		return dateformattermap.get(lan).formatSequentialNumber(n);
 	}
 	
+	public static DateFormatter getDateFormatter(Language lan)
+	{
+		if (dateformattermap == null) buildDateFormatterMap();
+		return dateformattermap.get(lan);
+	}
+	
 }

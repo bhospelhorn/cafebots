@@ -51,6 +51,22 @@ public class UserBank {
 		return all;
 	}
 	
+	public synchronized List<ActorUser> getAllUsersWithFarewellPing()
+	{
+		List<ActorUser> all = new ArrayList<ActorUser>(users.size());
+		Set<Long> keyset = users.keySet();
+		
+		for (Long l : keyset)
+		{
+			ActorUser u = users.get(l);
+			if (u != null){
+				if (u.pingFarewellsOn()) all.add(u);
+			}
+		}
+		
+		return all;
+	}
+	
 	public synchronized void addUser(ActorUser u)
 	{
 		long uid = u.getUID();

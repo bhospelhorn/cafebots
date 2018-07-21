@@ -349,6 +349,7 @@ public class InstallForm extends JFrame{
 			b.setLocalIndex(2);
 			set.addBot(b);	
 		}
+		else return set;
 		
 		if (t == null || t.isEmpty()) return null; //Can't skip bots - must be consecutive
 		btype = (Integer)spn3.getValue();
@@ -363,6 +364,7 @@ public class InstallForm extends JFrame{
 			b.setLocalIndex(3);
 			set.addBot(b);	
 		}
+		else return set;
 		
 		if (t == null || t.isEmpty()) return null; //Can't skip bots - must be consecutive
 		btype = (Integer)spn4.getValue();
@@ -377,6 +379,7 @@ public class InstallForm extends JFrame{
 			b.setLocalIndex(4);
 			set.addBot(b);	
 		}
+		else return set;
 		
 		if (t == null || t.isEmpty()) return null; //Can't skip bots - must be consecutive
 		btype = (Integer)spn5.getValue();
@@ -391,6 +394,7 @@ public class InstallForm extends JFrame{
 			b.setLocalIndex(5);
 			set.addBot(b);	
 		}
+		else return set;
 		
 		if (t == null || t.isEmpty()) return null; //Can't skip bots - must be consecutive
 		btype = (Integer)spn6.getValue();
@@ -405,6 +409,7 @@ public class InstallForm extends JFrame{
 			b.setLocalIndex(6);
 			set.addBot(b);	
 		}
+		else return set;
 		
 		if (t == null || t.isEmpty()) return null; //Can't skip bots - must be consecutive
 		btype = (Integer)spn7.getValue();
@@ -419,6 +424,7 @@ public class InstallForm extends JFrame{
 			b.setLocalIndex(7);
 			set.addBot(b);	
 		}
+		else return set;
 		
 		if (t == null || t.isEmpty()) return null; //Can't skip bots - must be consecutive
 		btype = (Integer)spn8.getValue();
@@ -433,6 +439,7 @@ public class InstallForm extends JFrame{
 			b.setLocalIndex(8);
 			set.addBot(b);	
 		}
+		else return set;
 		
 		if (t == null || t.isEmpty()) return null; //Can't skip bots - must be consecutive
 		btype = (Integer)spn9.getValue();
@@ -447,6 +454,7 @@ public class InstallForm extends JFrame{
 			b.setLocalIndex(9);
 			set.addBot(b);	
 		}
+		else return set;
 		
 		return set;
 	}

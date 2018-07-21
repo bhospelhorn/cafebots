@@ -1,6 +1,7 @@
 package waffleoRai_cafebotCore;
 
 import net.dv8tion.jda.core.events.guild.member.GuildMemberJoinEvent;
+import net.dv8tion.jda.core.events.guild.member.GuildMemberLeaveEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 import waffleoRai_cafebotCommands.ParseCore;
 
@@ -22,6 +23,16 @@ public class GreetingListener extends ListenerAdapter{
 		if (v)
 		{
 			System.out.println("GreetingListener.onGuildMemberJoin || New member detected! " + e.getMember().getEffectiveName());
+		}
+	}
+	
+	public void onGuildMemberLeave(GuildMemberLeaveEvent e)
+	{
+		//First pass to parser, then deal with message output...
+		parser.queueFarewell(e);
+		if (v)
+		{
+			System.out.println("GreetingListener.onGuildMemberLeave || Member leave detected! " + e.getMember().getEffectiveName());
 		}
 	}
 	

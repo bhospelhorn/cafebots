@@ -11,6 +11,8 @@ import waffleoRai_cafebotCore.AbstractBot;
  * Creation | June 27, 2018
  * Version 1.0.0 Documentation | July 1, 2018
  * 
+ * 1.0.0 -> 1.1.0 | July 20, 2018
+ * 	Added command message ID note
  */
 
 /**
@@ -20,8 +22,8 @@ import waffleoRai_cafebotCore.AbstractBot;
  * <br>chchan greeting [channelName]
  * <br><i>These commands are for guild admins only.</i>
  * @author Blythe Hospelhorn
- * @version 1.0.0
- * @since July 1, 2018
+ * @version 1.1.0
+ * @since July 20, 2018
  */
 public class CMD_ChChan extends CommandAdapter{
 
@@ -39,13 +41,15 @@ public class CMD_ChChan extends CommandAdapter{
 	 * @param birthday 
 	 * <br>True - If user wants to change the birthday channel
 	 * <br>False - If user wants to change the greeting channel
+	 * @param cmdID Long UID of the message the command was sent in.
 	 */
-	public CMD_ChChan(MessageChannel ch, Member u, String tchan, boolean birthday)
+	public CMD_ChChan(MessageChannel ch, Member u, String tchan, boolean birthday, long cmdID)
 	{
 		cmd_channel = ch;
 		user = u;
 		trg_channel = tchan;
 		bday = birthday;
+		super.setCommandMessageID(cmdID);
 	}
 	
 	@Override
@@ -73,5 +77,4 @@ public class CMD_ChChan extends CommandAdapter{
 	{
 		return "chchan";
 	}
-
 }

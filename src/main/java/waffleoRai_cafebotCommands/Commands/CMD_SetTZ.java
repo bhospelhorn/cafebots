@@ -11,6 +11,9 @@ import waffleoRai_cafebotCore.AbstractBot;
  * Creation | June 24, 2018
  * Version 1.0.0 Documentation | July 1, 2018
  * 
+ * 1.0.0 -> 1.1.0 | July 20, 2018
+ * 	Added command message ID note
+ * 
  */
 
 
@@ -19,8 +22,8 @@ import waffleoRai_cafebotCore.AbstractBot;
  * <br><br><b>Standard Command:</b>
  * <br>changetz [timezone]
  * @author Blythe Hospelhorn
- * @version 1.0.0
- * @since July 1, 2018
+ * @version 1.1.0
+ * @since July 20, 2018
  */
 public class CMD_SetTZ extends CommandAdapter {
 
@@ -33,12 +36,14 @@ public class CMD_SetTZ extends CommandAdapter {
 	 * @param c Channel command was issued on and reply should be sent to.
 	 * @param u User who issued the command, as a JDA Member object.
 	 * @param tzcode String recognized by <i>java.util.timezone</i> as a timezone ID.
+	 * @param cmdID Long UID of the message the command was sent in.
 	 */
-	public CMD_SetTZ(MessageChannel c, Member u, String tzcode)
+	public CMD_SetTZ(MessageChannel c, Member u, String tzcode, long cmdID)
 	{
 		ch = c;
 		user = u;
 		tz = tzcode;
+		super.setCommandMessageID(cmdID);
 	}
 	
 	@Override

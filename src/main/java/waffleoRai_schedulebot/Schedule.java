@@ -27,17 +27,28 @@ public class Schedule {
 	public static final int[] MONTHDAYS = {31, 29, 31, 30,
 										   31, 30, 31, 31,
 										   30, 31, 30, 31};
+	
+	public static final long MILLISECONDS_PER_SECOND = 1000;
+	public static final long MILLISECONDS_PER_MINUTE = 60000;
+	public static final long MILLISECONDS_PER_HOUR = 3600000;
 	public static final long MILLISECONDS_PER_DAY = 86400000;
 	
 	public static final int SLEEPTIME_MINUTES_BIRTHDAY = 240; //4 hours
 	
 	public static final String BIRTHDAY_FILENAME = "birthday.tsv";
+	public static final String ONETIME_FILENAME = "onetime.tsv";
+	public static final String DEADLINE_FILENAME = "deadline.tsv";
+	public static final String WEEKLY_FILENAME = "weekly.tsv";
+	public static final String BIWEEKLY_FILENAME = "biweekly.tsv";
+	public static final String MONTHLYA_FILENAME = "monthlydom.tsv";
+	public static final String MONTHLYB_FILENAME = "monthlydow.tsv";
 	
 	private long guildID;
 	private UserBank users;
 	private ParseCore cmdCore;
 	
 	private EventMap eventmap;
+	private EventTimerThread event_monitor_thread;
 	
 	//private LinkedList<Birthday> birthdayQueue;
 	private BirthdayMap bday_map;
@@ -45,7 +56,10 @@ public class Schedule {
 	private BirthdayQueue bday_wish_queue;
 	private WisherThread bday_monitor_thread;
 	
+	//private EventQueue events;
+	
 	public static String[] monthnames;
+	private static ReminderMap reminders;
 	
 	/* ----- Construction ----- */
 	
@@ -57,8 +71,9 @@ public class Schedule {
 		bday_map = new BirthdayMap();
 		cmdCore = parser;
 		guildID = guild;
-		bday_monitor_thread = new WisherThread(SLEEPTIME_MINUTES_BIRTHDAY);
+		//bday_monitor_thread = new WisherThread(SLEEPTIME_MINUTES_BIRTHDAY);
 		eventmap = new EventMap();
+		//events = new EventQueue();
 	}
 	
 	public Schedule(UserBank ub, long guild, String sdir, ParseCore parser) throws IOException, UnsupportedFileTypeException
@@ -68,6 +83,47 @@ public class Schedule {
 	}
 	
 	/* ----- Parsing ----- */
+	
+	private void loadEventListFile(String path, EventType type) throws IOException, UnsupportedFileTypeException
+	{
+		FileReader fr = new FileReader(path);
+		BufferedReader br = new BufferedReader(fr);
+		
+		String line = null;
+		while ((line = br.readLine()) != null)
+		{
+			EventAdapter e = null;
+			switch (type)
+			{
+			case BIWEEKLY:
+				e = new BiweeklyEvent(line);
+				break;
+			case DEADLINE:
+				e = new DeadlineEvent(line);
+				break;
+			case MONTHLYA:
+				e = new MonthlyDOMEvent(line);
+				break;
+			case MONTHLYB:
+				e = new MonthlyDOWEvent(line);
+				break;
+			case ONETIME:
+				e = new OneTimeEvent(line);
+				break;
+			case WEEKLY:
+				e = new WeeklyEvent(line);
+				break;
+			default:
+				br.close();
+				fr.close();
+				return;
+			}
+			addEvent(e);
+		}
+		
+		br.close();
+		fr.close();
+	}
 	
 	private void loadBirthdayFile(String sdir) throws IOException, UnsupportedFileTypeException
 	{
@@ -105,6 +161,12 @@ public class Schedule {
 	{
 		loadBirthdayFile(sdir);
 		updateBirthdayWishQueue();
+		loadEventListFile(sdir + File.separator + ONETIME_FILENAME, EventType.ONETIME);
+		loadEventListFile(sdir + File.separator + DEADLINE_FILENAME, EventType.DEADLINE);
+		loadEventListFile(sdir + File.separator + WEEKLY_FILENAME, EventType.WEEKLY);
+		loadEventListFile(sdir + File.separator + BIWEEKLY_FILENAME, EventType.BIWEEKLY);
+		loadEventListFile(sdir + File.separator + MONTHLYA_FILENAME, EventType.MONTHLYA);
+		loadEventListFile(sdir + File.separator + MONTHLYB_FILENAME, EventType.MONTHLYB);
 	}
 	
 	/* ----- Getters ----- */
@@ -134,6 +196,12 @@ public class Schedule {
 		
 		Collections.sort(myevents);
 		return myevents;
+	}
+	
+	public static ReminderTime getReminderTime(EventType type, int level)
+	{
+		if (reminders == null) throw new IllegalStateException();
+		return reminders.getTime(type, level);
 	}
 	
 	/* ----- Setters ----- */
@@ -168,6 +236,12 @@ public class Schedule {
 		{
 			return map.remove(eventID);
 		}
+	
+		public synchronized Set<Long> getAllEventIDs()
+		{
+			return map.keySet();
+		}
+	
 	}
 	
 	public boolean cancelEvent(long eID)
@@ -549,7 +623,111 @@ public class Schedule {
 		return bdays;
 	}
 	
+	/* ----- Events : Other ----- */
+	
+	public class EventTimerThread extends Thread
+	{
+		private boolean killme;
+		
+		public EventTimerThread()
+		{
+			killme = false;
+			this.setDaemon(true);
+			GregorianCalendar now = new GregorianCalendar();
+			this.setName("EventReminderMonitorDaemon_" + Long.toHexString(now.getTimeInMillis()));
+		}
+		
+		public void run()
+		{
+			while (!killed())
+			{
+				Set<Long> eidset = eventmap.getAllEventIDs();
+				for (long l : eidset)
+				{
+					CalendarEvent e = eventmap.get(l);
+					//See if non-birthday
+					if (!(e instanceof EventAdapter)) continue;
+					EventAdapter ea = (EventAdapter)e;
+					//See if it's passed the last reminder time
+					int lv = ea.nextReminderLevel();
+					long nr = ea.untilNextReminder();
+					if (nr <= 0 && lv > 0)
+					{
+						cmdCore.command_EventReminder(ea, lv, guildID);
+					}
+					//See if the event has already passed (and spawn sequel if need be)
+					long until = ea.getTimeUntil();
+					if (until <= 0)
+					{
+						eventmap.remove(l);
+						CalendarEvent seq = ea.spawnSequel();
+						if (seq != null) eventmap.put(l, seq);
+					}
+					else
+					{
+						//...Or reset reminder time
+						ea.determineNextReminder();
+					}
+				}
+				try 
+				{
+					Thread.sleep(60000);
+				} 
+				catch (InterruptedException e) 
+				{
+					Thread.interrupted();
+				}
+			}
+		}
+		
+		private synchronized boolean killed()
+		{
+			return killme;
+		}
+		
+		public synchronized void interruptMe()
+		{
+			this.interrupt();
+		}
+		
+		public synchronized void terminate()
+		{
+			killme = true;
+			this.interrupt();
+		}
+		
+	}
+	
+	public void addEvent(EventAdapter e)
+	{
+		if (e == null) return;
+		eventmap.put(e.getEventID(), e);
+	}
+	
 	/* ----- Serialization ----- */
+	
+	private void writeEventFile(String path, EventType type) throws IOException
+	{
+		Set<Long> alleid = eventmap.getAllEventIDs();
+		FileWriter fw = new FileWriter(path);
+		BufferedWriter bw = new BufferedWriter(fw);
+		
+		boolean first = true;
+		for (long l : alleid)
+		{
+			CalendarEvent eraw = eventmap.get(l);
+			if (eraw.getType() != type) continue;
+			if (!(eraw instanceof EventAdapter)) continue;
+			EventAdapter e = (EventAdapter)eraw;
+			String line = e.toTSV_record();
+			if (!first) bw.write("\n" + line);
+			else bw.write(line);
+			first = false;
+		}
+		
+		bw.close();
+		fw.close();
+	}
 	
 	private void writeBirthdayFile(String sdir) throws IOException
 	{
@@ -573,6 +751,12 @@ public class Schedule {
 	public void saveToDisk(String sdir) throws IOException
 	{
 		writeBirthdayFile(sdir);
+		writeEventFile(sdir + File.separator + ONETIME_FILENAME, EventType.ONETIME);
+		writeEventFile(sdir + File.separator + DEADLINE_FILENAME, EventType.DEADLINE);
+		writeEventFile(sdir + File.separator + WEEKLY_FILENAME, EventType.WEEKLY);
+		writeEventFile(sdir + File.separator + BIWEEKLY_FILENAME, EventType.BIWEEKLY);
+		writeEventFile(sdir + File.separator + MONTHLYA_FILENAME, EventType.MONTHLYA);
+		writeEventFile(sdir + File.separator + MONTHLYB_FILENAME, EventType.MONTHLYB);
 	}
 	
 	/* ----- Printing ----- */
@@ -610,16 +794,25 @@ public class Schedule {
 		return monthnames[m];
 	}
 
+	public static void loadReminderTimes(ReminderMap times)
+	{
+		reminders = times;
+	}
+	
 	/* ----- Threads ----- */
 	
 	public void startMonitorThreads()
 	{
+		bday_monitor_thread = new WisherThread(SLEEPTIME_MINUTES_BIRTHDAY);
 		bday_monitor_thread.start();
+		event_monitor_thread = new EventTimerThread();
+		event_monitor_thread.start();
 	}
 	
 	public void killMonitorThreads()
 	{
 		bday_monitor_thread.kill();
+		event_monitor_thread.terminate();
 	}
 	
 }

@@ -13,10 +13,13 @@ import waffleoRai_cafebotCommands.parsers.PRS_CleanMessages_3;
 import waffleoRai_cafebotCommands.parsers.PRS_EventHelp;
 import waffleoRai_cafebotCommands.parsers.PRS_GetTZ;
 import waffleoRai_cafebotCommands.parsers.PRS_Help;
+import waffleoRai_cafebotCommands.parsers.PRS_PingMeGreetings;
 import waffleoRai_cafebotCommands.parsers.PRS_SOR;
 import waffleoRai_cafebotCommands.parsers.PRS_SaySomething;
 import waffleoRai_cafebotCommands.parsers.PRS_SeeEvents;
 import waffleoRai_cafebotCommands.parsers.PRS_SeeTZ;
+import waffleoRai_cafebotCommands.parsers.PRS_SetFarewells;
+import waffleoRai_cafebotCommands.parsers.PRS_SetGreetings;
 import waffleoRai_cafebotCommands.parsers.PRS_SetTZ;
 import waffleoRai_cafebotCommands.parsers.PRS_qChan;
 
@@ -84,9 +87,18 @@ public interface Parser {
 		pmap.put("completerole", null);
 		pmap.put("pushdeadline", null);
 		pmap.put("cleanday", new PRS_CleanMessages_3());
-		pmap.put("setGreetings", null); //TODO
-		pmap.put("pingGreetings", null); //TODO
+		pmap.put("setGreetings", new PRS_SetGreetings());
+		pmap.put("pingGreetings", new PRS_PingMeGreetings());
+		pmap.put("setFarewells", new PRS_SetFarewells());
+		pmap.put("pingFarewells", null); //TODO
 		pmap.put("audconf", null);
+		pmap.put("cmdclean", null);
+		pmap.put("autocmdclean", null);
+		
+		pmap.put("accept", null);
+		pmap.put("decline", null);
+		pmap.put("attending", null);
+		pmap.put("cantgo", null);
 		
 		pmap.put("saysomething", new PRS_SaySomething());
 		pmap.put("bringmeagene", null);

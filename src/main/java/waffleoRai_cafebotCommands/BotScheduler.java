@@ -25,12 +25,16 @@ import javax.swing.Timer;
 import waffleoRai_Utils.FileBuffer;
 import waffleoRai_Utils.FileBuffer.UnsupportedFileTypeException;
 import waffleoRai_cafebotCommands.Commands.CMD_UpdateStatusAtShift;
+import waffleoRai_cafebotCore.AbstractBot;
 
 /*
  * UPDATES
  * 
  * Creation | June 10, 2018
  * Version 1.0.0 Documentation | July 1, 2018
+ * 
+ * 1.0.0 -> 1.0.1 | July 15, 2018
+ * 	Added some information access methods
  * 
  */
 
@@ -62,7 +66,7 @@ import waffleoRai_cafebotCommands.Commands.CMD_UpdateStatusAtShift;
  * <br><br><i>Outstanding Issues:</i>
  * <br>- Potential inefficient memory use in BotScheduler.Shift
  * @author Blythe Hospelhorn
- * @version 1.0.0
+ * @version 1.0.1
  * @since July 1, 2018
  */
 public class BotScheduler implements ActionListener{
@@ -897,6 +901,17 @@ public class BotScheduler implements ActionListener{
 		return t;
 	}
 	
+	/**
+	 * Returns the index of the bot currently occupying the position with the given index.
+	 * @param posIndex Position index.
+	 * @return Index of bot at that position.
+	 */
+	public int getBotAtPosition(int posIndex)
+	{
+		if (currentShift == null) return -1;
+		return currentShift.getBotAtPosition(posIndex);
+	}
+	
 	/* ----- Setters ----- */
 	
 	/* ----- Static Getters ----- */
@@ -948,6 +963,16 @@ public class BotScheduler implements ActionListener{
 		timer.stop();
 	}
 	
+	/**
+	 * Check to see if the background timer thread is running.
+	 * @return True if timer is running, false if not.
+	 */
+	public synchronized boolean timerRunning()
+	{
+		if (timer == null) return false;
+		return timer.isRunning();
+	}
+	
 	/* ----- Shift Changing ----- */
 	
 	/**
@@ -971,13 +996,18 @@ public class BotScheduler implements ActionListener{
 			for (int i = 1; i < 10; i++)
 			{
 				Position p = currentShift.getBotPosition(i);
+				boolean online = true;
+				if (AbstractBot.offdutyOffline() && i > 1)
+				{
+					if (p == null) online = false;
+				}
 				if (p == null){
-					Command cmd = new CMD_UpdateStatusAtShift(-1, c.get(Calendar.MONTH));
+					Command cmd = new CMD_UpdateStatusAtShift(-1, c.get(Calendar.MONTH), online);
 					commander.issueDirectCommand(i, cmd);
 				}
 				else
 				{
-					Command cmd = new CMD_UpdateStatusAtShift(p.getIndex(), c.get(Calendar.MONTH));
+					Command cmd = new CMD_UpdateStatusAtShift(p.getIndex(), c.get(Calendar.MONTH), online);
 					commander.issueDirectCommand(i, cmd);
 				}
 			}

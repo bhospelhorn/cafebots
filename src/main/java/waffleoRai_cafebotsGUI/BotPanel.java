@@ -8,6 +8,7 @@ import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.MessageChannel;
 import net.dv8tion.jda.core.entities.TextChannel;
 import waffleoRai_cafebotCore.AbstractBot;
+import waffleoRai_cafebotCore.BotMessage;
 
 import javax.swing.JTextField;
 import javax.swing.DefaultComboBoxModel;
@@ -186,7 +187,7 @@ public class BotPanel extends JPanel{
 	
 	private void refreshGuildList()
 	{
-		if (bot == null)
+		if (bot == null || bot.getJDA() == null)
 		{
 			cmbxGuild.setModel(new DefaultComboBoxModel<GuildListing>());
 			return;
@@ -250,6 +251,7 @@ public class BotPanel extends JPanel{
 	{
 		if (bot == null)
 		{
+			//System.err.println("BotPanel.updatePanel || DEBUG: Bot is null!");
 			pnlAvatar.setImage(null);
 			lblName.setText("[NO BOT LOADED]");
 			lblDisc.setText("#");
@@ -262,8 +264,25 @@ public class BotPanel extends JPanel{
 		}
 		else
 		{
+			//Check the damn JDA!
+			JDA botcore = bot.getJDA();
+			if (botcore == null)
+			{
+				//System.err.println("BotPanel.updatePanel || DEBUG: Bot is not loaded!");
+				pnlAvatar.setImage(null);
+				lblName.setText("[LOAD PENDING...]");
+				lblDisc.setText("#");
+				lblStatus.setText("");
+				lblNickname.setText("");
+				refreshGuildList();
+				refreshChannelList();
+				txtMessage.setText("");
+				disableParts();
+				return;
+			}
 			try 
 			{
+				//System.err.println("BotPanel.updatePanel || DEBUG: Searching for bot avatar image...");
 				pnlAvatar.setImage(bot.getBotAvatar());
 			} 
 			catch (IOException e) 
@@ -271,17 +290,27 @@ public class BotPanel extends JPanel{
 				showError("ERROR: Could not retrieve bot avatar image!");
 				e.printStackTrace();
 			}
-			lblName.setText(bot.getBotName());
-			lblDisc.setText("#" + bot.getBotDiscriminator());
-			lblStatus.setText(bot.getBotStatus());
+			String name = bot.getBotName();
+			String disc = bot.getBotDiscriminator();
+			//System.err.println("BotPanel.updatePanel || DEBUG: name = " + name);
+			//System.err.println("BotPanel.updatePanel || DEBUG: discriminator = " + disc);
+			lblName.setText(name);
+			lblDisc.setText("#" + disc);
+			String stat = bot.getBotStatus();
+			if (stat == null) stat = "NO STATUS";
+			lblStatus.setText(stat);
+			//System.err.println("BotPanel.updatePanel || DEBUG: Refreshing guild list...");
 			refreshGuildList();
+			//System.err.println("BotPanel.updatePanel || DEBUG: Refreshing channel list...");
 			refreshChannelList();
 			Guild g = getSelectedGuild();
 			if (g != null) lblNickname.setText(bot.getBotNickname(g));
 			else lblNickname.setText("[No guild selected]");
+			//System.err.println("BotPanel.updatePanel || DEBUG: Enabling...");
 			enableParts();
 		}
 		repaintAll();
+		//System.err.println("BotPanel.updatePanel || DEBUG: Update complete!");
 	}
 	
 	public void onGuildChanged()
@@ -291,32 +320,39 @@ public class BotPanel extends JPanel{
 	
 	public void sendMessage()
 	{
+		txtMessage.setEnabled(false);
 		if (bot == null){
 			showError("Cannot send message from non-existent bot!");
+			txtMessage.setEnabled(true);
 			return;
 		}
 		String text = txtMessage.getText();
 		if (text == null || text.isEmpty())
 		{
 			showError("Cannot send empty message!");
+			txtMessage.setEnabled(true);
 			return;
 		}
 		MessageChannel ch =  getSelectedChannel();
 		if (ch == null)
 		{
 			showError("Please select a channel!");
+			txtMessage.setEnabled(true);
 			return;
 		}
 		
 		try
 		{
-			bot.sendMessage(ch, text);
+			bot.sendMessage(ch, new BotMessage(text));
+			txtMessage.setText("");
+			txtMessage.repaint();
 		}
 		catch (Exception e)
 		{
 			showError("Message sending failed! See stderr for details.");
 			e.printStackTrace();
 		}
+		txtMessage.setEnabled(true);
 	}
 	
 	public void showError(String message)
