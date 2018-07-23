@@ -107,4 +107,16 @@ public class ReminderTime {
 		return minutes;
 	}
 
+	public String toString()
+	{
+		String s = "";
+		s += years + " Y | ";
+		s += months + " M | ";
+		s += weeks + " W | ";
+		s += days + " D | ";
+		s += hours + " HR | ";
+		s += minutes + " MIN";
+		return s;
+	}
+	
 }

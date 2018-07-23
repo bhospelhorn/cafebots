@@ -114,13 +114,13 @@ Universal Commands:
     Create a one-time event. Type !event arghelp for more info.
 !deadline yyyy mm dd hh:mm \"taskname\" rchannel tchannel target1 (target2+)
     Create a deadline event. Type !event arghelp for more info.
-!weekly DOW \"eventname\" rchannel tchannel target1 (target2+)
+!weekly DOW hh:mm \"eventname\" rchannel tchannel target1 (target2+)
     Create a weekly recurring event.
-!biweekly DOW \"eventname\" rchannel tchannel target1 (target2+)
+!biweekly DOW hh:mm \"eventname\" rchannel tchannel target1 (target2+)
     Create a bi-weekly recurring event.
-!monthlyday dd \"eventname\" rchannel tchannel target1 (target2+)
+!monthlyday dd hh:mm \"eventname\" rchannel tchannel target1 (target2+)
     Create a monthly event that occurs on a certain day of the month.
-!monthlydow DOW ww \"eventname\" rchannel tchannel target1 (target2+)
+!monthlydow DOW ww hh:mm \"eventname\" rchannel tchannel target1 (target2+)
     Create a monthly event that occurs on the ww-th DOW every month (eg. 2nd Monday).
 !birthday mm dd
     Add your birthday to the birthday list.
@@ -176,8 +176,8 @@ Admin Commands:
     Clean all messages from this channel that were posted in the last 24 hours (additional Discord permissions apply).
 !setGreetings on/off
     Turn on/off greetings when new members join.
-!pingGreetings on/off [channel]
-    Turn on/off whether to ping you when new members join, and what channel to ping you in.
+!pingGreetings on/off
+    Turn on/off whether to ping you when new members join.
 !audconf [user] [bool]
     Set whether a user has confirmed audio.
 
@@ -599,5 +599,26 @@ Farewell ping setting for user %r : ON
 
 #Check farewell ping setting - off
 Farewell ping setting for user %r : OFF
+
+#Clean CMDs - success
+Hello, %r! I was able to clear all of the command messages issued by members since my last boot!
+
+#Clean CMDs - failure
+Hello, %r! I was not able to clear all command messages issued by members since boot from the following channels:
+
+#Auto cmd clean ON - Success
+Of course, %r! I have turned on command autoclean. From now on, all commands issued by members since boot will be cleaned from the server every day at midnight!
+
+#Auto cmd clean ON - Failure
+I am sorry, %r. I was not able to change the setting for command autoclean. Please try again later.
+
+#Auto cmd clean OFF - Success
+Of course, %r! I have turned off command autoclean. Messages containing commands issued by members will no longer be automatically removed daily.
+
+#Auto cmd clean OFF - Failure
+I am sorry, %r. I was not able to change the setting for command autoclean. Please try again later.
+
+#SOR Restore Default
+Hello, %r! I have reset your reminders to default settings!
 	
 #ADD HERE...

@@ -265,7 +265,7 @@ When setting your timezone, make sure to use one of these names as your timezone
 I was unable to retrieve or attach the timezone name list for some reason. If this problem persists, please report it to the server owner. In the meantime, it may be possible to look up the list of timezone names that are considered valid by the Java.util.TimeZone class. 
 
 #Get timezone
-Hello, %r! Your timezone is currently set to "%z". Given this, your time is %t !
+Hello, %r! Your timezone is currently set to "%z". Given this, your time should be %t !
 Keep in mind that this timezone setting is only applicable to you, and only in this server. If you encounter another instance of me in a different server, you will have to set the timezone again for that server!
 
 #Set timezone (success)
@@ -286,8 +286,8 @@ Deadline: %T (Event UID: %n)
 Director Notes: %X
 
 Congratulations, %u!
-If you wish to accept this role, simply let me know by typing "accept %N" into any channel on this server!
-If you wish instead to decline the role, the command to do so is "decline %N".
+If you wish to accept this role, simply let me know by typing "!accept %N" into any channel on this server!
+If you wish instead to decline the role, the command to do so is "!decline %N".
 
 #Role assign (Major) - no deadline
 --- Role Assignment ---
@@ -298,8 +298,8 @@ Deadline: [Unset]
 Director Notes: %X
 
 Congratulations, %u!
-If you wish to accept this role, simply let me know by typing "accept %N" into any channel on this server!
-If you wish instead to decline the role, the command to do so is "decline %N".
+If you wish to accept this role, simply let me know by typing "!accept %N" into any channel on this server!
+If you wish instead to decline the role, the command to do so is "!decline %N".
 
 #Role deadline push
 Hello, %U! I am here to notify you that your next deadline for role %x has been changed to %T!
@@ -348,7 +348,7 @@ My apologies, %r... I was unable to add your birthday to the calendar for some r
 #Birthday event creation bad args
 I am sorry %r, but I do not understand the command you gave me. There must be something amiss with the arguments... If you wish to add your birthday to the schedule, please use the following command:
 	!birthday mm dd
-Substituting the month number for mm (01-12) and the day number for dd.
+Substitute the month number for mm (01-12) and the day number for dd.
 
 #Birthday wish variant 1
 I heard that is was your birthday today, %U. Allow me to wish you a wonderful day and many splendid years to come!
@@ -395,7 +395,7 @@ It appears that I was unable to add your weekly event to the schedule. I am not 
 #Weekly event creation fail - bad args
 My deepest apologies, but I was unable to fully parse your command. Perhaps there is something wrong with one or more of your arguments?
 To create a weekly recurring event, use the following command format:
-    !weekly DOW \"eventname\" rchannel tchannel target1 (target2+)
+    !weekly DOW hh:mm \"eventname\" rchannel tchannel target1 (target2+)
 For more information about event command arguments, feel free to type "!event arghelp" at any time we are online.
 
 #Weekly event creation fail - bad channel
@@ -550,5 +550,62 @@ Ah, it looks like your request is already being taken care of! As you were.
 
 #General string for user answering "no"
 Very well, %r. As you wish!
+
+#Server farewell
+Ah, it seems that %u has left the café! Farewell, %u - hopefully our paths cross again!
+
+#Server leave ping
+Hello, %R! As you requested, I am here to inform you that customer %u has left the café. 
+
+#Set farewell on
+As you wish, %r! I will take care of re-enabling farewell messages for this server shortly.
+
+#Set farewell off
+Of course, %r. I have disabled farewell messages for this server.
+
+#Set farewell fail
+My apologies, %r. For some reason, I was unable to alter the farewell message setting for this server...
+
+#Set farewell ping on
+No problem, %r. We will be sure to let you know every time someone leaves the server! You will receive our messages on channel %C.
+
+#Set farewell ping off
+Of course, %r. We will no longer notify you whenever somebody leaves the server.
+
+#Set farewell ping fail
+My deepest apologies, %r. I do not know why, but I was unable to change your farewell ping setting... Once again, I apologize for the inconvenience.
+
+#Check farewell setting [On]
+Hello, %r! Currently, farewell messages are turned on for this server.
+
+#Check farewell setting [Off]
+Hello, %r! Currently, farewell messages are turned off for this server.
+
+#Check farewell ping setting [On]
+Of course, %r. As of now, farewell pings for you are turned on.
+
+#Check farewell ping setting [Off]
+Hello, %r. As of now, farewell pings for you are turned off.
+
+#Clean CMDs - success
+Greetings, %r! I have successfully removed all messages containing bot commands that were sent since my last bootup.
+
+#Clean CMDs - failure
+My apologies, %r... I was not able to remove bot command messages from the following channels, most likely due to me not having permission to delete messages:
+
+#Auto cmd clean ON - Success
+As you wish, %r! I will turn on command autoclean. As long as autoclean is on, all commands issued by server members since my last boot will be cleaned from all channels we have message delete permissions for every day at midnight!
+
+#Auto cmd clean ON - Failure
+Apologies, %r... I was not able to switch command autoclean on for some reason. If this problem persists, it might be prudent to contact the server owner.
+
+#Auto cmd clean OFF - Success
+No problem, %r! At your request, I will turn off command autoclean. Messages containing bot commands will no longer be cleared at midnight.
+
+#Auto cmd clean OFF - Failure
+Apologies, %r... I was not able to switch command autoclean off for some reason. If this problem persists, it might be prudent to contact the server owner.
+
+#SOR Default
+Ah hello, %r! As you requested, I have reset your reminder ping on/off states to their default values!
 	
 #ADD HERE...

@@ -34,6 +34,7 @@ public class BotStrings {
 	public static final String KEY_SOR_OFF = ".soroff";
 	public static final String KEY_SOR_ALLON = ".soronall";
 	public static final String KEY_SOR_ALLOFF = ".soroffall";
+	public static final String KEY_SOR_DEFO = ".sordefo";
 	public static final String KEY_RESPONSE_GENERALNO = ".userno_general";
 	public static final String KEY_BADRESPONSE_TIMEOUT = ".responsetimeout";
 	public static final String KEY_BADRESPONSE_REPROMPT = ".responseinvalid";

@@ -1880,6 +1880,46 @@ public abstract class AbstractBot implements Bot{
 		sendMessage(channelID, bmsg);
 	}
 	
+	public void sorDefo(long channelID, Member user)
+	{
+		long gid = user.getGuild().getIdLong();
+		long uid = user.getUser().getIdLong();
+		
+		//Get user object
+		GuildSettings gs = brain.getUserData().getGuildSettings(gid);
+		if (gs == null)
+		{
+			boolean b = newGuild(user.getGuild());
+			if (!b)
+			{
+				System.err.println(Thread.currentThread().getName() + " || AbstractBot.sorDefo || Action failed: Could not retrieve/create guild data.");
+				return;
+			}
+			gs = brain.getUserData().getGuildSettings(gid);
+		}
+		ActorUser u = gs.getUserBank().getUser(uid);
+		if (u == null)
+		{
+			boolean b = newMember(user);
+			if (!b)
+			{
+				System.err.println(Thread.currentThread().getName() + " || AbstractBot.sorDefo || Action failed: Could not retrieve/create member data.");
+				return;
+			}
+			u = gs.getUserBank().getUser(uid);
+		}
+		
+		//Turn off reminders
+		u.resetRemindersToDefault();
+		
+		//Print message
+		String msgkey = BotStrings.KEY_MAINGROUP_BOTSTRINGS + BotStrings.KEY_GROUP_GENERAL + BotStrings.KEY_SOR_DEFO;
+		String msg = botStrings.get(msgkey);
+		BotMessage bmsg = new BotMessage(msg);
+		bmsg.substituteString(ReplaceStringType.REQUSER, user.getUser().getName());
+		sendMessage(channelID, bmsg);
+	}
+	
 	/* ----- Commands : Events ----- */
 	
 		// ---- Birthday
@@ -2272,8 +2312,9 @@ public abstract class AbstractBot implements Bot{
 		sendMessage(ch, bmsg);
 	}
 	
-	public void cancelEvent_cancel(long chID, long guildID, long eventID)
+	public void cancelEvent_cancel(long chID, long guildID, long eventID, long uid)
 	{
+		brain.unblacklist(uid, localIndex);
 		String msg = botStrings.get(KEY_MAINGROUP_BOTSTRINGS + KEY_GROUP_EVENTMANAGE + KEY_CANCELEVENTS_CANCEL);
 		CalendarEvent e = brain.getEvent(guildID, eventID);
 		if (e == null)
@@ -2287,8 +2328,9 @@ public abstract class AbstractBot implements Bot{
 		sendMessage(chID, bmsg);
 	}
 	
-	public void cancelEvent(long chID, long guildID, long eventID)
+	public void cancelEvent(long chID, long guildID, long eventID, long uid)
 	{
+		brain.unblacklist(uid, localIndex);
 		String msgs = botStrings.get(KEY_MAINGROUP_BOTSTRINGS + KEY_GROUP_EVENTMANAGE + KEY_CANCELEVENTS_SUCCESS);
 		String msgf = botStrings.get(KEY_MAINGROUP_BOTSTRINGS + KEY_GROUP_EVENTMANAGE + KEY_CANCELEVENTS_FAILURE);
 		BotMessage bmsgs = new BotMessage(msgs);
@@ -2331,7 +2373,8 @@ public abstract class AbstractBot implements Bot{
 		String rawmsg = botStrings.get(promptkey);
 		BotMessage bmsg = new BotMessage(rawmsg);
 		bmsg.substituteString(ReplaceStringType.EVENTNAME, command.getEventName());
-		bmsg.substituteString(ReplaceStringType.DAYOFWEEK, brain.getDayOfWeek(command.getDayOfWeek()));
+		String dowstring = brain.getDayOfWeek(command.getDayOfWeek());
+		bmsg.substituteString(ReplaceStringType.DAYOFWEEK, brain.capitalize(dowstring));
 		bmsg.substituteString(ReplaceStringType.TIMEONLY, brain.formatTimeString_clocktime(command.getHour(), command.getMinute()));
 		MessageChannel ch = this.getChannel(command.getChannelID());
 		brain.requestResponse(this.localIndex, command.getRequestingUser().getUser(), command, ch);
@@ -2365,6 +2408,7 @@ public abstract class AbstractBot implements Bot{
 	
 	public void makeWeeklyEvent_complete(CMD_EventMakeWeekly command, boolean r)
 	{
+		brain.unblacklist(command.getRequestingUser().getUser().getIdLong(), localIndex);
 		if (!r)
 		{
 			String cancelkey = BotStrings.getStringKey_Event(EventType.WEEKLY, StringKey.EVENT_CONFIRMCREATE, StringKey.OP_NO, 0);
@@ -2435,7 +2479,15 @@ public abstract class AbstractBot implements Bot{
 			{
 				for (String u : targets)
 				{
-					User byid = botcore.getUserById(u);	
+					User byid = null;	
+					try
+					{
+						byid = botcore.getUserById(u);	
+					}
+					catch (Exception ex)
+					{
+						byid = null;
+					}
 					if (byid != null)
 					{
 						long uid = byid.getIdLong();
@@ -2501,7 +2553,8 @@ public abstract class AbstractBot implements Bot{
 			String rawmsgs = botStrings.get(successkey);
 			BotMessage bmsgs = new BotMessage(rawmsgs);
 			bmsgs.substituteString(ReplaceStringType.EVENTNAME, e.getEventName());
-			bmsgs.substituteString(ReplaceStringType.DAYOFWEEK, brain.getDayOfWeek(command.getDayOfWeek()));
+			String dowstring = brain.getDayOfWeek(command.getDayOfWeek());
+			bmsgs.substituteString(ReplaceStringType.DAYOFWEEK, brain.capitalize(dowstring));
 			bmsgs.substituteString(ReplaceStringType.TIMEONLY, brain.formatTimeString_clocktime(command.getHour(), command.getMinute(), tz));
 			sendMessage(ch, bmsgs);
 		}
@@ -2691,6 +2744,15 @@ public abstract class AbstractBot implements Bot{
 		if (tmsg != null) sendMessage(e.getTargetChannel(), tmsg);
 	}
 	
+	public void insufficientArgsMessage_general(long chID, String username, EventType type)
+	{
+		String skey = BotStrings.getStringKey_Event(type, StringKey.EVENT_BADARGS, null, 0);
+		String rawmsg = botStrings.get(skey);
+		BotMessage msg = new BotMessage(rawmsg);
+		msg.substituteString(ReplaceStringType.REQUSER, username);
+		sendMessage(chID, msg);
+	}
+	
 	/* ----- Cleaning ----- */
 	
 	public List<Message> getAllMessages(MessageChannel ch, Member mem, boolean dayonly, boolean useronly)
@@ -2825,6 +2887,7 @@ public abstract class AbstractBot implements Bot{
 	
 	public void cleanChannelMessages_allDay(long channelID, Member mem)
 	{
+		brain.unblacklist(mem.getUser().getIdLong(), localIndex);
 		//Assumed admin confirmation already complete.
 		TextChannel ch = getChannel(channelID);
 		if (ch == null) return;
@@ -2843,6 +2906,7 @@ public abstract class AbstractBot implements Bot{
 	
 	public void cleanChannelMessages_allUser(long channelID, Member mem)
 	{
+		brain.unblacklist(mem.getUser().getIdLong(), localIndex);
 		TextChannel ch = getChannel(channelID);
 		if (ch == null) return;
 		List<Message> messages = getAllMessages(ch, mem, false, true);
@@ -2860,6 +2924,7 @@ public abstract class AbstractBot implements Bot{
 	
 	public void cleanChannelMessages_allUserDay(long channelID, Member mem)
 	{
+		brain.unblacklist(mem.getUser().getIdLong(), localIndex);
 		TextChannel ch = getChannel(channelID);
 		if (ch == null) return;
 		List<Message> messages = getAllMessages(ch, mem, true, true);
@@ -2897,6 +2962,11 @@ public abstract class AbstractBot implements Bot{
 		MessageChannel ch = getChannel(channelID);
 		if (ch == null) return;
 		sendMessage(ch, new BotMessage(msg));
+	}
+	
+	public void queueRerequest(Command cmd, long channelID, long userID)
+	{
+		brain.requestResponse(localIndex, botcore.getUserById(userID), cmd, botcore.getTextChannelById(channelID));
 	}
 	
 }

@@ -78,6 +78,10 @@ public class ParseCore {
 	public static final String CMD_ROLE_MINOR = "pingrolemin";
 	public static final String CMD_ROLE_EXTRA = "pingroleext";
 	
+	public static final String CMD_NOTIFY_AUDCONF = "notify_audconf";
+	public static final String CMD_NOTIFY_ROLECOMPLETE = "notify_rolecomplete";
+	public static final String CMD_NOTIFY_ROLEREVOKED = "notify_roledelete";
+	
 	/* ----- Static Variables ----- */
 	
 	private static Map<String, Parser> parserMap;
@@ -803,6 +807,7 @@ public class ParseCore {
 		greeter.addCommand("qchan");
 		greeter.addCommand(CMD_FAREWELLMEMBER);
 		greeter.addCommand(CMD_PINGDEPARTURE);
+		greeter.addCommand("checkg");
 		
 		Position helpdesk = new Position(1);
 		helpdesk.addCommand("help");
@@ -815,6 +820,7 @@ public class ParseCore {
 		userhelper.addCommand("changetz");
 		userhelper.addCommand("sor");
 		userhelper.addCommand("amiaudconf");
+		userhelper.addCommand(CMD_NOTIFY_AUDCONF);
 		
 		Position cleaner = new Position(3);
 		cleaner.addCommand("cleanme");
@@ -865,6 +871,8 @@ public class ParseCore {
 		map.put("pushdeadline", 2);
 		map.put("setGreetings", 1);
 		map.put("pingGreetings", 1);
+		map.put("setFarewells", 1);
+		map.put("pingFarewells", 1);
 		map.put("audconf", 2);
 		map.put("autocmdclean", 1);
 		

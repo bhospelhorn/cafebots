@@ -2,14 +2,14 @@
 [STRING NOT FOUND]
 
 #Greeting
-Welcome to %G! I am %s, the café bot. Nice to meet you, %u!
-To get a non-comprehensive list of commands, type !help into the chat box!
+Hey! Welcome to %G. I'm %s, one of the automated co-managers of the "café." Get it? It's a café themed bot service. Anyway, nice to meet you, %u. 
+If you want to know what all we cafébots do here, you can type !help into the chat box and submit. It's mostly comprehensive - there are some commands that aren't on the list. If you have any questions that our protocols can't handle, feel free to ask the server admins.
 
 #New member
-Hello, %R! It looks like %u has just joined the server!
-	 
+Hey, %R. I should probably let you know that a new customer just entered the café. Name's %u, or something like that. Should probably stop by and say hi to them.
+
 #Event help 1
-Hi, %r. Information about the event creation arguments:
+So you want more information about the event creation command arguments, do you? Alright, %r:
 
 #Event help 2
 yyyy - 4 digit year (>= 2015; Discord does not record time before the year 2015)
@@ -27,10 +27,10 @@ tchannel - Name of channel to issue event reminders to event participants in.
 target[n] - Usernames or UIDs of users to include as event participants. You can, in theory, include as many users as you want to. IDs of users not on the server will be ignored.
 
 #Event help 4
-Also, you don't have to include the pound sign (#) in channel name arguments.
+Also, you don't have to include the pound sign (#) in channel name arguments. I mean, you can if you want to. Just doesn't matter.
 
 #SOR Help 1
-Hello, %r! Here's some more information about the switch on/off reminder command arguments:
+Hey, %r. You want more information about the switch on/off reminder command arguments, here you go:
 
 #SOR Help 2
 TYPES
@@ -42,64 +42,316 @@ TYPES
   monthlydow
 
 #SOR Help 3
-Each individual type has 3-5 reminder levels. To see what the times are for each, you can re-enter the sor command with the type argument, but without the level argument.
+Each individual type has 3-5 reminder levels. To see what the times are for each, you re-enter the sor command with the type argument, but without the level argument.
 
 #SOR Off
-No problem, %r! I will no longer send you %l reminders for %t events!
+Gotcha, %r. We'll make sure not to bug you %l before %t events.
 
 #SOR Off All
-No problem, %r! I will no longer send you reminders events!
+Gotcha, %r. I've turned off all of your event reminders.
 
 #SOR On
-No problem, %r! I will re-enable your %l reminders for %t events!
+Sure, %r. I'll turn back on your %l reminder for %t events.
 
 #SOR On All
-No problem, %r! I will re-enable your event reminders!
+Sure, %r. I'll turn back on all of your event reminders.
 
-#Permission Query
-The following role(s) have cafébot admin permissions:
+#Invalid y/n response
+Sorry, but I didn't catch that. I'm gonna need a 'y'/'yes' to confirm or a 'n'/'no' to reject.
 
-#Confirm permission add
-Would you like to give cafébot admin permissions to the %o role?
+#Response timeout
+Hey, I can't sit in an idle loop forever. Since you didn't respond to my last prompt, I had to time out. If you wanna resubmit the command, go ahead. Next time if I need a reply, you gotta reply!
 
-#Confirm permission remove
-Would you like to take away cafébot admin permissions for the %o role?
+#Parser Block
+Parser's blocked, still booting up or shutting down or something. Sorry, but I can't take commands while my brain is half loaded.
 
-#Confirm Permissions
-The %o role now has cafébot admin permissions.
+#Insufficient Permissions
+Sorry %r, but only admins have permission to execute that command.
 
-#Confirm permissions negative
-The %o role no longer has cafébot admin permissions.
+#Wrong bot
+Mm sorry, but I don't actually know how to do that. Lemme find someone that can.
 
-#Reject
-You can't remove cafébot admin permissions from the server owner!
+#General bad command
+Yeah, I have no idea what you're trying to say to me. I'm a computer program and all that, so you have to be pretty specific if you wanna boss me around. I can get you a basic list of commands if you type "!help" to get you started if you're interested.
 
-#One-time Make Confirm
-Set up a one-time event at %T with %u [y/n]?
+#Another bot is handling it
+Welp, looks like one of the others is already handling it. If that's that, then I'm out.
 
-#One-time Make Confirm Positive
-All done! Your event is now scheduled!
+#General user cancel reply
+"No?" You sure 'bout that, %r? ...Nah, just messing with you. I'll go ahead and cancel that for you.
 
-#One-time Make Confirm Negative
-Of course. I have not added your event to the schedule.
+#Audconf - Approved
+Yo, %r. You wanted me to check if your audio quality has been approved? Looks like you're good. Have fun.
 
-#One-time More Arguments
-I was not able to parse all of your arguments...
-To create a one-time event, please enter the following:
-     !onetime yyyy mm dd hh:mm eventname rchannel tchannel target1 (target2+)
-	 
-#Bad Channel
-The channel %c does not appear to exist... I'll default to placing reminders in the #general channel.
+#Audconf - Not approved
+Sorry, %r. Doesn't look like your audio quality has been approved yet. I dunno, maybe go ask the director or something?
+
+#Say something
+Something
+
+#Check greeting channel - good
+The greeting channel? Looks like your greeting channel right now is %C.
+
+#Check greeting channel - null
+Dunno how, but somehow this server doesn't have a greeting channel at all.
+
+#Check greetings - On
+Right now this server is set to display new member greetings. So, greetings are on.
+
+#Check greetings - Off
+Right now you're not set to show new member greetings. In other words, greetings are off.
+
+#Check greeting pings - On
+%r, right? Yeah, right now I have you down for greeting notifications. You can turn them off whenever if you don't like it.
+
+#Check greeting pings - Off
+Nah %r, says you're not supposed to be getting greeting pings now. If you're an admin though, you can turn them on whenever.
+
+#Check farewells - On
+Yeah, farewell messages are on right now. Dunno why - it's not like the person leaving will see them.
+
+#Check farewells - Off
+Right now your server is not set to display farewell messages. Dunno why - seems like you're missing out.
+
+#Check farewell pings - On
+Hey %r. Right now you are set to get pinged whenever someone leaves the server. ...You wanna know every time someone leaves? Alright, your funeral.
+
+#Check farewell pings - Off
+%r, huh? Looks like you are not set to get notifications whenever someone leaves the server. You sure about that? Don't you want to know these things?
+
+#Timezone list - success
+Yeah sure, gimme a sec %r.
+Alright, I've attached a plain text list of timezone codes recognized by the Java class we use to parse that calendar stuff. If you want to specify a timezone for anything, you gotta use one of these or we won't know what timezone you want. Got it?
+
+#Timezone list - fail
+Ah dammit. Sorry, but for some reason (probably channel permissions), I couldn't upload the list of valid timezones. That's fine. Here's a link: http://tutorials.jenkov.com/java-date-time/java-util-timezone.html
+
+#Get TZ
+Gotcha, %r. Looks like the timezone we have for you on this server is "%z" making it %t where you are - at least if this timezone is right. If not, you can use the !changetz command to switch the timezone we have on file for you.
+Oh, and one more thing. This timezone setting is only applicable to this Discord server. If you see us in another server, you will have to set your timezone again.
+
+#Change TZ - success
+Alright %r. I was able to change your timezone to "%z". The time should be %t now, correct? If not, just try another timezone 'til you get it right.
+
+#Change TZ - fail
+Whoops. Sorry %r, looks like I couldn't set your timezone for you. I mean, there's a pretty good chance that the timezone name you provided is invalid, but it's not as if we're free of internal errors either...
+
+#View actor roles
+Well if it isn't %r. You're wondering what your outstanding roles are as an actor? Sure, lemme get that list for you...
+
+#View director roles
+Ah, hey %r. Director now? Fancy. Here're the roles you are currently listed as director for:
+
+#View all roles
+How's it going, %r? You want to see all the roles on this server? Both active and inactive? Sure, here you go:
+
+#View user roles
+Hey, %r. You wanted to see all of your active roles, both as director and actor? Yeah, alright:
+
+#Make role prompt
+Gotcha %r. So, just to make sure, this is the role you want me to make [y/n]?
+Character: %x
+Actor: %u
+Channel: %C
+Notes: %X
+
+#Make role success
+Alright, %r. I've made role "%x" for you. I've also gone ahead and notified %u as well. Hope it goes well.
+
+#Make role failure
+Hm... sorry, %r. For some reason, I wasn't able to create role "%x" for you. Dunno why. You'll probably have to check my stderr stream or ask the server owner or something.
+
+#Complete role - prompt
+Hey %r. You sure you want to mark the "%x" role (ID: %n) as completed? You suuuuuuuure [y/n]?
+
+#Complete role - success
+Alright, gotcha %r. I've marked "%x" (ID: %n) as complete. I'll get someone to let %u know.
+
+#Complete role - cancel
+Yeah okay. I'll leave "%x" incomplete then.
+
+#Complete role - failure
+Uh oh. For some reason I wasn't able to change the completion status for role %n ("%x"). Weird. Sorry about that.
+
+#Revoke role - prompt
+'Sup, %r? You want me to revoke role "%x" (ID: %n) from %u? This will effectively delete the role entry altogether. Oh, and I'm gonna have to let %u know as well... hopefully that won't end up being too awkward. [Answer [y/n]]
+
+#Revoke role - success
+Alright %r. I've just revoked role %n ("%x") and deleted it from the server role list. %u will be notified shortly.
+
+#Revoke role - cancel
+Sure, %r. I'll leave "%x" as it is then. Also, %u doesn't have to know. Our little secret, right?
+
+#Revoke role - failure
+Huh. Well, looks like I can't revoke role %n ("%x") right now anyway. Sorry about that. It's an internal error thing - you should probably report it if it keeps happening.
+
+#Push deadline - success
+Hey %r. I've pushed the deadline for role "%x" (ID: %n) to %T. That's what you wanted, right? Anyway, we'll also let %u know.
+
+#Push deadline - failure
+Hm. Well, that didn't work. Sorry, %r... looks like I can't push the deadline for role %n ("%x") right now. If this problem keeps coming up, you should probably report it. Hopefully it won't happen again.
+
+#Set audconf - On
+Gotcha. I'll go mark %u as audio confirmed. Don't worry, we'll let %u know as well.
+
+#Set audconf - Off
+Yeah, alright. I'll go revoke audio confirmation status from %u. We won't tell %u explicitly, so hopefully you let them know why.
+
+#Set audconf - Fail
+Whoops. Sorry, for some reason I wasn't able to change the audio confirmation for %u. Get your debugger to look into that.
+
+#Set audconf - Notify
+Well hey, %U. Looks like somebody, by which I mean some admin likes the sound of your sound. What I mean is, your audio quality has just been confirmed. Pretty cool, huh.
+
+#Role assign (Support)
+--- Role Assignment ---
+|| %x ||
+%U
+Role UID: %N
+Deadline: %T (Event UID: %n)
+Director Notes: %X
+
+Good for you, %u!
+Question is, you gonna accept the role?
+If so, you can use the command "accept %N" - don't forget to preface it with a bot ping or !
+If you wanna decline the role, then just use "decline %N" instead.
+
+#Role assign (Support) - no deadline
+--- Role Assignment ---
+|| %x ||
+%U
+Role UID: %N
+Deadline: [Unset]
+Director Notes: %X
+
+Good for you, %u!
+Question is, you gonna accept the role?
+If so, you can use the command "accept %N" - don't forget to preface it with a bot ping or !
+If you wanna decline the role, then just use "decline %N" instead.
+
+#Role deadline push
+Hey, %U. I just wanted to let you know that your next deadline for your role "%x" has been pushed to %T.
+Oh, and just in case you need to look it up, the event ID for the deadline is %n.
+
+#Role complete notification
+Hey %U - looks like your role "%x" (ID: %n) has just been marked as complete. Celebration after a job well done and all that.
+
+#Role revoked nofication
+Hey %U. Should probably let you know - your role "%x" was deleted. Don't sweat it - was probably an organizational thing.
+
+#Actor accept role
+Alright, %u! I'll let the director know that you've accepted role %x, then.
+
+#Actor decline role
+That's how it is then, %u? Alright, I'll let the director know you've decline role "%x", then.
+
+#Actor response failed
+Huh. Sorry about that. For some reason I wasn't able to mark your response. Try again later, I guess.
+
+#Actor accept notify director
+Hey %R. Just thought I'd let you know that %u accepted the role of "%x" (ID: %n). Everybody wins.
+
+#Actor decline notify director
+%R. Dunno how to say this nicely, so I'm just gonna say it - %u declined the role %x (ID: %n). Sucks, huh. Ah well, we'll find somebody better.
+
+#Birthday wish variant 1
+So %U, it's your birthday today is it? Happy birthday, then!
+...What? What else is there to say?
+
+#Birthday wish variant 2
+Happy birthday, %U! I hope you have a great day. I mean, I WOULD give you a present, absolutely buuuuut... bot and all.
+
+#Clean All User - Prompt
+Sure %r. First - you sure you want me to clear away EVERY message you have ever sent on channel %C [y/n]?
+
+#Clean All User - Success
+There we go, %r. I have just cleaned out every message sent by you on channel %C... every message I could anyway.
+
+#Clean All User - Fail
+Oops. Sorry, %r. Couldn't clear your messages from %C. Probably a permissions thing.
+
+#Clean All User Day - Prompt
+Yeah I can do that, %r. I first need if you really want me to do this, though. You sure you want me to delete all your messages sent to %C in the past 24 hours [y/n]?
+
+#Clean All User Day - Success
+All done, %r. Hope you won't miss any of those %C messages you sent in the last day.
+
+#Clean All User Day - Fail
+Oops. Sorry, %r. Couldn't clear your messages from %C. Probably a permissions thing.
+
+#Clean All Day - Prompt
+Hey %r. Sure you want me to delete all messages - that's ALL messages, not just your own - sent to %C in the last 24 hours [y/n]?
+
+#Clean All Day - Success
+Alright %r. Just finished deleting all the messages sent to %C in the last day or so. Hope that's what you wanted, 'cuz you'll never see them again.
+
+#Clean All Day - Fail
+Yo, %r. So uh... I wasn't able to delete the messages you wanted from %C. Probably a permissions thing. Sorry.
+
+#Clean CMDs - success
+Hey %r. I just finished deleting all the messages on this server containing bot commands that were sent since the last time the bot core was booted.
+
+#Clean CMDs - failure
+Hey, %r. I tried to clean up the bot command messages from this server, but I couldn't delete all the messages from certain channels - again, probably because I don't have permission.
+
+#Off shift - January
+all alone in this frozen hellscape
+
+#Off shift - February
+what's with all this chocolate?
+
+#Off shift - March
+with Earth's future
+
+#Off shift - April
+probably some internet game
+
+#Off shift - May
+hooky
+
+#Off shift - June
+with your exome
+
+#Off shift - July
+Mario Party 4
+
+#Off shift - August
+with that freeze ray idea
+
+#Off shift - September
+none of your business
+
+#Off shift - October
+with the very concept of bioethics
+
+#Off shift - November
+you've probably never heard of it
+
+#Off shift - December
+obnoxious Christmas music (very loudly)
+
+#On shift - Greeter
+Café Host
+
+#On shift - Help desk
+Help Desk
+
+#On shift - Personal Assistant
+Personal Assistant
+
+#On shift - Cleaner
+Cleanup Manager
 
 #Standard help 1
-Greetings! My name is %s, a Java bot created to help with schedule management!
-Below, you will find our current menu of commands available for standard server members. Upon issuing a valid command, I or one of the other server café bots will see to it that you are helped!
+Hey there. I'm %s, a Java bot for schedule management.
+Here's a list of the commands you're most likely to find useful as a standard server member. When you issue a valid command, one of the café bots - not necessarily me, mind - will try to help you. 
 
 #Standard help 2
-All café bots are capable of recognizing ! prefixed commands. If you prefix a command with !, then either a random café bot or the bot most appropriate for the job you are requesting will answer. You may also issue a command by pinging a particular café bot. If the bot recognizes the command, then the bot you specified will fulfill your request. If the individual bot you pinged does not recognize the command, it will delegate your command to the bot that does. 
+You can issue general commands by using the ! prefix or issue commands to specific bots by mentioning them specifically. If you mention more than one bot in a command, only one bot will execute it (usually the first one you mention). If you issue a direct command to a bot that doesn't know how to handle that command, it will try to defer to a bot that knows what to do.
 
 #Standard help 3
 Universal Commands:
+
 !help 
     View current list of commands
 !cleanme
@@ -114,13 +366,13 @@ Universal Commands:
     Create a one-time event. Type !event arghelp for more info.
 !deadline yyyy mm dd hh:mm \"taskname\" rchannel tchannel target1 (target2+)
     Create a deadline event. Type !event arghelp for more info.
-!weekly DOW \"eventname\" rchannel tchannel target1 (target2+)
+!weekly DOW hh:mm \"eventname\" rchannel tchannel target1 (target2+)
     Create a weekly recurring event.
-!biweekly DOW \"eventname\" rchannel tchannel target1 (target2+)
+!biweekly DOW hh:mm \"eventname\" rchannel tchannel target1 (target2+)
     Create a bi-weekly recurring event.
-!monthlyday dd \"eventname\" rchannel tchannel target1 (target2+)
+!monthlyday dd hh:mm \"eventname\" rchannel tchannel target1 (target2+)
     Create a monthly event that occurs on a certain day of the month.
-!monthlydow DOW ww \"eventname\" rchannel tchannel target1 (target2+)
+!monthlydow DOW ww hh:mm \"eventname\" rchannel tchannel target1 (target2+)
     Create a monthly event that occurs on the ww-th DOW every month (eg. 2nd Monday).
 !birthday mm dd
     Add your birthday to the birthday list.
@@ -146,14 +398,15 @@ Universal Commands:
     See whether you have been marked as having confirmed audio quality.
 
 #Standard help 4
-When entering times for your events, please enter the time relative to YOUR timezone. We will calculate as appropriate for everyone else!
+Oh and also. When entering times for event creation, we expect it to be relative to the timezone we have set for you. When notifying other attendees, we'll do all that calculation for you so they can have the time relative to their own timezones. So don't you worry about that.
 
 #Admin help 1
-Hello, admin! My name is %s, a Java bot created to help with schedule management!
-Below, you will find our current menu of commands available for server members with café bot admin permissions. Upon issuing a valid command, I or one of the other server café bots will see to it that you are helped!
+Admin, eh? Hello then, admin. I'm %s a Java bot built for schedule management.
+Here's a non-comprehensive list of both common standard commands and admin-specific commands you might find useful. When you issue a valid command, one of the café bots - not necessarily me, mind - will try to help you. 
 
 #Admin help 2
 Admin Commands:
+
 !addperm [role]
     Add admin permissions for a role.
 !remperm [role]
@@ -180,388 +433,15 @@ Admin Commands:
     Turn on/off whether to ping you when new members join, and what channel to ping you in.
 !audconf [user] [bool]
     Set whether a user has confirmed audio.
-
-# Audconf - Yes
-Hello, %r! Your audio quality has been approved.
-
-# Audconf - No
-Hello, %r! Your audio quality has not yet been approved.
-
-#Say something
-HELLO WORLD
-
-#Invalid y/n response
-I didn't understand your response. Please enter 'y' or 'yes' to confirm/'n' or 'no' to reject...
-
-#Response timeout
-Your command has timed out.
-
-#Parser Block
-PARSER BLOCKED - PLEASE WAIT AND RESUBMIT COMMAND
-
-#Insufficient Permissions
-Sorry %r, but you don't have permission to do that.
-
-#Greeting Channel Set - Success
-Hello %r. The server's greeting channel is now set to %C .
-
-#Greeting Channel Set - Failure
-Hello %r. I was unable to set the server's greeting channel.
-
-#Check Greeting Channel
-The channel currently set to receive greeting messages on this server is %C .
-
-#Check greeting channel (no channel set)
-There is no channel currently set as the greeting channel for this server.
-
-#Set Greet On (Success)
-Understood, %r. Member greetings for this server have been turned on.
-
-#Set Greet Off (Success)
-Understood, %r. Member greetings for this server have been turned off.
-
-#Set Greet Fail
-Member greetings setting could not be changed.
-
-#Set Greet Ping On (Success)
-Understood, %r. New member pings to channel %C have been turned on for you.
-
-#Set Greet Ping Off (Success)
-Understood, %r. New member pings have been turned off for you.
-
-#Set Greet Ping Fail
-New member ping settings could not be changed.
-
-#Check Greetings (on)
-New member greetings are currently ON for this server.
-
-#Check Greetings (off)
-New member greetings are currently OFF for this server.
-
-#Check pings (on)
-At the moment, you are set to be notified (by mention) every time a new member joins the server.
-
-#Check pings (off)
-You are currently NOT set to be notified when a new member joins the server.
-
-#Cancel event - confirm prompt
-You have requested to cancel event %n [%e (%t) at %T]. Are you sure you wish to cancel this event [y/n]?
-
-#Cancel event - success
-Event %n (%e) has been successfully cancelled!
-
-#Cancel event - cancel
-Event %e was not cancelled.
-
-#Cancel event - failure
-ERROR cancelling event %n !
-
-#See all timezone names (success)
-Hello, %r! These are the standard Java 7 TimeZone object ID keys. Enjoy.
-
-#See all timezone names (fail)
-ERROR retrieving timezone ID list file.
-
-#Get timezone
-Hello, %r! Your timezone is currently set to "%z". Your time should be %t !
-
-#Set timezone (success)
-Hello, %r! I have set your timezone to "%z". Your time should be %t !
-
-#Set timezone (fail)
-Hello, %r! I was unable to change your timezone!
-
-#Audio conf on - Notify user
-Hello, %U! Your audio quality has been approved by the server admins.
-
-#Role assign (Major)
---- Role Assignment ---
-|| %x ||
-%U
-Role UID: %N
-Deadline: %T (Event UID: %n)
-Director Notes: %X
-
-Congratulations, %u
-If you wish to accept this role, please type "accept %N" into any channel on this server.
-If you wish instead to decline the role, the command to do so is "decline %N".
-
-#Role assign (Major) - no deadline
---- Role Assignment ---
-|| %x ||
-%U
-Role UID: %N
-Deadline: [Unset]
-Director Notes: %X
-
-Congratulations, %u
-If you wish to accept this role, please type "accept %N" into any channel on this server.
-If you wish instead to decline the role, the command to do so is "decline %N".
-
-#Role deadline push
-Hello, %U! I am here to notify you that your next deadline for role %x has been changed to %T!
-For reference, the event UID for this deadline is: %n
-
-#Role complete notification
-Hello, %U! I am here to notify you that your role %x (%n) has been marked as complete by the director.
-Thank you for all of your hard work!
-
-#Role revoked nofication
-Hello, %U. Your role %x appears to have been deleted by the director.
-
-#Actor accept role
-Hello, %u. Your role %x has been marked as accepted.
-
-#Actor decline role
-Hello, %u! I have marked your role %x as declined.
-
-#Actor response failed
-ERROR - Command was not understood. Please re-enter your command. If this problem persists, double check the role ID and contact the server owner.
-
-#Actor accept notify director
-Hello, %R. Actor %u has accepted the role of %x (%n).
-
-#Actor decline notify director
-Hello, %R. Actor %u has declined the role of %x (%n).
-
-#Check birthday channel
-The birthday wishes channel for this server is currently %C .
-
-#Check birthday channel (none set)
-There is currently no channel in this server set as the birthday wishes channel.
-
-#Set birthday channel (success)
-No problem, %r. The birthday wishes channel on this server has been set to %C .
-
-#Set birthday channel (failure)
-ERROR: Sorry %r, but birthday wishes channel could not be set.
-
-#Create birthday event (success)
-Hello %r! I will add your birthday %M %d to the calendar.
-
-#Create birthday event (failure)
-Sorry %r. I was not able to add your birthday to the calendar.
-
-#Birthday event creation bad args
-I am sorry %r, but I do not understand the command you gave me. The command should look like this:
-	!birthday mm dd
-Substituting the month number for mm (01-12) and the day number for dd.
-
-#Birthday wish variant 1
-Happy birthday, %U.
-
-#Birthday wish variant 2
-HAPPY BIRTHDAY, %U.
-
-#Confirm deadline event creation
-Would you like me to create a deadline for "%e" at %T for %u [y/n]?
-
-#Confirm deadline event creation - success
-I have successfully added your deadline for %e to our schedule!
-
-#Confirm deadline event creation - cancel
-Deadline will not be added to the schedule.
-
-#Confirm deadline event creation - general fail
-ERROR: Deadline could not be added to schedule.
-
-#Confirm onetime event creation - general fail
-ERROR: One-time event could not be added to schedule.
-
-#Deadline event creation fail - bad args
-ERROR: Arguments could not be interpreted!
-To create a deadline event, use the following command format:
-     !deadline yyyy mm dd hh:mm \"taskname\" rchannel tchannel target1 (target2+)
-For more information about event command arguments, feel free to type "!event arghelp" at any time we are online.
-
-#Deadline event creation fail - bad channel
-ERROR: One or more channels does not exist.
-
-#Confirm weekly event creation
-Set up a weekly recurring event "%e" on %D at %i?
-
-#Confirm weekly event creation - success
-Weekly event "%e" has been scheduled. It will occur every week on %D at %i until the event is cancelled.
-
-#Confirm weekly event creation - cancel
-Weekly event "%e" was not added.
-
-#Confirm weekly event creation - general fail
-ERROR: Weekly event could not be added!
-
-#Weekly event creation fail - bad args
-ERROR: Arguments could not be interpreted!
-To create a weekly recurring event, use the following command format:
-    !weekly DOW \"eventname\" rchannel tchannel target1 (target2+)
-For more information about event command arguments, feel free to type "!event arghelp" at any time we are online.
-
-#Weekly event creation fail - bad channel
-ERROR: One or more channels does not exist.
-
-#Confirm biweekly event creation
-Set up a recurring event "%e" on every other %D at %i?
-
-#Confirm biweekly event creation - success
-Biweekly event "%e" has been scheduled. It will occur every other week on %D at %i until the event is cancelled.
-
-#Confirm biweekly event creation - cancel
-Biweekly event "%e" was not added.
-
-#Confirm biweekly event creation - general fail
-ERROR: Biweekly event could not be added!
-
-#Biweekly event creation fail - bad args
-ERROR: Arguments could not be interpreted!
-To create a biweekly recurring event, use the following command format:
-    !biweekly DOW \"eventname\" rchannel tchannel target1 (target2+)
-For more information about event command arguments, feel free to type "!event arghelp" at any time we are online.
-
-#Biweekly event creation fail - bad channel
-ERROR: One or more channels does not exist.
-
-#Confirm monthly(A) event creation
-Set up an event called "%e" that occurs on the %I of every month?
-
-#Confirm monthly(A) event creation - success
-Monthly event "%e" has been added. It will occur on the %I of every month until it is cancelled.
-
-#Confirm monthly(A) event creation - cancel
-Monthly event was not added.
-
-#Confirm monthly(A) event creation - general fail
-ERROR: Monthly event could not be added!
-
-#Monthly(A) event creation fail - bad args
-ERROR: Arguments could not be interpreted!
-To create a monthly event the recurs on a set day of the month, use the following command format:
-    !monthlyday dd \"eventname\" rchannel tchannel target1 (target2+)
-For more information about event command arguments, feel free to type "!event arghelp" at any time we are online.
-
-#Monthly(A) event creation fail - bad channel
-ERROR: One or more channels does not exist.
-
-#Confirm monthly(B) event creation
-Set up an event called "%e" that occurs on the %I %D of every month?
-
-#Confirm monthly(B) event creation - success
-Monthly event "%e" has been added. It will occur on the %I %D of every month until it is cancelled.
-
-#Confirm monthly(B) event creation - cancel
-Monthly event was not added.
-
-#Confirm monthly(B) event creation - general fail
-ERROR: Monthly event could not be added!
-
-#Monthly(B) event creation fail - bad args
-ERROR: Arguments could not be interpreted!
-To create a monthly event the recurs on a specific day of the week in the nth week of each month, use the following command format:
-    !monthlydow DOW ww \"eventname\" rchannel tchannel target1 (target2+)
-For more information about event command arguments, feel free to type "!event arghelp" at any time we are online.
-
-#Monthly(B) event creation fail - bad channel
-ERROR: One or more channels does not exist.
-
-#Clean All User - Prompt
-Hello, %r. Are you sure you want me to clear every message you have ever sent on channel %C [y/n]?
-
-#Clean All User - Success
-Hello, %r! I have finished clearing channel %C of every message you have ever sent.
-
-#Clean All User - Fail
-ERROR removing all messages from user %r on channel %C
-
-#Clean All User Day - Prompt
-Hello, %r. Are you sure you want me to clear every message you have sent on channel %C in the past 24 hours [y/n]?
-
-#Clean All User Day - Success
-All messages from user %r sent to channel %C in the last 24 hours have been removed.
-
-#Clean All User Day - Fail
-ERROR removing last day's worth of messages from user %r on channel %C
-
-#Clean All Day - Prompt
-Hello, %r. Are you sure you want me to clear every message anybody has sent on channel %C in the past 24 hours [y/n]?
-
-#Clean All Day - Success
-REQUESTING ADMIN: %r || All messages sent to channel %C in the last 24 hours have been removed.
-
-#Clean All Day - Fail
-REQUESTING ADMIN: %r || ERROR removing last day's worth of messages on channel %C
-
-#Off shift - January
-IT IS JANUARY
-
-#Off shift - February
-IT IS FEBRUARY
-
-#Off shift - March
-IT IS MARCH
-
-#Off shift - April
-IT IS APRIL
-
-#Off shift - May
-IT IS MAY
-
-#Off shift - June
-IT IS JUNE
-
-#Off shift - July
-IT IS JULY
-
-#Off shift - August
-IT IS AUGUST
-
-#Off shift - September
-IT IS SEPTEMBER
-
-#Off shift - October
-IT IS OCTOBER
-
-#Off shift - November
-IT IS NOVEMBER
-
-#Off shift - December
-IT IS DECEMBER
-
-#On shift - Greeter
-Café Host
-
-#On shift - Help desk
-Help Desk
-
-#On shift - Personal Assistant
-Personal Assistant
-
-#On shift - Cleaner
-Cleanup Manager
-
-#Wrong bot
-I don't know how to do that. Let me find another bot.
-
-#Bad command
-I do not understand that command. Try typing !help to get a list of commands I can understand.
-
-#This bot is pinged explicitly with other bots, and another bot will be taking care of it
-It appears I am no longer needed here.
-
-#General string for user answering "no"
-No problem, %r.
-
-#View user events 1
-Hello, %r. Below are all of the events I have scheduled for you...
-Events created by you:
-EVENTID	TYPE	NAME	TIME	CREATOR	ATTENDEES
-%E
-
-#View user events 2
-Events you are involved in:
-EVENTID	TYPE	NAME	TIME	CREATOR	ATTENDEES
-%E
-
-#View user requested events
-Hello, %r. Below are all of the events you have created:
-EVENTID	TYPE	NAME	TIME	CREATOR	ATTENDEES
-%E
 	
+#Farewell message
+Uh? %u?! Wait! 
+...Looks like %u left. Goodbye, then.
+
+#Member leave ping
+Hey %R. Looks like your friend %u has left the café (server, whatever). You asked to know, so here you go.
+
+#SOR Defo
+Gotcha, %r. I've reset your reminder on/off settings to the default.
+
 #ADD HERE...

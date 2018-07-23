@@ -78,6 +78,8 @@ public class WeeklyEvent extends EventAdapter{
 			//Figure out how many days to add
 			if (nowdow > dayOfWeek)
 			{
+				nowdow--;
+				dayOfWeek--;
 				int toend = 7 - nowdow;
 				next.add(Calendar.DAY_OF_MONTH, toend + dayOfWeek);
 			}

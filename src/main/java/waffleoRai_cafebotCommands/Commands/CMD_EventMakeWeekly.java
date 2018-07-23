@@ -26,6 +26,7 @@ public class CMD_EventMakeWeekly extends CommandAdapter{
 	
 	public CMD_EventMakeWeekly(MessageChannel ch, Member req, int dayOfWeek, List<String> targets, long cmdID)
 	{
+		System.err.println(Thread.currentThread().getName() + " || CMD_EventMakeWeekly.<init> || DEBUG - Called!");
 		comChannel = ch;
 		requestingUser = req;
 		DOW = dayOfWeek;

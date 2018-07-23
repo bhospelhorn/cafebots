@@ -32,6 +32,7 @@ public class CMD_SOR extends CommandAdapter {
 	private Member user;
 	private boolean dir;
 	private boolean all;
+	private boolean defo;
 	private EventType type;
 	private int level;
 	
@@ -43,7 +44,7 @@ public class CMD_SOR extends CommandAdapter {
 	 * @param direction True if turning all reminders on, False if turning all reminders off.
 	 * @param cmdID Long UID of the message the command was sent in.
 	 */
-	public CMD_SOR(MessageChannel ch, Member u, boolean direction, long cmdID)
+	public CMD_SOR(MessageChannel ch, Member u, boolean direction, boolean setdefo, long cmdID)
 	{
 		//All	
 		channel = ch;
@@ -51,6 +52,7 @@ public class CMD_SOR extends CommandAdapter {
 		dir = direction;
 		all = true;
 		type = null;
+		defo = setdefo;
 		level = -1;
 		super.setCommandMessageID(cmdID);
 	}
@@ -71,6 +73,7 @@ public class CMD_SOR extends CommandAdapter {
 		user = u;
 		dir = false;
 		all = false;
+		defo = false;
 		type = t;
 		level = l;
 		super.setCommandMessageID(cmdID);
@@ -96,6 +99,10 @@ public class CMD_SOR extends CommandAdapter {
 		{
 			if(dir) bot.sorAllOn(channel.getIdLong(), user);
 			else bot.sorAllOff(channel.getIdLong(), user);
+		}
+		else if (defo)
+		{
+			bot.sorDefo(channel.getIdLong(), user);
 		}
 		else bot.sor(channel.getIdLong(), user, type, level);
 		

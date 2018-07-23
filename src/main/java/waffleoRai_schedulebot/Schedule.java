@@ -569,9 +569,9 @@ public class Schedule {
 		
 		//Add new bdays
 		Set<Long> soonbdays = new HashSet<Long>();
-		soonbdays.addAll(today);
-		soonbdays.addAll(tom);
-		soonbdays.addAll(aftertom);
+		if (today != null) soonbdays.addAll(today);
+		if (tom != null) soonbdays.addAll(tom);
+		if (aftertom != null) soonbdays.addAll(aftertom);
 		if (soonbdays != null && !soonbdays.isEmpty())
 		{
 			for (long l : soonbdays)
@@ -796,7 +796,32 @@ public class Schedule {
 
 	public static void loadReminderTimes(ReminderMap times)
 	{
+		//System.err.println("Schedule.loadReminderTimes || DEBUG - Called!");
 		reminders = times;
+		//System.err.println("Schedule.loadReminderTimes || DEBUG - Map:");
+		//System.err.println(reminders.stringContents());
+	}
+	
+	private static Map<String, Integer> day_of_week_arg_map;
+	
+	private static void populateDOWarg_map()
+	{
+		day_of_week_arg_map = new HashMap<String, Integer>();
+		day_of_week_arg_map.put("mon", Calendar.MONDAY);
+		day_of_week_arg_map.put("tue", Calendar.TUESDAY);
+		day_of_week_arg_map.put("wed", Calendar.WEDNESDAY);
+		day_of_week_arg_map.put("thu", Calendar.THURSDAY);
+		day_of_week_arg_map.put("fri", Calendar.FRIDAY);
+		day_of_week_arg_map.put("sat", Calendar.SATURDAY);
+		day_of_week_arg_map.put("sun", Calendar.SUNDAY);
+	}
+	
+	public static int getDayOfWeek(String dowArg)
+	{
+		if (day_of_week_arg_map == null) populateDOWarg_map();
+		Integer i = day_of_week_arg_map.get(dowArg.toLowerCase());
+		if (i == null) return -1;
+		return i;
 	}
 	
 	/* ----- Threads ----- */

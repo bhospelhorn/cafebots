@@ -585,7 +585,8 @@ public class InstallForm extends JFrame{
 			protected Void doInBackground() throws Exception {
 				
 				setWait();
-				install();
+				try{install();}
+				catch(Exception e){e.printStackTrace();}
 				
 				return null;
 			}
@@ -606,7 +607,8 @@ public class InstallForm extends JFrame{
 			protected Void doInBackground() throws Exception {
 				
 				setWait();
-				uninstall();
+				try{uninstall();}
+				catch(Exception e){e.printStackTrace();}
 				
 				return null;
 			}
@@ -783,6 +785,7 @@ public class InstallForm extends JFrame{
 		Map<String, Integer> ppos = ParseCore.getDefaultPermPositionMap();
 		List<Position> spos = ParseCore.getDefaultShiftPositions();
 		BotScheduler sched = new BotScheduler(LaunchCore.SHIFTS_PER_DAY_DEFO, spos, blist.size(), ppos);
+		System.out.println("InstallForm.install || Bot shift schedule generated. Now saving...");
 		String bdatdir = datadir + File.separator + LaunchCore.DIR_BOTDATA;
 		String bsfile = bdatdir + File.separator + LaunchCore.BOTSCHED_FILE;
 		String bpfile = bdatdir + File.separator + LaunchCore.BOTPERM_FILE;
@@ -813,7 +816,7 @@ public class InstallForm extends JFrame{
 			e.printStackTrace();
 			return;
 		}
-		
+		System.out.println("InstallForm.install || Installation complete!");
 	}
 	
 	public void uninstall()

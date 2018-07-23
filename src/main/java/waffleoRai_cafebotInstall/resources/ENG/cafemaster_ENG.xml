@@ -7,8 +7,8 @@
 	<generalbotstrings>
 		<servergreeting>2,2</servergreeting>
 		<newmemberping>6,1</newmemberping>
-		<serverfarewell>197,1</serverfarewell>
-		<memberleaveping>197,1</memberleaveping>
+		<serverfarewell>555,1</serverfarewell>
+		<memberleaveping>558,1</memberleaveping>
 		<helpmessage1>92,2</helpmessage1>
 		<helpmessage2>96,1</helpmessage2>
 		<helpmessage3>99,45</helpmessage3>
@@ -26,6 +26,7 @@
 		<soroffall>48,1</soroffall>
 		<soron>51,1</soron>
 		<soronall>54,1</soronall>
+		<sordefo>609,1</sordefo>
 		<responseinvalid>191,1</responseinvalid>
 		<responsetimeout>194,1</responsetimeout>
 		<parserblocked>200,1</parserblocked>
@@ -63,16 +64,16 @@
 		<checkgsettingoff>239,1</checkgsettingoff>
 		<checkpsettingon>242,1</checkpsettingon>
 		<checkpsettingoff>245,1</checkpsettingoff>
-		<setfarewellon>197,1</setfarewellon>
-		<setfarewelloff>197,1</setfarewelloff>
-		<setfarewellfail>197,1</setfarewellfail>
-		<setfarewellpingon>197,1</setfarewellpingon>
-		<setfarewellpingoff>197,1</setfarewellpingoff>
-		<setfarewellpingfail>197,1</setfarewellpingfail>
-		<checkfsettingon>197,1</checkfsettingon>
-		<checkfsettingoff>197,1</checkfsettingoff>
-		<checkfpsettingon>197,1</checkfpsettingon>
-		<checkfpsettingoff>197,1</checkfpsettingoff>
+		<setfarewellon>561,1</setfarewellon>
+		<setfarewelloff>564,1</setfarewelloff>
+		<setfarewellfail>567,1</setfarewellfail>
+		<setfarewellpingon>570,1</setfarewellpingon>
+		<setfarewellpingoff>573,1</setfarewellpingoff>
+		<setfarewellpingfail>576,1</setfarewellpingfail>
+		<checkfsettingon>579,1</checkfsettingon>
+		<checkfsettingoff>582,1</checkfsettingoff>
+		<checkfpsettingon>585,1</checkfpsettingon>
+		<checkfpsettingoff>588,1</checkfpsettingoff>
 	</greetings>
 	<eventmanage>
 		<viewuserevents1>197,1</viewuserevents1>
@@ -95,6 +96,7 @@
 		<viewdirectorroles>197,1</viewdirectorroles>
 		<viewallroles>197,1</viewallroles>
 		<viewallrolesuser>197,1</viewallrolesuser>
+		<makeroleprompt>197,1</makeroleprompt>
 		<makerolesuccess>197,1</makerolesuccess>
 		<makerolefailure>197,1</makerolefailure>
 		<completeroleprompt>197,1</completeroleprompt>
@@ -171,6 +173,9 @@
 		<remind3>197,1</remind3>
 		<remind4>197,1</remind4>
 		<remind5>197,1</remind5>
+		<attendlist1>197,1</attendlist1>
+		<attendlist2>197,1</attendlist2>
+		<attendlist3>197,1</attendlist3>
 		<confirmattend_yes>197,1</confirmattend_yes>
 		<confirmattend_fail>197,1</confirmattend_fail>
 		<confirmattend_no>197,1</confirmattend_no>
@@ -193,6 +198,9 @@
 		<remind3>197,1</remind3>
 		<remind4>197,1</remind4>
 		<remind5>197,1</remind5>
+		<attendlist1>197,1</attendlist1>
+		<attendlist2>197,1</attendlist2>
+		<attendlist3>197,1</attendlist3>
 		<confirmattend_yes>197,1</confirmattend_yes>
 		<confirmattend_fail>197,1</confirmattend_fail>
 		<confirmattend_no>197,1</confirmattend_no>
@@ -215,6 +223,9 @@
 		<remind3>197,1</remind3>
 		<remind4>197,1</remind4>
 		<remind5>197,1</remind5>
+		<attendlist1>197,1</attendlist1>
+		<attendlist2>197,1</attendlist2>
+		<attendlist3>197,1</attendlist3>
 		<confirmattend_yes>197,1</confirmattend_yes>
 		<confirmattend_fail>197,1</confirmattend_fail>
 		<confirmattend_no>197,1</confirmattend_no>
@@ -237,6 +248,9 @@
 		<remind3>197,1</remind3>
 		<remind4>197,1</remind4>
 		<remind5>197,1</remind5>
+		<attendlist1>197,1</attendlist1>
+		<attendlist2>197,1</attendlist2>
+		<attendlist3>197,1</attendlist3>
 		<confirmattend_yes>197,1</confirmattend_yes>
 		<confirmattend_fail>197,1</confirmattend_fail>
 		<confirmattend_no>197,1</confirmattend_no>
@@ -259,6 +273,9 @@
 		<remind3>197,1</remind3>
 		<remind4>197,1</remind4>
 		<remind5>197,1</remind5>
+		<attendlist1>197,1</attendlist1>
+		<attendlist2>197,1</attendlist2>
+		<attendlist3>197,1</attendlist3>
 		<confirmattend_yes>197,1</confirmattend_yes>
 		<confirmattend_fail>197,1</confirmattend_fail>
 		<confirmattend_no>197,1</confirmattend_no>
@@ -281,6 +298,9 @@
 		<remind3>197,1</remind3>
 		<remind4>197,1</remind4>
 		<remind5>197,1</remind5>
+		<attendlist1>197,1</attendlist1>
+		<attendlist2>197,1</attendlist2>
+		<attendlist3>197,1</attendlist3>
 		<confirmattend_yes>197,1</confirmattend_yes>
 		<confirmattend_fail>197,1</confirmattend_fail>
 		<confirmattend_no>197,1</confirmattend_no>
@@ -301,6 +321,12 @@
 		<cmday_confirm>486,1</cmday_confirm>
 		<cmday_confirm_success>489,1</cmday_confirm_success>
 		<cmday_confirm_fail>492,1</cmday_confirm_fail>
+		<cmd_clean_success>591,1</cmd_clean_success>
+		<cmd_clean_fail>594,1</cmd_clean_fail>
+		<set_auto_cmd_clean_on_success>597,1</set_auto_cmd_clean_on_success>
+		<set_auto_cmd_clean_on_fail>600,1</set_auto_cmd_clean_on_fail>
+		<set_auto_cmd_clean_off_success>603,1</set_auto_cmd_clean_off_success>
+		<set_auto_cmd_clean_off_fail>606,1</set_auto_cmd_clean_off_fail>
 	</cleanmessages>
 	<gameplayingstatus>
 		<off0>495,1</off0>

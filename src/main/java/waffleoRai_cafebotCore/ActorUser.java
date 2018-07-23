@@ -149,11 +149,12 @@ public class ActorUser {
 
 	public boolean reminderOn(EventType type, int rlevel)
 	{
-		if (rlevel < 0) return false;
+		int lv = rlevel - 1;
+		if (lv < 0) return false;
 		Boolean[] barr = rswitches.get(type);
 		if (barr == null) return false;
-		if (rlevel > barr.length) return false;
-		return barr[rlevel];
+		if (lv > barr.length) return false;
+		return barr[lv];
 	}
 	
 	public boolean isAdmin()
@@ -291,6 +292,20 @@ public class ActorUser {
 			if (switches != null)
 			{
 				for (int i = 0; i < switches.length; i++) switches[i] = true;
+			}
+		}
+	}
+	
+	public void resetRemindersToDefault()
+	{
+		Set<EventType> alltypes = rswitches.keySet();
+		for (EventType t : alltypes)
+		{
+			Boolean[] switches = rswitches.get(t);
+			for (int i = 0; i < switches.length; i++)
+			{
+				if (i < 2) switches[i] = true;
+				else switches[i] = false;
 			}
 		}
 	}

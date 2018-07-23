@@ -11,6 +11,7 @@ import waffleoRai_cafebotCommands.parsers.PRS_CleanMessages_1;
 import waffleoRai_cafebotCommands.parsers.PRS_CleanMessages_2;
 import waffleoRai_cafebotCommands.parsers.PRS_CleanMessages_3;
 import waffleoRai_cafebotCommands.parsers.PRS_EventHelp;
+import waffleoRai_cafebotCommands.parsers.PRS_EventWeekly;
 import waffleoRai_cafebotCommands.parsers.PRS_GetTZ;
 import waffleoRai_cafebotCommands.parsers.PRS_Help;
 import waffleoRai_cafebotCommands.parsers.PRS_PingMeGreetings;
@@ -64,7 +65,7 @@ public interface Parser {
 		pmap.put("ecancel", new PRS_CancelEvent());
 		pmap.put("onetime", null);
 		pmap.put("deadline", null);
-		pmap.put("weekly", null);
+		pmap.put("weekly", new PRS_EventWeekly());
 		pmap.put("biweekly", null);
 		pmap.put("monthlyday", null);
 		pmap.put("monthlydow", null);
@@ -91,6 +92,7 @@ public interface Parser {
 		pmap.put("pingGreetings", new PRS_PingMeGreetings());
 		pmap.put("setFarewells", new PRS_SetFarewells());
 		pmap.put("pingFarewells", null); //TODO
+		pmap.put("checkg", null); //TODO
 		pmap.put("audconf", null);
 		pmap.put("cmdclean", null);
 		pmap.put("autocmdclean", null);

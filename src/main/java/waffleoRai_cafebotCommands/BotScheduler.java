@@ -485,8 +485,10 @@ public class BotScheduler implements ActionListener{
 		System.err.println("DEBUG BotScheduler.<init> || Called!");
 		System.err.println("\tShifts per day: " + shifts_per_day);
 		System.err.println("\tPositions null?: " + (positions == null));
+		System.err.println("\tNumber Positions: " + (positions.size()));
 		System.err.println("\tNumber of bots: " + nbots);
 		System.err.println("\tPermmap null?: " + (permMap == null));
+		System.err.println("\tNumber PermCmds: " + (permMap.size()));
 		
 		if (shifts_per_day < 1) throw new IllegalArgumentException();
 		if (nbots < 1) throw new IllegalArgumentException();
@@ -717,7 +719,9 @@ public class BotScheduler implements ActionListener{
 			//System.err.println("DEBUG BotScheduler.<init> || Finishing scheduler construction...");
 			
 			shiftsPerDay = shifts_per_day;
+			//System.err.println("DEBUG BotScheduler.<init> || Calling setCurrentShift()...");
 			setCurrentShift();
+			//System.err.println("DEBUG BotScheduler.<init> || setCurrentShift() returned");
 		}
 		
 		timer = new Timer(minutesPerShift(shifts_per_day) * MILLIS_PER_MINUTE, this);	
@@ -983,16 +987,29 @@ public class BotScheduler implements ActionListener{
 	 */
 	public synchronized void setCurrentShift()
 	{
+		//System.err.println("DEBUG BotScheduler.setCurrentShift || DEBUG: Method Called!");
 		GregorianCalendar c = new GregorianCalendar();
-		MonthSchedule ms = allshifts.get(c.get(Calendar.MONTH));
+		int m = c.get(Calendar.MONTH);
+		MonthSchedule ms = allshifts.get(m);
+		//System.err.println("DEBUG BotScheduler.setCurrentShift || DEBUG: Point 1");
 		if (ms != null)
 		{
-			DaySchedule ds = ms.get(c.get(Calendar.DAY_OF_WEEK));
-			Shift sh = ds.getCurrentShift(c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE));
-			currentShift = sh;	
+			int d = c.get(Calendar.DAY_OF_WEEK) - 1;
+			DaySchedule ds = ms.get(d);
+			if (ds == null){
+				currentShift = null;
+				System.err.println("BotScheduler.setCurrentShift || ERROR! NULL DAY: Month = " + m + " Day = " + d);
+			}
+			else
+			{
+				Shift sh = ds.getCurrentShift(c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE));
+				currentShift = sh;		
+			}
 		}
 		else currentShift = null;
+		//System.err.println("DEBUG BotScheduler.setCurrentShift || DEBUG: Point 2");
 		if (commander != null){
+			//System.err.println("DEBUG BotScheduler.setCurrentShift || DEBUG: Point 3");
 			for (int i = 1; i < 10; i++)
 			{
 				Position p = currentShift.getBotPosition(i);
@@ -1011,7 +1028,9 @@ public class BotScheduler implements ActionListener{
 					commander.issueDirectCommand(i, cmd);
 				}
 			}
+			//System.err.println("DEBUG BotScheduler.setCurrentShift || DEBUG: Point 4");
 		}
+		//System.err.println("DEBUG BotScheduler.setCurrentShift || DEBUG: Method Returning!");
 	}
 	
 	/* ----- Command Management ----- */

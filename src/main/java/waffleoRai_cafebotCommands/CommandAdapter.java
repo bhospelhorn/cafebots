@@ -48,7 +48,6 @@ public abstract class CommandAdapter implements Command{
 	 */
 	public void execute_confirm(AbstractBot bot) {
 		//Does nothing.
-		
 	}
 
 	@Override
@@ -71,6 +70,7 @@ public abstract class CommandAdapter implements Command{
 	 */
 	public void execute_rerequest(AbstractBot bot) {
 		bot.displayRerequestMessage(getChannelID());
+		bot.queueRerequest(this, this.getChannelID(), this.getUserID());
 	}
 	
 	protected void setCommandMessageID(long cmdID)

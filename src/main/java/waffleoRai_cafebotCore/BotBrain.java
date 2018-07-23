@@ -433,7 +433,7 @@ public class BotBrain {
 	
 	public String getDayOfWeek(int dow)
 	{
-		String key = "commonstrings.daysofweek.day" + (dow+1);
+		String key = "commonstrings.daysofweek.day" + (dow);
 		return commonStrings.get(key);
 	}
 	

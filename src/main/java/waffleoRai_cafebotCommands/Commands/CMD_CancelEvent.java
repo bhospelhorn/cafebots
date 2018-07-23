@@ -69,7 +69,7 @@ public class CMD_CancelEvent extends CommandAdapter{
 	 * @throws NullPointerException If bot is null.
 	 */
 	public void execute_confirm(AbstractBot bot) {
-		bot.cancelEvent(channel.getIdLong(), user.getGuild().getIdLong(), event);
+		bot.cancelEvent(channel.getIdLong(), user.getGuild().getIdLong(), event, getUserID());
 		
 	}
 	
@@ -78,7 +78,7 @@ public class CMD_CancelEvent extends CommandAdapter{
 	 * @throws NullPointerException If bot is null.
 	 */
 	public void execute_reject(AbstractBot bot) {
-		bot.cancelEvent_cancel(channel.getIdLong(), user.getGuild().getIdLong(), event);
+		bot.cancelEvent_cancel(channel.getIdLong(), user.getGuild().getIdLong(), event, getUserID());
 		
 	}
 	

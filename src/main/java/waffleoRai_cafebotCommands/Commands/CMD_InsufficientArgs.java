@@ -31,11 +31,12 @@ public class CMD_InsufficientArgs extends CommandAdapter{
 	 * @param channelID Discord long UID of channel command was issued on and reply should be sent to.
 	 * @param et EventType of event creation attempt.
 	 */
-	public CMD_InsufficientArgs(long channelID, EventType et, String uname)
+	public CMD_InsufficientArgs(long channelID, EventType et, String uname, long cmdID)
 	{
 		chid = channelID;
 		type = et;
 		username = uname;
+		super.setCommandMessageID(cmdID);
 	}
 
 	/**
@@ -50,16 +51,22 @@ public class CMD_InsufficientArgs extends CommandAdapter{
 			bot.insufficientArgsMessage_birthday(chid, username);
 			break;
 		case BIWEEKLY:
+			bot.insufficientArgsMessage_general(chid, username, EventType.BIWEEKLY);
 			break;
 		case DEADLINE:
+			bot.insufficientArgsMessage_general(chid, username, EventType.DEADLINE);
 			break;
 		case MONTHLYA:
+			bot.insufficientArgsMessage_general(chid, username, EventType.MONTHLYA);
 			break;
 		case MONTHLYB:
+			bot.insufficientArgsMessage_general(chid, username, EventType.MONTHLYB);
 			break;
 		case ONETIME:
+			bot.insufficientArgsMessage_general(chid, username, EventType.ONETIME);
 			break;
 		case WEEKLY:
+			bot.insufficientArgsMessage_general(chid, username, EventType.WEEKLY);
 			break;
 		default:
 			break;
