@@ -1,11 +1,12 @@
 # cafebots
 
-## --------- Command Overview ---------
+## Command Overview
 Although many of these commands are listing when requesting !help from the bots directly, !help does not provide a comprehensive list.
 Therefore, I shall include a comprehensive list here instead.
 
 ### Prefixes
 For the message listener to recognize a sent message as a command and even bother to process it, the message must meet one of two requirements:
+
   A. It must begin with "!" OR
   B. It must contain mentions of one or more bot accounts connected to the core.
   
@@ -187,7 +188,7 @@ mm - 2 digit month (Must be 01-12)
 dd - 2 digit day (Lowest it can be is 01, highest is the last day of that month)
 hh - Hour on 24 hour clock (00-23)
 mm - Minute (00-59)
-DOW - Day of the week. Can be upper case or lower case or both! Has to be one of the following: [mon, tue, wed, thu, fri, sat, sun]
+DOW - Day of the week. Not case sensitive. Has to be one of the following: [mon, tue, wed, thu, fri, sat, sun]
 ww - Week number in month (01-05)
 ```
 
@@ -253,13 +254,12 @@ There are 3-5 reminder levels for each event type. The index system is 1-based. 
     + The channel's name WITHOUT the # pound prefix.
 - The notes argument for role creation is just a string, and should be surrounded by double quotes if it includes whitespace.
 - The optional (instance) and (silent) arguments for ecancel are bools.
-- For those unfamiliar with the term "bool" is short for "boolean" which is a simple true/false.
-    Acceptable bool values are...
-      + TRUE: "true", "t", "yes", "y", "1"
-      + FALSE: "false", "f", "no", "n", "0"
-    Boolean arguments are not case sensitive.
+- For those unfamiliar with the term "bool" is short for "boolean" which is a simple true/false. Acceptable bool values are...
+    + TRUE: "true", "t", "yes", "y", "1"
+    + FALSE: "false", "f", "no", "n", "0"
+  Boolean arguments are not case sensitive.
 
-## --------- Known Issues ---------
+## Known Issues
 
 ### The Parser Bottleneck
 
@@ -296,6 +296,6 @@ I really didn't intend to spend much time developing this bot framework, but as 
 As a result, there are certainly quite a few parts that are just... not optimized. It's a bit of a patchwork, really.
 I might fix that one day. Maybe.
 
-## --------- Future Changes ---------
+## Future Changes
 
-## --------- Translation ---------
+## Translation
