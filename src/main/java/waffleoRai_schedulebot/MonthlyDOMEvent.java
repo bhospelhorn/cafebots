@@ -1,5 +1,9 @@
 package waffleoRai_schedulebot;
 
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
+
 import waffleoRai_Utils.FileBuffer.UnsupportedFileTypeException;
 
 public class MonthlyDOMEvent extends EventAdapter {
@@ -57,5 +61,72 @@ public class MonthlyDOMEvent extends EventAdapter {
 		return MAX_REMINDERS;
 	}
 	
+	public boolean acceptsRSVP()
+	{
+		return true;
+	}
+	
+	public boolean isRecurring()
+	{
+		return true;
+	}
 
+	public void setName(String ename)
+	{
+		super.setEventName(ename);
+	}
+	
+	public void setReqChannel(long chid)
+	{
+		super.setRequesterChannel(chid);
+	}
+	
+	public void setTargChannel(long chid)
+	{
+		super.setTargetChannel(chid);
+	}
+	
+	public void setEventTime(int dayOfMonth, int hour, int minute, TimeZone tz)
+	{
+		GregorianCalendar now = new GregorianCalendar();
+		now.setTimeZone(tz);
+		GregorianCalendar next = new GregorianCalendar();
+		next.setTimeZone(tz);
+		next.set(Calendar.HOUR_OF_DAY, hour);
+		next.set(Calendar.MINUTE, minute);
+		int nowday = now.get(Calendar.DAY_OF_MONTH);
+		if (nowday == dayOfMonth)
+		{
+			//See if it's before or after.
+			int nowhr = now.get(Calendar.HOUR_OF_DAY);
+			if (hour == nowhr)
+			{
+				int nowmin = now.get(Calendar.MINUTE);	
+				if (minute >= nowmin)
+				{
+					//Add seven days
+					next.add(Calendar.MONTH, 1);
+				}
+			}
+			else if (hour > nowhr)
+			{
+				//Add seven days
+				next.add(Calendar.MONTH, 1);
+			}
+		}
+		else
+		{
+			if (nowday > dayOfMonth)
+			{
+				//Add a month
+				next.add(Calendar.MONTH, 1);
+			}
+			//Set the day directly
+			next.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+		}
+		super.setEventTime(next);
+		determineNextReminder();
+	}
+	
+	
 }

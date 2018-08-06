@@ -127,4 +127,14 @@ public class WeeklyEvent extends EventAdapter{
 		return MAX_REMINDERS;
 	}
 	
+	public boolean acceptsRSVP()
+	{
+		return true;
+	}
+	
+	public boolean isRecurring()
+	{
+		return true;
+	}
+	
 }

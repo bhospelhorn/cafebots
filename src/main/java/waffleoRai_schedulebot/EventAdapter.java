@@ -20,6 +20,7 @@ public abstract class EventAdapter implements CalendarEvent{
 	private GregorianCalendar eventTime;
 	private Map<Long, Attendance> targetUsers;
 	private long requestingUser;
+	private boolean groupEvent;
 	
 	private long eventID;
 	private String eventName;
@@ -150,6 +151,11 @@ public abstract class EventAdapter implements CalendarEvent{
 		rt.add(Calendar.HOUR_OF_DAY, (time.getHours() * -1));
 		rt.add(Calendar.MINUTE, (time.getMinutes() * -1));
 		reminderTimes[level-1] = rt.getTimeInMillis();
+	}
+	
+	public void setGroupEvent(boolean b)
+	{
+		groupEvent = b;
 	}
 	
 	@Override
@@ -333,6 +339,11 @@ public abstract class EventAdapter implements CalendarEvent{
 		return requestTime;
 	}
 
+	public boolean isGroupEvent()
+	{
+		return groupEvent;
+	}
+	
 	protected void readFromTSV_record(String tsvRecord) throws UnsupportedFileTypeException
 	{
 		//EventID
@@ -454,5 +465,10 @@ public abstract class EventAdapter implements CalendarEvent{
 	
 	public abstract int getMaxReminders();
 	public abstract void loadReminderTimes();
+	
+	public long getEventTime()
+	{
+		return eventTime.getTimeInMillis();
+	}
 	
 }

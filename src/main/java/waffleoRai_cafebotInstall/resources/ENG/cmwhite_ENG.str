@@ -42,16 +42,16 @@ TYPES
   monthlydow
 
 #SOR Help 3
-Each individual type has 3-5 reminder levels. To see what the times are for each, you re-enter the sor command with the type argument, but without the level argument.
+Each individual type has 3-5 reminder levels. To see what the times are for each, you can say "!sor view [type]". Not too hard, eh?
 
 #SOR Off
-Gotcha, %r. We'll make sure not to bug you %l before %t events.
+Gotcha, %r. We'll make sure not to bug you %l before %y events.
 
 #SOR Off All
 Gotcha, %r. I've turned off all of your event reminders.
 
 #SOR On
-Sure, %r. I'll turn back on your %l reminder for %t events.
+Sure, %r. I'll turn back on your %l reminder for %y events.
 
 #SOR On All
 Sure, %r. I'll turn back on all of your event reminders.
@@ -102,7 +102,7 @@ Right now this server is set to display new member greetings. So, greetings are 
 Right now you're not set to show new member greetings. In other words, greetings are off.
 
 #Check greeting pings - On
-%r, right? Yeah, right now I have you down for greeting notifications. You can turn them off whenever if you don't like it.
+%r, right? Yeah, right now I have you down for greeting notifications on %C. You can turn them off whenever if you don't like it.
 
 #Check greeting pings - Off
 Nah %r, says you're not supposed to be getting greeting pings now. If you're an admin though, you can turn them on whenever.
@@ -114,7 +114,7 @@ Yeah, farewell messages are on right now. Dunno why - it's not like the person l
 Right now your server is not set to display farewell messages. Dunno why - seems like you're missing out.
 
 #Check farewell pings - On
-Hey %r. Right now you are set to get pinged whenever someone leaves the server. ...You wanna know every time someone leaves? Alright, your funeral.
+Hey %r. Right now you are set to get pinged on %C whenever someone leaves the server. ...You wanna know every time someone leaves? Alright, your funeral.
 
 #Check farewell pings - Off
 %r, huh? Looks like you are not set to get notifications whenever someone leaves the server. You sure about that? Don't you want to know these things?
@@ -221,7 +221,7 @@ If you wanna decline the role, then just use "decline %N" instead.
 || %x ||
 %U
 Role UID: %N
-Deadline: [Unset]
+Deadline: [None]
 Director Notes: %X
 
 Good for you, %u!
@@ -243,7 +243,7 @@ Hey %U. Should probably let you know - your role "%x" was deleted. Don't sweat i
 Alright, %u! I'll let the director know that you've accepted role %x, then.
 
 #Actor decline role
-That's how it is then, %u? Alright, I'll let the director know you've decline role "%x", then.
+That's how it is then, %u? Alright, I'll let the director know you've declined role "%x", then.
 
 #Actor response failed
 Huh. Sorry about that. For some reason I wasn't able to mark your response. Try again later, I guess.
@@ -443,5 +443,24 @@ Hey %R. Looks like your friend %u has left the café (server, whatever). You ask
 
 #SOR Defo
 Gotcha, %r. I've reset your reminder on/off settings to the default.
+
+#Check birthday channel
+Birthday wishes? Um, okay. Yeah, the birthday wishes channel for this server is %C.
+
+#Check birthday channel - null
+This server doesn't have a birthday wishes channel. The reference is null. You might wanna fix that.
+
+#Bring me a gene 1
+Bring you a gene, eh? I like your style.
+Alright, well I've got a RefSeq database for hg38 lying around. Hope you like that.
+
+#Bring me a gene 2
+%1
+Transcript ID: %2
+Position: %3
+Protein-Coding: %4
+Number of Exons: %5
+
+Curious? Well, I'm too lazy to generate a proper link for you, but here's a database you can use to look up more information: https://www.ncbi.nlm.nih.gov/gene/
 
 #ADD HERE...

@@ -60,5 +60,15 @@ public class DeadlineEvent extends EventAdapter{
 		return MAX_REMINDERS;
 	}
 	
+	public boolean acceptsRSVP()
+	{
+		return false;
+	}
+	
+	public boolean isRecurring()
+	{
+		return false;
+	}
+	
 	
 }

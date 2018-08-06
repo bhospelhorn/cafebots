@@ -29,6 +29,9 @@ public class CMD_CancelEvent extends CommandAdapter{
 	private Member user;
 	private long event;
 	
+	private boolean silent;
+	private boolean cancelAll;
+	
 	/**
 	 * Construct a new CancelEvent command.
 	 * @param ch Channel the command was received on and the bot should send prompts and messages
@@ -37,11 +40,13 @@ public class CMD_CancelEvent extends CommandAdapter{
 	 * @param eventID UID of the event to cancel.
 	 * @param cmdID Long UID of the message the command was sent in.
 	 */
-	public CMD_CancelEvent(MessageChannel ch, Member u, long eventID, long cmdID)
+	public CMD_CancelEvent(MessageChannel ch, Member u, long eventID, long cmdID, boolean s, boolean all)
 	{
 		channel = ch;
 		user = u;
 		event = eventID;
+		silent = s;
+		cancelAll = all;
 		super.setCommandMessageID(cmdID);
 	}
 
@@ -69,7 +74,7 @@ public class CMD_CancelEvent extends CommandAdapter{
 	 * @throws NullPointerException If bot is null.
 	 */
 	public void execute_confirm(AbstractBot bot) {
-		bot.cancelEvent(channel.getIdLong(), user.getGuild().getIdLong(), event, getUserID());
+		bot.cancelEvent(channel.getIdLong(), user.getGuild().getIdLong(), event, getUserID(), silent, !cancelAll);
 		
 	}
 	

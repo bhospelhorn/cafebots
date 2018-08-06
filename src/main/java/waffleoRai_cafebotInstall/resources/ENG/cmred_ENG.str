@@ -39,16 +39,16 @@ TYPES
   monthlydow
 
 #SOR Help 3
-Each individual type has 3-5 reminder levels. To see what the times are for each, you may re-enter the sor command with the type argument, but without the level argument.
+Each individual type has 3-5 reminder levels. To see what the times are for each, the sor view [type] command may be of use!
 
 #SOR Off
-Hello, %r. At your request, we will no longer issue you a %l reminder for %t events.
+Hello, %r. At your request, we will no longer issue you a %l reminder for %y events.
 
 #SOR Off All
 Hello, %r. At your request, we will no longer issue you reminders for events.
 
 #SOR On
-Of course, %r! I will re-enable your %l reminder for %t events.
+Of course, %r! I will re-enable your %l reminder for %y events.
 
 #SOR On All
 Of course, %r! I will re-enable your event reminders!
@@ -72,7 +72,7 @@ The %o role no longer has cafébot admin permissions.
 Apologies, but you cannot remove cafébot admin permissions from the server owner.
 
 #One-time Make Confirm
-Would you like me to set up a one-time event at %T with %u [y/n]?
+Would you like me to set up a one-time event at %T with users %u [y/n]?
 
 #One-time Make Confirm Positive
 I have added your event to our schedule!
@@ -105,19 +105,19 @@ Universal Commands:
     Wipe all of your messages from this channel that were posted in the past 24 hours.
 !myevents
     View a list of all events you are scheduled for.
-!ecancel [eventID]
+!ecancel [eventID] (instance) (silent)
     Cancel an event you created.
 !onetime yyyy mm dd hh:mm \"eventname\" rchannel tchannel target1 (target2+)
     Create a one-time event. Type !event arghelp for more info.
 !deadline yyyy mm dd hh:mm \"taskname\" rchannel tchannel target1 (target2+)
     Create a deadline event. Type !event arghelp for more info.
-!weekly DOW \"eventname\" rchannel tchannel target1 (target2+)
+!weekly DOW hh:mm \"eventname\" rchannel tchannel target1 (target2+)
     Create a weekly recurring event.
-!biweekly DOW \"eventname\" rchannel tchannel target1 (target2+)
+!biweekly DOW hh:mm \"eventname\" rchannel tchannel target1 (target2+)
     Create a bi-weekly recurring event.
-!monthlyday dd \"eventname\" rchannel tchannel target1 (target2+)
+!monthlyday dd hh:mm \"eventname\" rchannel tchannel target1 (target2+)
     Create a monthly event that occurs on a certain day of the month.
-!monthlydow DOW ww \"eventname\" rchannel tchannel target1 (target2+)
+!monthlydow DOW ww hh:mm \"eventname\" rchannel tchannel target1 (target2+)
     Create a monthly event that occurs on the ww-th DOW every month (eg. 2nd Monday).
 !birthday mm dd
     Add your birthday to the birthday list.
@@ -239,7 +239,7 @@ New member greetings are currently ON for this server.
 New member greetings are currently OFF for this server.
 
 #Check pings (on)
-At the moment, you are set to be notified (by mention) every time a new member joins the server.
+At the moment %r, you are set to be notified (by mention via %C) every time a new member joins the server.
 
 #Check pings (off)
 You are currently NOT set to be notified when a new member joins the server.
@@ -357,7 +357,7 @@ I heard that is was your birthday today, %U. Allow me to wish you a wonderful da
 Permit me to say... Happy Birthday %U! Had I the opportunity, I would bake you a delightful cake to celebrate! Alas, being merely a small computer program I rather lack the resources! Still, I hope the sentiment brightens your day!
 
 #Confirm deadline event creation
-Would you like me to create a deadline for "%e" at %T for %u [y/n]?
+Would you like me to create a deadline for "%e" at %T for users %u [y/n]?
 
 #Confirm deadline event creation - success
 I have successfully added your deadline for %e to our schedule!
@@ -582,7 +582,7 @@ Hello, %r! Currently, farewell messages are turned on for this server.
 Hello, %r! Currently, farewell messages are turned off for this server.
 
 #Check farewell ping setting [On]
-Of course, %r. As of now, farewell pings for you are turned on.
+Of course, %r. As of now, farewell pings for you via %C are turned on.
 
 #Check farewell ping setting [Off]
 Hello, %r. As of now, farewell pings for you are turned off.

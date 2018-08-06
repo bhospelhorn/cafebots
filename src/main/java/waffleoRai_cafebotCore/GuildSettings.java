@@ -297,6 +297,11 @@ public class GuildSettings {
 		return recentCommands;
 	}
 	
+	public ActorUser getUser(long uid)
+	{
+		return users.getUser(uid);
+	}
+	
 	/* ----- Setters ----- */
 	
 	public synchronized void setBirthdayChannel(MessageChannel ch)

@@ -193,4 +193,26 @@ public class Birthday implements CalendarEvent{
 		return this;
 	}
 	
+	public boolean acceptsRSVP()
+	{
+		return false;
+	}
+
+	public boolean isGroupEvent()
+	{
+		return false;
+	}
+	
+	public boolean isRecurring()
+	{
+		return true;
+	}
+	
+	public long getEventTime()
+	{
+		OffsetDateTime nextbday = getNextBirthday();
+		long millis = nextbday.toEpochSecond() * 1000;
+		return millis;
+	}
+
 }

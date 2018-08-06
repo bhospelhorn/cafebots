@@ -18,6 +18,10 @@ public interface CalendarEvent extends Comparable<CalendarEvent>{
 	public long getEventID();
 	public String getEventName();
 	
+	public boolean acceptsRSVP();
+	public boolean isGroupEvent();
+	public boolean isRecurring();
+	
 	public int getYear(TimeZone tz);
 	public int getMonth(TimeZone tz);
 	public int getDayOfMonth(TimeZone tz);
@@ -26,6 +30,7 @@ public interface CalendarEvent extends Comparable<CalendarEvent>{
 	public int getHour(TimeZone tz);
 	public int getMinute(TimeZone tz);
 	
+	public long getEventTime();
 	public long getTimeUntil();
 	//public String printRecord(Language l, TimeZone tz);
 	public int nextReminderLevel();

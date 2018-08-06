@@ -12,7 +12,9 @@ import waffleoRai_schedulebot.EventType;
 import waffleoRai_schedulebot.Schedule;
 
 public class PRS_EventWeekly implements Parser{
-
+	
+	private static String[] groupargs = {"everyone", "all", "group"};
+	
 	@Override
 	public Command generateCommand(String[] args, MessageReceivedEvent event) 
 	{
@@ -54,18 +56,42 @@ public class PRS_EventWeekly implements Parser{
 		}
 		//System.err.println(Thread.currentThread().getName() + " || PRS_EventWeekly.generateCommand || Hour Detected: " + hr);
 		//System.err.println(Thread.currentThread().getName() + " || PRS_EventWeekly.generateCommand || Minute Detected: " + min);
-		
-		List<String> tusers = new LinkedList<String>();
+		boolean group = false;
+		List<String> tusers = null;
 		if (args.length > 6)
 		{
-			for (int i = 6; i < args.length; i++)
+			//Check argument 6 to see if it's a group cue
+			for (String a : groupargs)
 			{
-				//System.err.println(Thread.currentThread().getName() + " || PRS_EventWeekly.generateCommand || Target User Detected: " + args[i]);
-				tusers.add(args[i]);
+				if (a.equalsIgnoreCase(args[6]))
+				{
+					group = true;
+					break;
+				}
+			}
+			if(!group)
+			{
+				tusers = new LinkedList<String>();
+				if (args.length > 6)
+				{
+					for (int i = 6; i < args.length; i++)
+					{
+						//System.err.println(Thread.currentThread().getName() + " || PRS_EventWeekly.generateCommand || Target User Detected: " + args[i]);
+						tusers.add(args[i]);
+					}
+				}
 			}
 		}
 		
-		CMD_EventMakeWeekly cmd = new CMD_EventMakeWeekly(event.getChannel(), event.getMember(), dow, tusers, event.getMessageIdLong());
+		CMD_EventMakeWeekly cmd = null;
+		if (group)
+		{
+			cmd = new CMD_EventMakeWeekly(event.getChannel(), event.getMember(), dow, event.getMessageIdLong());
+		}
+		else
+		{
+			cmd = new CMD_EventMakeWeekly(event.getChannel(), event.getMember(), dow, tusers, event.getMessageIdLong());
+		}
 		//System.err.println(Thread.currentThread().getName() + " || PRS_EventWeekly.generateCommand || Event Name Detected: " + ename);
 		cmd.setEventName(ename);
 		//System.err.println(Thread.currentThread().getName() + " || PRS_EventWeekly.generateCommand || RChannel Name Detected: " + rchan);

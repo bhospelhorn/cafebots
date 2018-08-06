@@ -1,5 +1,8 @@
 package waffleoRai_schedulebot;
 
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
+
 import waffleoRai_Utils.FileBuffer.UnsupportedFileTypeException;
 
 public class OneTimeEvent extends EventAdapter{
@@ -50,5 +53,42 @@ public class OneTimeEvent extends EventAdapter{
 	{
 		return MAX_REMINDERS;
 	}
+	
+	public boolean acceptsRSVP()
+	{
+		return true;
+	}
+	
+	public boolean isRecurring()
+	{
+		return false;
+	}
+	
+	public void setName(String ename)
+	{
+		super.setEventName(ename);
+	}
+	
+	public void setReqChannel(long chid)
+	{
+		super.setRequesterChannel(chid);
+	}
+	
+	public void setTargChannel(long chid)
+	{
+		super.setTargetChannel(chid);
+	}
+	
+	public void setEventTime(long millis, TimeZone tz)
+	{
+		GregorianCalendar next = new GregorianCalendar();
+		next.setTimeZone(tz);
+		next.setTimeInMillis(millis);
+
+		super.setEventTime(next);
+		determineNextReminder();
+	}
+	
+	
 	
 }

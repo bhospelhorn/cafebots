@@ -2,8 +2,10 @@ package waffleoRai_cafebotCore;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.List;
 import java.util.TimeZone;
 
+import net.dv8tion.jda.core.entities.IMentionable;
 import waffleoRai_Utils.FileBuffer;
 import waffleoRai_schedulebot.Schedule;
 
@@ -243,4 +245,57 @@ public class DF_ENG implements DateFormatter{
 		return s;
 	}
 
+	public void insertMentionList(List<IMentionable> ulist, BotMessage msg, ReplaceStringType replace)
+	{
+		if (ulist == null || ulist.isEmpty()){
+			msg.substituteString(replace, "");
+			return;
+		}
+		if (ulist.size() == 1)
+		{
+			msg.substituteMention(replace, ulist.get(0));
+			return;
+		}
+		msg.substituteFormattedMentions(replace, ulist, ", ", "and ", " and ");
+	}
+	
+	public String formatStringList(List<String> list)
+	{
+		if (list == null) return "";
+		if (list.isEmpty()) return "";
+		String s = "";
+		int size = list.size();
+		if (size == 1)
+		{
+			return list.get(0);
+		}
+		int i = 0;
+		if (size == 2)
+		{
+			boolean first = true;
+			for (String str : list)
+			{
+				if (str == null) str = "";
+				s += str;
+				if (first) s += " and ";
+				first = false;
+			}
+			return s;
+		}
+		for (String str : list)
+		{
+			if (str == null) continue;
+			s += str;
+			if (i < size-1) s += ", ";
+			if (i == size-2) s += "and ";
+			i++;
+		}
+		return s;
+	}
+	
+	public String getEveryoneString()
+	{
+		return "everyone";
+	}
+	
 }

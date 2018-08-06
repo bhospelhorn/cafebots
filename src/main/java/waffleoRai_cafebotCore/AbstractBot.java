@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.time.OffsetDateTime;
+import java.util.Collection;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -27,6 +28,7 @@ import net.dv8tion.jda.core.entities.IMentionable;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.MessageChannel;
+import net.dv8tion.jda.core.entities.Role;
 import net.dv8tion.jda.core.entities.SelfUser;
 import net.dv8tion.jda.core.entities.TextChannel;
 import net.dv8tion.jda.core.entities.User;
@@ -42,9 +44,15 @@ import waffleoRai_cafebotCommands.Commands.CMD_EventMakeMonthlyDOM;
 import waffleoRai_cafebotCommands.Commands.CMD_EventMakeMonthlyDOW;
 import waffleoRai_cafebotCommands.Commands.CMD_EventMakeOnetime;
 import waffleoRai_cafebotCommands.Commands.CMD_EventMakeWeekly;
+import waffleoRai_schedulebot.Attendance;
+import waffleoRai_schedulebot.Birthday;
+import waffleoRai_schedulebot.BiweeklyEvent;
 import waffleoRai_schedulebot.CalendarEvent;
 import waffleoRai_schedulebot.EventAdapter;
 import waffleoRai_schedulebot.EventType;
+import waffleoRai_schedulebot.MonthlyDOMEvent;
+import waffleoRai_schedulebot.MonthlyDOWEvent;
+import waffleoRai_schedulebot.OneTimeEvent;
 import waffleoRai_schedulebot.Schedule;
 import waffleoRai_schedulebot.WeeklyEvent;
 
@@ -1070,6 +1078,11 @@ public abstract class AbstractBot implements Bot{
 		sendMessage(channelID, bmsg);
 	}
 	
+	public void redirectEventCommand(Command cmd, EventType t)
+	{
+		brain.redirectEventCommand(cmd, t);
+	}
+	
 	/* ----- Commands : Greetings ----- */
 	
 	public void setGreetingChannel(long cmdChanID, String gChan, Member m)
@@ -1587,6 +1600,111 @@ public abstract class AbstractBot implements Bot{
 		sendMessage(ch, bmsg);
 	}
 	
+	public void checkGreetingStatus(long channelID, Guild guild, boolean farewells)
+	{
+		//Get guild settings
+		long gid = guild.getIdLong();
+		GuildSettings gs = brain.getGuild(gid);
+		if (gs == null)
+		{
+			boolean b = newGuild(guild);
+			if (!b)
+			{
+				GregorianCalendar stamp = new GregorianCalendar();
+				System.err.println(Thread.currentThread().getName() + " || AbstractBot.checkGreetingStatus || ERROR: Data for guild " + Long.toHexString(gid) + " could not be retrieved! | " + FileBuffer.formatTimeAmerican(stamp));
+			}
+			gs = brain.getGuild(gid);
+		}
+		String keybase = BotStrings.KEY_MAINGROUP_BOTSTRINGS + BotStrings.KEY_GROUP_GREETINGS;
+		String key;
+		if (farewells)
+		{
+			if (gs.farewellsOn()) key = keybase + BotStrings.KEY_GREET_CHECKF_ON;
+			else key = keybase + BotStrings.KEY_GREET_CHECKF_OFF;
+		}
+		else
+		{
+			if (gs.greetingsOn()) key = keybase + BotStrings.KEY_GREET_CHECKG_ON;
+			else key = keybase + BotStrings.KEY_GREET_CHECKG_OFF;
+		}
+		String rawmsg = botStrings.get(key);
+		BotMessage bmsg = new BotMessage(rawmsg);
+		//No substitutions?
+		sendMessage(channelID, bmsg);
+	}
+	
+	public void checkGreetingPingStatus(long channelID, Member mem, boolean farewells)
+	{
+		//Get guild settings
+		Guild guild = mem.getGuild();
+		long gid = guild.getIdLong();
+		GuildSettings gs = brain.getGuild(gid);
+		if (gs == null)
+		{
+			boolean b = newGuild(guild);
+			if (!b)
+			{
+				GregorianCalendar stamp = new GregorianCalendar();
+				System.err.println(Thread.currentThread().getName() + " || AbstractBot.checkGreetingPingStatus || ERROR: Data for guild " + Long.toHexString(gid) + " could not be retrieved! | " + FileBuffer.formatTimeAmerican(stamp));
+			}
+			gs = brain.getGuild(gid);
+		}
+		
+		//Get user settings
+		long uid = mem.getUser().getIdLong();
+		ActorUser user = gs.getUser(uid);
+		if (user == null)
+		{
+			boolean b = newMember(mem);
+			if (!b)
+			{
+				GregorianCalendar stamp = new GregorianCalendar();
+				System.err.println(Thread.currentThread().getName() + " || AbstractBot.checkGreetingPingStatus || ERROR: Data for member " + Long.toHexString(uid) + " could not be retrieved! | " + FileBuffer.formatTimeAmerican(stamp));
+			}
+			user = gs.getUser(uid);
+		}
+		
+		//Check ping settings
+		String keybase = BotStrings.KEY_MAINGROUP_BOTSTRINGS + BotStrings.KEY_GROUP_GREETINGS;
+		long pingChannel = 0;
+		boolean on = false;
+		String key;
+		String memname = mem.getUser().getName();
+		if (farewells)
+		{
+			if (user.pingFarewellsOn()){
+				key = keybase + BotStrings.KEY_GREET_CHECKFP_ON;
+				on = true;
+				pingChannel = user.getPingGreetingsChannel();
+			}
+			else key = keybase + BotStrings.KEY_GREET_CHECKFP_OFF;
+		}
+		else
+		{
+			if (user.pingGreetingsOn()){
+				key = keybase + BotStrings.KEY_GREET_CHECKGP_ON;
+				on = true;
+				pingChannel = user.getPingGreetingsChannel();
+			}
+			else key = keybase + BotStrings.KEY_GREET_CHECKGP_OFF;
+		}
+		
+		//Substitute!
+		String rawmsg = botStrings.get(key);
+		BotMessage bmsg = new BotMessage(rawmsg);
+		bmsg.substituteString(ReplaceStringType.REQUSER, memname);
+		if (on)
+		{
+			TextChannel chan = guild.getTextChannelById(pingChannel);
+			if (chan == null) bmsg.substituteString(ReplaceStringType.CHANNEL_MENTION, "NULL");
+			else bmsg.substituteMention(ReplaceStringType.CHANNEL_MENTION, chan);
+		}
+		
+		//Send!
+		sendMessage(channelID, bmsg);
+		
+	}
+	
 	/* ----- Commands : Change Status ----- */
 	
 	public void changeShiftStatus(int month, int pos, boolean online)
@@ -1920,6 +2038,26 @@ public abstract class AbstractBot implements Bot{
 		sendMessage(channelID, bmsg);
 	}
 	
+	public void printReminderTime(long channelID, EventType type, int level)
+	{
+		String rtime = brain.getReminderLevelString(type, level, true);
+		BotMessage bmsg = new BotMessage(rtime);
+		sendMessage(channelID, bmsg);
+	}
+
+	public void printReminderTimes(long channelID, EventType type)
+	{
+		int nrem = brain.getReminderCount(type);
+		String s = "";
+		for (int i = 1; i <= nrem; i++)
+		{
+			s += "l" + i + ":" + brain.getReminderLevelString(type, i, true);
+			s += "\n";
+		}
+		BotMessage bmsg = new BotMessage(s);
+		sendMessage(channelID, bmsg);
+	}
+	
 	/* ----- Commands : Events ----- */
 	
 		// ---- Birthday
@@ -2182,6 +2320,37 @@ public abstract class AbstractBot implements Bot{
 	
 		// ---- Manage
 	
+	public TimeZone determineTargetTimezone(EventAdapter e, long guildID)
+	{
+		if (e.isGroupEvent()) return TimeZone.getDefault();
+		List<Long> targets = e.getTargetUsers();
+		if (targets == null) return TimeZone.getDefault();
+		if (targets.isEmpty()) return TimeZone.getDefault();
+		GuildSettings guild = brain.getGuild(guildID);
+		//Does not try to add guild.
+		if (guild == null)
+		{
+			GregorianCalendar stamp = new GregorianCalendar();
+			System.err.println(Thread.currentThread().getName() + " || AbstractBot.determineTargetTimezone || ERROR: Guild " + Long.toHexString(guildID) + " could not be retrieved! | " + FileBuffer.formatTimeAmerican(stamp));
+			return TimeZone.getDefault();
+		}
+		ActorUser u1 = guild.getUser(targets.get(1));
+		TimeZone tz = TimeZone.getDefault();
+		if (u1 != null) tz = u1.getTimeZone();
+		for (long user : targets)
+		{
+			ActorUser guser = guild.getUser(user);
+			if (guser != null)
+			{
+				if (guser.getTimeZone() != tz)
+				{
+					return TimeZone.getDefault();
+				}
+			}
+		}
+		return tz;
+	}
+	
 	public void displayAllUserEvents(long chID, Member m)
 	{
 		MessageChannel ch = getChannel(chID);
@@ -2328,7 +2497,7 @@ public abstract class AbstractBot implements Bot{
 		sendMessage(chID, bmsg);
 	}
 	
-	public void cancelEvent(long chID, long guildID, long eventID, long uid)
+	public void cancelEvent(long chID, long guildID, long eventID, long uid, boolean silent, boolean instance)
 	{
 		brain.unblacklist(uid, localIndex);
 		String msgs = botStrings.get(KEY_MAINGROUP_BOTSTRINGS + KEY_GROUP_EVENTMANAGE + KEY_CANCELEVENTS_SUCCESS);
@@ -2345,11 +2514,78 @@ public abstract class AbstractBot implements Bot{
 			sendMessage(chID, bmsgf);
 			return;	
 		}
+		//long time = e.getEventTime();
 		bmsgs.substituteString(ReplaceStringType.GENERALNUM, Long.toUnsignedString(eventID));
 		bmsgs.substituteString(ReplaceStringType.EVENTNAME, e.getEventName());
-		boolean b = brain.cancelEvent(guildID, eventID);
-		if (b) sendMessage(chID, bmsgs);
-		else sendMessage(chID, bmsgf);
+		if (!instance)
+		{
+			boolean b = brain.cancelEvent(guildID, eventID);
+			if (b) sendMessage(chID, bmsgs);
+			else sendMessage(chID, bmsgf);
+		}
+		else
+		{
+			if (e.isRecurring())
+			{
+				if (e instanceof Birthday)
+				{
+					bmsgf.addToEnd("\n\n[Error Details: Cannot cancel single instance of birthday event]");
+					sendMessage(chID, bmsgf);
+				}
+				boolean b = brain.cancelEventInstance(guildID, eventID);
+				if (b) sendMessage(chID, bmsgs);
+				else sendMessage(chID, bmsgf);
+			}
+			else
+			{
+				bmsgf.addToEnd("\n\n[Error Details: Cannot cancel single instance of non-recurring event]");
+				sendMessage(chID, bmsgf);
+			}
+		}
+		if (!silent) brain.requestCancellationNotification(e, instance, guildID);
+	}
+	
+	public void notifyCancellation(CalendarEvent event, boolean instance, long guildID)
+	{
+		if (!(event instanceof EventAdapter))
+		{
+			System.err.println(Thread.currentThread().getName() + " || AbstractBot.notifyCancellation || ERROR: Event isn't notifiable!");
+			return;
+		}
+		EventAdapter e = (EventAdapter)event;
+		long tchan = e.getTargetChannel();
+		String key = "";
+		if (instance) key = BotStrings.getStringKey_Event(e.getType(), StringKey.EVENT_NOTIFYCANCELINSTANCE, null, 0);
+		else key = BotStrings.getStringKey_Event(e.getType(), StringKey.EVENT_NOTIFYCANCEL, null, 0);
+		String rawmsg = botStrings.get(key);
+		BotMessage bmsg = new BotMessage(rawmsg);
+		User requser = botcore.getUserById(event.getRequestingUser());
+		
+		//%U %r %e %F %n
+		bmsg.substituteString(ReplaceStringType.REQUSER, requser.getName());
+		Guild guild = botcore.getGuildById(guildID);
+		if (!e.isGroupEvent())
+		{
+			List<IMentionable> targUsers = new LinkedList<IMentionable>();
+			List<Long> tids = event.getTargetUsers();
+			for (long id : tids)
+			{
+				Member target = guild.getMemberById(id);
+				targUsers.add(target);
+			}
+			bmsg.substituteMentions(ReplaceStringType.TARGUSER_MENTION, targUsers);	
+		}
+		else
+		{
+			Role everyone = guild.getPublicRole();
+			bmsg.substituteMention(ReplaceStringType.TARGUSER_MENTION, everyone);
+		}
+		bmsg.substituteString(ReplaceStringType.EVENTNAME, e.getEventName());
+		bmsg.substituteString(ReplaceStringType.GENERALNUM, Long.toUnsignedString(e.getEventID()));
+		String ftime = brain.getReminderTimeString_eventtime(e.getEventTime(), determineTargetTimezone(e, guildID));
+		bmsg.substituteString(ReplaceStringType.FORMATTED_TIME_RELATIVE, ftime);
+		
+		sendMessage(tchan, bmsg);
 	}
 	
 		// ---- Other events
@@ -2383,22 +2619,124 @@ public abstract class AbstractBot implements Bot{
 	
 	public void makeBiweeklyEvent_prompt(CMD_EventMakeBiweekly command)
 	{
-		
+		List<TextChannel> possible_rchan = botcore.getTextChannelsByName(command.getRequesterChannelName(), true);
+		List<TextChannel> possible_tchan = botcore.getTextChannelsByName(command.getTargetChannelName(), true);
+		if (possible_rchan == null || possible_rchan.isEmpty() || possible_tchan == null || possible_tchan.isEmpty())
+		{
+			String badchan_key = BotStrings.getStringKey_Event(EventType.BIWEEKLY, StringKey.EVENT_BADCHAN, null, 0);
+			String rawmsg = botStrings.get(badchan_key);
+			BotMessage bmsg = new BotMessage(rawmsg);
+			sendMessage(command.getChannelID(), bmsg);
+		}
+		command.resolveRequesterChannel(possible_rchan.get(0).getIdLong());
+		command.resolveTargetChannel(possible_tchan.get(0).getIdLong());
+		//If channels pass, then display prompt
+		String promptkey = BotStrings.getStringKey_Event(EventType.BIWEEKLY, StringKey.EVENT_CONFIRMCREATE, null, 0);
+		String rawmsg = botStrings.get(promptkey);
+		BotMessage bmsg = new BotMessage(rawmsg);
+		bmsg.substituteString(ReplaceStringType.EVENTNAME, command.getEventName());
+		String dowstring = brain.getDayOfWeek(command.getDayOfWeek());
+		bmsg.substituteString(ReplaceStringType.DAYOFWEEK, brain.capitalize(dowstring));
+		bmsg.substituteString(ReplaceStringType.TIMEONLY, brain.formatTimeString_clocktime(command.getHour(), command.getMinute()));
+		MessageChannel ch = this.getChannel(command.getChannelID());
+		brain.requestResponse(this.localIndex, command.getRequestingUser().getUser(), command, ch);
+		sendMessage(ch, bmsg);
 	}
 	
 	public void makeMonthlyAEvent_prompt(CMD_EventMakeMonthlyDOM command)
 	{
-		
+		List<TextChannel> possible_rchan = botcore.getTextChannelsByName(command.getRequesterChannelName(), true);
+		List<TextChannel> possible_tchan = botcore.getTextChannelsByName(command.getTargetChannelName(), true);
+		if (possible_rchan == null || possible_rchan.isEmpty() || possible_tchan == null || possible_tchan.isEmpty())
+		{
+			String badchan_key = BotStrings.getStringKey_Event(EventType.MONTHLYA, StringKey.EVENT_BADCHAN, null, 0);
+			String rawmsg = botStrings.get(badchan_key);
+			BotMessage bmsg = new BotMessage(rawmsg);
+			sendMessage(command.getChannelID(), bmsg);
+		}
+		command.resolveRequesterChannel(possible_rchan.get(0).getIdLong());
+		command.resolveTargetChannel(possible_tchan.get(0).getIdLong());
+		//If channels pass, then display prompt
+		String promptkey = BotStrings.getStringKey_Event(EventType.MONTHLYA, StringKey.EVENT_CONFIRMCREATE, null, 0);
+		String rawmsg = botStrings.get(promptkey);
+		BotMessage bmsg = new BotMessage(rawmsg);
+		bmsg.substituteString(ReplaceStringType.EVENTNAME, command.getEventName());
+		bmsg.substituteString(ReplaceStringType.NTH, brain.formatNth(command.getDayOfMonth()));
+		bmsg.substituteString(ReplaceStringType.TIMEONLY, brain.formatTimeString_clocktime(command.getHour(), command.getMinute()));
+		MessageChannel ch = this.getChannel(command.getChannelID());
+		brain.requestResponse(this.localIndex, command.getRequestingUser().getUser(), command, ch);
+		sendMessage(ch, bmsg);
 	}
 	
 	public void makeMonthlyBEvent_prompt(CMD_EventMakeMonthlyDOW command)
 	{
-		
+		List<TextChannel> possible_rchan = botcore.getTextChannelsByName(command.getRequesterChannelName(), true);
+		List<TextChannel> possible_tchan = botcore.getTextChannelsByName(command.getTargetChannelName(), true);
+		if (possible_rchan == null || possible_rchan.isEmpty() || possible_tchan == null || possible_tchan.isEmpty())
+		{
+			String badchan_key = BotStrings.getStringKey_Event(EventType.MONTHLYB, StringKey.EVENT_BADCHAN, null, 0);
+			String rawmsg = botStrings.get(badchan_key);
+			BotMessage bmsg = new BotMessage(rawmsg);
+			sendMessage(command.getChannelID(), bmsg);
+		}
+		command.resolveRequesterChannel(possible_rchan.get(0).getIdLong());
+		command.resolveTargetChannel(possible_tchan.get(0).getIdLong());
+		//If channels pass, then display prompt
+		String promptkey = BotStrings.getStringKey_Event(EventType.MONTHLYB, StringKey.EVENT_CONFIRMCREATE, null, 0);
+		String rawmsg = botStrings.get(promptkey);
+		BotMessage bmsg = new BotMessage(rawmsg);
+		bmsg.substituteString(ReplaceStringType.EVENTNAME, command.getEventName());
+		String dowstring = brain.getDayOfWeek(command.getDayOfWeek());
+		bmsg.substituteString(ReplaceStringType.DAYOFWEEK, brain.capitalize(dowstring));
+		bmsg.substituteString(ReplaceStringType.NTH, brain.formatNth(command.getWeek()));
+		bmsg.substituteString(ReplaceStringType.TIMEONLY, brain.formatTimeString_clocktime(command.getHour(), command.getMinute()));
+		MessageChannel ch = this.getChannel(command.getChannelID());
+		brain.requestResponse(this.localIndex, command.getRequestingUser().getUser(), command, ch);
+		sendMessage(ch, bmsg);
 	}
 	
 	public void makeOnetimeEvent_prompt(CMD_EventMakeOnetime command)
 	{
+		List<TextChannel> possible_rchan = botcore.getTextChannelsByName(command.getRequesterChannelName(), true);
+		List<TextChannel> possible_tchan = botcore.getTextChannelsByName(command.getTargetChannelName(), true);
+		if (possible_rchan == null || possible_rchan.isEmpty() || possible_tchan == null || possible_tchan.isEmpty())
+		{
+			String badchan_key = BotStrings.getStringKey_Event(EventType.ONETIME, StringKey.EVENT_BADCHAN, null, 0);
+			String rawmsg = botStrings.get(badchan_key);
+			BotMessage bmsg = new BotMessage(rawmsg);
+			sendMessage(command.getChannelID(), bmsg);
+		}
+		command.resolveRequesterChannel(possible_rchan.get(0).getIdLong());
+		command.resolveTargetChannel(possible_tchan.get(0).getIdLong());
+		//Try to get user profile
+		ActorUser requser = brain.getUser(command.getGuildID(), command.getUserID());
+		TimeZone rtz = TimeZone.getDefault();
+		if (requser != null) rtz = requser.getTimeZone();
 		
+		//If channels pass, then display prompt
+		String promptkey = BotStrings.getStringKey_Event(EventType.ONETIME, StringKey.EVENT_CONFIRMCREATE, null, 0);
+		String rawmsg = botStrings.get(promptkey);
+		BotMessage bmsg = new BotMessage(rawmsg);
+		
+		//Req user name
+		bmsg.substituteString(ReplaceStringType.REQUSER, command.getUsername());
+		
+		//Event name
+		bmsg.substituteString(ReplaceStringType.EVENTNAME, command.getEventName());
+		
+		//Event time
+		GregorianCalendar etime = new GregorianCalendar();
+		etime.setTimeZone(rtz);
+		etime.set(command.getYear(), command.getMonth(), command.getDay(), command.getHour(), command.getMinute());
+		String datestring = brain.formatDateString(etime, true);
+		bmsg.substituteString(ReplaceStringType.TIME, datestring);
+		
+		//Target name(s)
+		bmsg.substituteString(ReplaceStringType.TARGUSER, brain.formatStringList(command.getTargetUsers()));
+		
+		MessageChannel ch = this.getChannel(command.getChannelID());
+		brain.requestResponse(this.localIndex, command.getRequestingUser().getUser(), command, ch);
+		sendMessage(ch, bmsg);
 	}
 	
 	public void makeDeadlineEvent_prompt(CMD_EventMakeDeadline command)
@@ -2474,78 +2812,86 @@ public abstract class AbstractBot implements Bot{
 			//Figure out targets
 				//Looks for usernames, nicknames, and UIDs
 			//Also make user profiles for all targets if not there
-			List<String> targets = command.getTargetUsers();
-			if (targets != null && !targets.isEmpty())
+			if (!command.isGroupEvent())
 			{
-				for (String u : targets)
+				e.setGroupEvent(false);
+				List<String> targets = command.getTargetUsers();
+				if (targets != null && !targets.isEmpty())
 				{
-					User byid = null;	
-					try
+					for (String u : targets)
 					{
-						byid = botcore.getUserById(u);	
-					}
-					catch (Exception ex)
-					{
-						byid = null;
-					}
-					if (byid != null)
-					{
-						long uid = byid.getIdLong();
-						e.addTargetUser(uid);
-						ActorUser t = gs.getUserBank().getUser(uid);
-						if (t == null)
+						User byid = null;	
+						try
 						{
-							boolean b = newMember(g.getMember(byid));
-							if (!b)
-							{
-								GregorianCalendar stamp = new GregorianCalendar();
-								System.err.println(Thread.currentThread().getName() + " || AbstractBot.makeWeeklyEvent_complete || ERROR: Data for member " + Long.toHexString(uid) + " could not be retrieved! | " + FileBuffer.formatTimeAmerican(stamp));
-								sendMessage(ch, bmsgf);
-								return;	
-							}
+							byid = botcore.getUserById(u);	
 						}
-						continue;
-					}
-					List<Member> byname = g.getMembersByName(u, true);
-					if (byname != null && !byname.isEmpty())
-					{
-						long uid = byname.get(0).getUser().getIdLong();
-						e.addTargetUser(uid);
-						ActorUser t = gs.getUserBank().getUser(uid);
-						if (t == null)
+						catch (Exception ex)
 						{
-							boolean b = newMember(byname.get(0));
-							if (!b)
-							{
-								GregorianCalendar stamp = new GregorianCalendar();
-								System.err.println(Thread.currentThread().getName() + " || AbstractBot.makeWeeklyEvent_complete || ERROR: Data for member " + Long.toHexString(uid) + " could not be retrieved! | " + FileBuffer.formatTimeAmerican(stamp));
-								sendMessage(ch, bmsgf);
-								return;	
-							}
+							byid = null;
 						}
-						continue;
-					}
-					List<Member> bynickname = g.getMembersByNickname(u, true);
-					if (bynickname != null && !bynickname.isEmpty())
-					{
-						long uid = bynickname.get(0).getUser().getIdLong();
-						e.addTargetUser(uid);
-						ActorUser t = gs.getUserBank().getUser(uid);
-						if (t == null)
+						if (byid != null)
 						{
-							boolean b = newMember(bynickname.get(0));
-							if (!b)
+							long uid = byid.getIdLong();
+							e.addTargetUser(uid);
+							ActorUser t = gs.getUserBank().getUser(uid);
+							if (t == null)
 							{
-								GregorianCalendar stamp = new GregorianCalendar();
-								System.err.println(Thread.currentThread().getName() + " || AbstractBot.makeWeeklyEvent_complete || ERROR: Data for member " + Long.toHexString(uid) + " could not be retrieved! | " + FileBuffer.formatTimeAmerican(stamp));
-								sendMessage(ch, bmsgf);
-								return;	
+								boolean b = newMember(g.getMember(byid));
+								if (!b)
+								{
+									GregorianCalendar stamp = new GregorianCalendar();
+									System.err.println(Thread.currentThread().getName() + " || AbstractBot.makeWeeklyEvent_complete || ERROR: Data for member " + Long.toHexString(uid) + " could not be retrieved! | " + FileBuffer.formatTimeAmerican(stamp));
+									sendMessage(ch, bmsgf);
+									return;	
+								}
 							}
+							continue;
 						}
-						continue;
+						List<Member> byname = g.getMembersByName(u, true);
+						if (byname != null && !byname.isEmpty())
+						{
+							long uid = byname.get(0).getUser().getIdLong();
+							e.addTargetUser(uid);
+							ActorUser t = gs.getUserBank().getUser(uid);
+							if (t == null)
+							{
+								boolean b = newMember(byname.get(0));
+								if (!b)
+								{
+									GregorianCalendar stamp = new GregorianCalendar();
+									System.err.println(Thread.currentThread().getName() + " || AbstractBot.makeWeeklyEvent_complete || ERROR: Data for member " + Long.toHexString(uid) + " could not be retrieved! | " + FileBuffer.formatTimeAmerican(stamp));
+									sendMessage(ch, bmsgf);
+									return;	
+								}
+							}
+							continue;
+						}
+						List<Member> bynickname = g.getMembersByNickname(u, true);
+						if (bynickname != null && !bynickname.isEmpty())
+						{
+							long uid = bynickname.get(0).getUser().getIdLong();
+							e.addTargetUser(uid);
+							ActorUser t = gs.getUserBank().getUser(uid);
+							if (t == null)
+							{
+								boolean b = newMember(bynickname.get(0));
+								if (!b)
+								{
+									GregorianCalendar stamp = new GregorianCalendar();
+									System.err.println(Thread.currentThread().getName() + " || AbstractBot.makeWeeklyEvent_complete || ERROR: Data for member " + Long.toHexString(uid) + " could not be retrieved! | " + FileBuffer.formatTimeAmerican(stamp));
+									sendMessage(ch, bmsgf);
+									return;	
+								}
+							}
+							continue;
+						}
+						System.err.println("AbstractBot.makeWeeklyEvent_complete || ERROR: Unable to find target user: " + u);
 					}
-					System.err.println("AbstractBot.makeWeeklyEvent_complete || ERROR: Unable to find target user: " + u);
 				}
+			}
+			else
+			{
+				e.setGroupEvent(true);
 			}
 			//Add to schedule
 			s.addEvent(e);
@@ -2562,22 +2908,677 @@ public abstract class AbstractBot implements Bot{
 	
 	public void makeBiweeklyEvent_complete(CMD_EventMakeBiweekly command, boolean r)
 	{
-		
+		brain.unblacklist(command.getRequestingUser().getUser().getIdLong(), localIndex);
+		if (!r)
+		{
+			String cancelkey = BotStrings.getStringKey_Event(EventType.BIWEEKLY, StringKey.EVENT_CONFIRMCREATE, StringKey.OP_NO, 0);
+			String rawmsg = botStrings.get(cancelkey);
+			BotMessage bmsg = new BotMessage(rawmsg);
+			bmsg.substituteString(ReplaceStringType.EVENTNAME, command.getEventName());
+			sendMessage(command.getChannelID(), bmsg);
+		}
+		else
+		{
+			String successkey = BotStrings.getStringKey_Event(EventType.BIWEEKLY, StringKey.EVENT_CONFIRMCREATE, StringKey.OP_YES, 0);
+			String failkey = BotStrings.getStringKey_Event(EventType.BIWEEKLY, StringKey.EVENT_CONFIRMCREATE, StringKey.OP_FAIL, 0);
+			String rawmsgf = botStrings.get(failkey);
+			BotMessage bmsgf = new BotMessage(rawmsgf);
+			//Get channel
+			MessageChannel ch = this.getChannel(command.getChannelID());
+			//Get guild and user info
+			long requid = command.getUserID();
+			Guild g = command.getRequestingUser().getGuild();
+			long gid = g.getIdLong();
+			GuildSettings gs = brain.getUserData().getGuildSettings(gid);
+			if (gs == null)
+			{
+				boolean b = newGuild(g);
+				if (!b)
+				{
+					GregorianCalendar stamp = new GregorianCalendar();
+					System.err.println(Thread.currentThread().getName() + " || AbstractBot.makeBiweeklyEvent_complete || ERROR: Data for guild " + Long.toHexString(gid) + " could not be retrieved! | " + FileBuffer.formatTimeAmerican(stamp));
+					sendMessage(ch, bmsgf);
+					return;	
+				}
+				gs = brain.getUserData().getGuildSettings(gid);
+			}
+			Schedule s = gs.getSchedule();
+			if (s == null)
+			{
+				GregorianCalendar stamp = new GregorianCalendar();
+				System.err.println(Thread.currentThread().getName() + " || AbstractBot.makeBiweeklyEvent_complete || ERROR: Guild schedule could not be retrieved! | " + FileBuffer.formatTimeAmerican(stamp));
+				sendMessage(ch, bmsgf);
+				return;	
+			}
+			ActorUser user = gs.getUserBank().getUser(requid);
+			if (user == null)
+			{
+				boolean b = newMember(command.getRequestingUser());
+				if (!b)
+				{
+					GregorianCalendar stamp = new GregorianCalendar();
+					System.err.println(Thread.currentThread().getName() + " || AbstractBot.makeBiweeklyEvent_complete || ERROR: Data for member " + Long.toHexString(requid) + " could not be retrieved! | " + FileBuffer.formatTimeAmerican(stamp));
+					sendMessage(ch, bmsgf);
+					return;	
+				}
+				user = gs.getUserBank().getUser(requid);
+			}
+			TimeZone tz = user.getTimeZone();
+			//Load easy variables
+			BiweeklyEvent e = new BiweeklyEvent(requid);
+			e.setName(command.getEventName());
+			e.setReqChannel(command.getRequesterChannelID());
+			e.setTargChannel(command.getTargetChannelID());
+			//Calculate when next event would be
+			e.setEventTime(command.getDayOfWeek(), command.getHour(), command.getMinute(), tz);
+			//Figure out targets
+				//Looks for usernames, nicknames, and UIDs
+			//Also make user profiles for all targets if not there
+			if (!command.isGroupEvent())
+			{
+				e.setGroupEvent(false);
+				List<String> targets = command.getTargetUsers();
+				if (targets != null && !targets.isEmpty())
+				{
+					for (String u : targets)
+					{
+						User byid = null;	
+						try
+						{
+							byid = botcore.getUserById(u);	
+						}
+						catch (Exception ex)
+						{
+							byid = null;
+						}
+						if (byid != null)
+						{
+							long uid = byid.getIdLong();
+							e.addTargetUser(uid);
+							ActorUser t = gs.getUserBank().getUser(uid);
+							if (t == null)
+							{
+								boolean b = newMember(g.getMember(byid));
+								if (!b)
+								{
+									GregorianCalendar stamp = new GregorianCalendar();
+									System.err.println(Thread.currentThread().getName() + " || AbstractBot.makeBiweeklyEvent_complete || ERROR: Data for member " + Long.toHexString(uid) + " could not be retrieved! | " + FileBuffer.formatTimeAmerican(stamp));
+									sendMessage(ch, bmsgf);
+									return;	
+								}
+							}
+							continue;
+						}
+						List<Member> byname = g.getMembersByName(u, true);
+						if (byname != null && !byname.isEmpty())
+						{
+							long uid = byname.get(0).getUser().getIdLong();
+							e.addTargetUser(uid);
+							ActorUser t = gs.getUserBank().getUser(uid);
+							if (t == null)
+							{
+								boolean b = newMember(byname.get(0));
+								if (!b)
+								{
+									GregorianCalendar stamp = new GregorianCalendar();
+									System.err.println(Thread.currentThread().getName() + " || AbstractBot.makeBiweeklyEvent_complete || ERROR: Data for member " + Long.toHexString(uid) + " could not be retrieved! | " + FileBuffer.formatTimeAmerican(stamp));
+									sendMessage(ch, bmsgf);
+									return;	
+								}
+							}
+							continue;
+						}
+						List<Member> bynickname = g.getMembersByNickname(u, true);
+						if (bynickname != null && !bynickname.isEmpty())
+						{
+							long uid = bynickname.get(0).getUser().getIdLong();
+							e.addTargetUser(uid);
+							ActorUser t = gs.getUserBank().getUser(uid);
+							if (t == null)
+							{
+								boolean b = newMember(bynickname.get(0));
+								if (!b)
+								{
+									GregorianCalendar stamp = new GregorianCalendar();
+									System.err.println(Thread.currentThread().getName() + " || AbstractBot.makeBiweeklyEvent_complete || ERROR: Data for member " + Long.toHexString(uid) + " could not be retrieved! | " + FileBuffer.formatTimeAmerican(stamp));
+									sendMessage(ch, bmsgf);
+									return;	
+								}
+							}
+							continue;
+						}
+						System.err.println("AbstractBot.makeBiweeklyEvent_complete || ERROR: Unable to find target user: " + u);
+					}
+				}
+			}
+			else
+			{
+				e.setGroupEvent(true);
+			}
+			//Add to schedule
+			s.addEvent(e);
+			//Print message
+			String rawmsgs = botStrings.get(successkey);
+			BotMessage bmsgs = new BotMessage(rawmsgs);
+			bmsgs.substituteString(ReplaceStringType.EVENTNAME, e.getEventName());
+			String dowstring = brain.getDayOfWeek(command.getDayOfWeek());
+			bmsgs.substituteString(ReplaceStringType.DAYOFWEEK, brain.capitalize(dowstring));
+			bmsgs.substituteString(ReplaceStringType.TIMEONLY, brain.formatTimeString_clocktime(command.getHour(), command.getMinute(), tz));
+			sendMessage(ch, bmsgs);
+		}
 	}
 	
 	public void makeMonthlyAEvent_complete(CMD_EventMakeMonthlyDOM command, boolean r)
 	{
-		
+		brain.unblacklist(command.getRequestingUser().getUser().getIdLong(), localIndex);
+		if (!r)
+		{
+			String cancelkey = BotStrings.getStringKey_Event(EventType.MONTHLYA, StringKey.EVENT_CONFIRMCREATE, StringKey.OP_NO, 0);
+			String rawmsg = botStrings.get(cancelkey);
+			BotMessage bmsg = new BotMessage(rawmsg);
+			bmsg.substituteString(ReplaceStringType.EVENTNAME, command.getEventName());
+			sendMessage(command.getChannelID(), bmsg);
+		}
+		else
+		{
+			String successkey = BotStrings.getStringKey_Event(EventType.MONTHLYA, StringKey.EVENT_CONFIRMCREATE, StringKey.OP_YES, 0);
+			String failkey = BotStrings.getStringKey_Event(EventType.MONTHLYA, StringKey.EVENT_CONFIRMCREATE, StringKey.OP_FAIL, 0);
+			String rawmsgf = botStrings.get(failkey);
+			BotMessage bmsgf = new BotMessage(rawmsgf);
+			//Get channel
+			MessageChannel ch = this.getChannel(command.getChannelID());
+			//Get guild and user info
+			long requid = command.getUserID();
+			Guild g = command.getRequestingUser().getGuild();
+			long gid = g.getIdLong();
+			GuildSettings gs = brain.getUserData().getGuildSettings(gid);
+			if (gs == null)
+			{
+				boolean b = newGuild(g);
+				if (!b)
+				{
+					GregorianCalendar stamp = new GregorianCalendar();
+					System.err.println(Thread.currentThread().getName() + " || AbstractBot.makeMonthlyAEvent_complete || ERROR: Data for guild " + Long.toHexString(gid) + " could not be retrieved! | " + FileBuffer.formatTimeAmerican(stamp));
+					sendMessage(ch, bmsgf);
+					return;	
+				}
+				gs = brain.getUserData().getGuildSettings(gid);
+			}
+			Schedule s = gs.getSchedule();
+			if (s == null)
+			{
+				GregorianCalendar stamp = new GregorianCalendar();
+				System.err.println(Thread.currentThread().getName() + " || AbstractBot.makeMonthlyAEvent_complete || ERROR: Guild schedule could not be retrieved! | " + FileBuffer.formatTimeAmerican(stamp));
+				sendMessage(ch, bmsgf);
+				return;	
+			}
+			ActorUser user = gs.getUserBank().getUser(requid);
+			if (user == null)
+			{
+				boolean b = newMember(command.getRequestingUser());
+				if (!b)
+				{
+					GregorianCalendar stamp = new GregorianCalendar();
+					System.err.println(Thread.currentThread().getName() + " || AbstractBot.makeMonthlyAEvent_complete || ERROR: Data for member " + Long.toHexString(requid) + " could not be retrieved! | " + FileBuffer.formatTimeAmerican(stamp));
+					sendMessage(ch, bmsgf);
+					return;	
+				}
+				user = gs.getUserBank().getUser(requid);
+			}
+			TimeZone tz = user.getTimeZone();
+			//Load easy variables
+			MonthlyDOMEvent e = new MonthlyDOMEvent(requid);
+			e.setName(command.getEventName());
+			e.setReqChannel(command.getRequesterChannelID());
+			e.setTargChannel(command.getTargetChannelID());
+			//Calculate when next event would be
+			e.setEventTime(command.getDayOfMonth(), command.getHour(), command.getMinute(), tz);
+			//Figure out targets
+				//Looks for usernames, nicknames, and UIDs
+			//Also make user profiles for all targets if not there
+			if (!command.isGroupEvent())
+			{
+				e.setGroupEvent(false);
+				List<String> targets = command.getTargetUsers();
+				if (targets != null && !targets.isEmpty())
+				{
+					for (String u : targets)
+					{
+						User byid = null;	
+						try
+						{
+							byid = botcore.getUserById(u);	
+						}
+						catch (Exception ex)
+						{
+							byid = null;
+						}
+						if (byid != null)
+						{
+							long uid = byid.getIdLong();
+							e.addTargetUser(uid);
+							ActorUser t = gs.getUserBank().getUser(uid);
+							if (t == null)
+							{
+								boolean b = newMember(g.getMember(byid));
+								if (!b)
+								{
+									GregorianCalendar stamp = new GregorianCalendar();
+									System.err.println(Thread.currentThread().getName() + " || AbstractBot.makeMonthlyAEvent_complete || ERROR: Data for member " + Long.toHexString(uid) + " could not be retrieved! | " + FileBuffer.formatTimeAmerican(stamp));
+									sendMessage(ch, bmsgf);
+									return;	
+								}
+							}
+							continue;
+						}
+						List<Member> byname = g.getMembersByName(u, true);
+						if (byname != null && !byname.isEmpty())
+						{
+							long uid = byname.get(0).getUser().getIdLong();
+							e.addTargetUser(uid);
+							ActorUser t = gs.getUserBank().getUser(uid);
+							if (t == null)
+							{
+								boolean b = newMember(byname.get(0));
+								if (!b)
+								{
+									GregorianCalendar stamp = new GregorianCalendar();
+									System.err.println(Thread.currentThread().getName() + " || AbstractBot.makeMonthlyAEvent_complete || ERROR: Data for member " + Long.toHexString(uid) + " could not be retrieved! | " + FileBuffer.formatTimeAmerican(stamp));
+									sendMessage(ch, bmsgf);
+									return;	
+								}
+							}
+							continue;
+						}
+						List<Member> bynickname = g.getMembersByNickname(u, true);
+						if (bynickname != null && !bynickname.isEmpty())
+						{
+							long uid = bynickname.get(0).getUser().getIdLong();
+							e.addTargetUser(uid);
+							ActorUser t = gs.getUserBank().getUser(uid);
+							if (t == null)
+							{
+								boolean b = newMember(bynickname.get(0));
+								if (!b)
+								{
+									GregorianCalendar stamp = new GregorianCalendar();
+									System.err.println(Thread.currentThread().getName() + " || AbstractBot.makeMonthlyAEvent_complete || ERROR: Data for member " + Long.toHexString(uid) + " could not be retrieved! | " + FileBuffer.formatTimeAmerican(stamp));
+									sendMessage(ch, bmsgf);
+									return;	
+								}
+							}
+							continue;
+						}
+						System.err.println("AbstractBot.makeMonthlyAEvent_complete || ERROR: Unable to find target user: " + u);
+					}
+				}
+			}
+			else
+			{
+				e.setGroupEvent(true);
+			}
+			//Add to schedule
+			s.addEvent(e);
+			//Print message
+			String rawmsgs = botStrings.get(successkey);
+			BotMessage bmsgs = new BotMessage(rawmsgs);
+			bmsgs.substituteString(ReplaceStringType.EVENTNAME, e.getEventName());
+			bmsgs.substituteString(ReplaceStringType.NTH, brain.formatNth(command.getDayOfMonth()));
+			bmsgs.substituteString(ReplaceStringType.TIMEONLY, brain.formatTimeString_clocktime(command.getHour(), command.getMinute(), tz));
+			sendMessage(ch, bmsgs);
+		}	
 	}
 	
 	public void makeMonthlyBEvent_complete(CMD_EventMakeMonthlyDOW command, boolean r)
 	{
-		
+		brain.unblacklist(command.getRequestingUser().getUser().getIdLong(), localIndex);
+		if (!r)
+		{
+			String cancelkey = BotStrings.getStringKey_Event(EventType.MONTHLYB, StringKey.EVENT_CONFIRMCREATE, StringKey.OP_NO, 0);
+			String rawmsg = botStrings.get(cancelkey);
+			BotMessage bmsg = new BotMessage(rawmsg);
+			bmsg.substituteString(ReplaceStringType.EVENTNAME, command.getEventName());
+			sendMessage(command.getChannelID(), bmsg);
+		}
+		else
+		{
+			String successkey = BotStrings.getStringKey_Event(EventType.MONTHLYB, StringKey.EVENT_CONFIRMCREATE, StringKey.OP_YES, 0);
+			String failkey = BotStrings.getStringKey_Event(EventType.MONTHLYB, StringKey.EVENT_CONFIRMCREATE, StringKey.OP_FAIL, 0);
+			String rawmsgf = botStrings.get(failkey);
+			BotMessage bmsgf = new BotMessage(rawmsgf);
+			//Get channel
+			MessageChannel ch = this.getChannel(command.getChannelID());
+			//Get guild and user info
+			long requid = command.getUserID();
+			Guild g = command.getRequestingUser().getGuild();
+			long gid = g.getIdLong();
+			GuildSettings gs = brain.getUserData().getGuildSettings(gid);
+			if (gs == null)
+			{
+				boolean b = newGuild(g);
+				if (!b)
+				{
+					GregorianCalendar stamp = new GregorianCalendar();
+					System.err.println(Thread.currentThread().getName() + " || AbstractBot.makeMonthlyBEvent_complete || ERROR: Data for guild " + Long.toHexString(gid) + " could not be retrieved! | " + FileBuffer.formatTimeAmerican(stamp));
+					sendMessage(ch, bmsgf);
+					return;	
+				}
+				gs = brain.getUserData().getGuildSettings(gid);
+			}
+			Schedule s = gs.getSchedule();
+			if (s == null)
+			{
+				GregorianCalendar stamp = new GregorianCalendar();
+				System.err.println(Thread.currentThread().getName() + " || AbstractBot.makeMonthlyBEvent_complete || ERROR: Guild schedule could not be retrieved! | " + FileBuffer.formatTimeAmerican(stamp));
+				sendMessage(ch, bmsgf);
+				return;	
+			}
+			ActorUser user = gs.getUserBank().getUser(requid);
+			if (user == null)
+			{
+				boolean b = newMember(command.getRequestingUser());
+				if (!b)
+				{
+					GregorianCalendar stamp = new GregorianCalendar();
+					System.err.println(Thread.currentThread().getName() + " || AbstractBot.makeMonthlyBEvent_complete || ERROR: Data for member " + Long.toHexString(requid) + " could not be retrieved! | " + FileBuffer.formatTimeAmerican(stamp));
+					sendMessage(ch, bmsgf);
+					return;	
+				}
+				user = gs.getUserBank().getUser(requid);
+			}
+			TimeZone tz = user.getTimeZone();
+			//Load easy variables
+			MonthlyDOWEvent e = new MonthlyDOWEvent(requid);
+			e.setName(command.getEventName());
+			e.setReqChannel(command.getRequesterChannelID());
+			e.setTargChannel(command.getTargetChannelID());
+			//Calculate when next event would be
+			e.setEventTime(command.getDayOfWeek(), command.getWeek(), command.getHour(), command.getMinute(), tz);
+			//Figure out targets
+				//Looks for usernames, nicknames, and UIDs
+			//Also make user profiles for all targets if not there
+			if (!command.isGroupEvent())
+			{
+				e.setGroupEvent(false);
+				List<String> targets = command.getTargetUsers();
+				if (targets != null && !targets.isEmpty())
+				{
+					for (String u : targets)
+					{
+						User byid = null;	
+						try
+						{
+							byid = botcore.getUserById(u);	
+						}
+						catch (Exception ex)
+						{
+							byid = null;
+						}
+						if (byid != null)
+						{
+							long uid = byid.getIdLong();
+							e.addTargetUser(uid);
+							ActorUser t = gs.getUserBank().getUser(uid);
+							if (t == null)
+							{
+								boolean b = newMember(g.getMember(byid));
+								if (!b)
+								{
+									GregorianCalendar stamp = new GregorianCalendar();
+									System.err.println(Thread.currentThread().getName() + " || AbstractBot.makeMonthlyBEvent_complete || ERROR: Data for member " + Long.toHexString(uid) + " could not be retrieved! | " + FileBuffer.formatTimeAmerican(stamp));
+									sendMessage(ch, bmsgf);
+									return;	
+								}
+							}
+							continue;
+						}
+						List<Member> byname = g.getMembersByName(u, true);
+						if (byname != null && !byname.isEmpty())
+						{
+							long uid = byname.get(0).getUser().getIdLong();
+							e.addTargetUser(uid);
+							ActorUser t = gs.getUserBank().getUser(uid);
+							if (t == null)
+							{
+								boolean b = newMember(byname.get(0));
+								if (!b)
+								{
+									GregorianCalendar stamp = new GregorianCalendar();
+									System.err.println(Thread.currentThread().getName() + " || AbstractBot.makeMonthlyBEvent_complete || ERROR: Data for member " + Long.toHexString(uid) + " could not be retrieved! | " + FileBuffer.formatTimeAmerican(stamp));
+									sendMessage(ch, bmsgf);
+									return;	
+								}
+							}
+							continue;
+						}
+						List<Member> bynickname = g.getMembersByNickname(u, true);
+						if (bynickname != null && !bynickname.isEmpty())
+						{
+							long uid = bynickname.get(0).getUser().getIdLong();
+							e.addTargetUser(uid);
+							ActorUser t = gs.getUserBank().getUser(uid);
+							if (t == null)
+							{
+								boolean b = newMember(bynickname.get(0));
+								if (!b)
+								{
+									GregorianCalendar stamp = new GregorianCalendar();
+									System.err.println(Thread.currentThread().getName() + " || AbstractBot.makeMonthlyBEvent_complete || ERROR: Data for member " + Long.toHexString(uid) + " could not be retrieved! | " + FileBuffer.formatTimeAmerican(stamp));
+									sendMessage(ch, bmsgf);
+									return;	
+								}
+							}
+							continue;
+						}
+						System.err.println("AbstractBot.makeMonthlyBEvent_complete || ERROR: Unable to find target user: " + u);
+					}
+				}
+			}
+			else
+			{
+				e.setGroupEvent(true);
+			}
+			//Add to schedule
+			s.addEvent(e);
+			//Print message
+			String rawmsgs = botStrings.get(successkey);
+			BotMessage bmsgs = new BotMessage(rawmsgs);
+			bmsgs.substituteString(ReplaceStringType.EVENTNAME, e.getEventName());
+			String dowstring = brain.getDayOfWeek(command.getDayOfWeek());
+			bmsgs.substituteString(ReplaceStringType.DAYOFWEEK, brain.capitalize(dowstring));
+			bmsgs.substituteString(ReplaceStringType.NTH, brain.formatNth(command.getWeek()));
+			bmsgs.substituteString(ReplaceStringType.TIMEONLY, brain.formatTimeString_clocktime(command.getHour(), command.getMinute(), tz));
+			sendMessage(ch, bmsgs);
+		}		
 	}
 	
 	public void makeOnetimeEvent_complete(CMD_EventMakeOnetime command, boolean r)
 	{
-		
+		brain.unblacklist(command.getRequestingUser().getUser().getIdLong(), localIndex);
+		if (!r)
+		{
+			String cancelkey = BotStrings.getStringKey_Event(EventType.ONETIME, StringKey.EVENT_CONFIRMCREATE, StringKey.OP_NO, 0);
+			String rawmsg = botStrings.get(cancelkey);
+			BotMessage bmsg = new BotMessage(rawmsg);
+			bmsg.substituteString(ReplaceStringType.EVENTNAME, command.getEventName());
+			sendMessage(command.getChannelID(), bmsg);
+		}
+		else
+		{
+			String successkey = BotStrings.getStringKey_Event(EventType.ONETIME, StringKey.EVENT_CONFIRMCREATE, StringKey.OP_YES, 0);
+			String failkey = BotStrings.getStringKey_Event(EventType.ONETIME, StringKey.EVENT_CONFIRMCREATE, StringKey.OP_FAIL, 0);
+			String rawmsgf = botStrings.get(failkey);
+			BotMessage bmsgf = new BotMessage(rawmsgf);
+			//Get channel
+			MessageChannel ch = this.getChannel(command.getChannelID());
+			//Get guild and user info
+			long requid = command.getUserID();
+			Guild g = command.getRequestingUser().getGuild();
+			long gid = g.getIdLong();
+			GuildSettings gs = brain.getUserData().getGuildSettings(gid);
+			if (gs == null)
+			{
+				boolean b = newGuild(g);
+				if (!b)
+				{
+					GregorianCalendar stamp = new GregorianCalendar();
+					System.err.println(Thread.currentThread().getName() + " || AbstractBot.makeOnetimeEvent_complete || ERROR: Data for guild " + Long.toHexString(gid) + " could not be retrieved! | " + FileBuffer.formatTimeAmerican(stamp));
+					sendMessage(ch, bmsgf);
+					return;	
+				}
+				gs = brain.getUserData().getGuildSettings(gid);
+			}
+			Schedule s = gs.getSchedule();
+			if (s == null)
+			{
+				GregorianCalendar stamp = new GregorianCalendar();
+				System.err.println(Thread.currentThread().getName() + " || AbstractBot.makeOnetimeEvent_complete || ERROR: Guild schedule could not be retrieved! | " + FileBuffer.formatTimeAmerican(stamp));
+				sendMessage(ch, bmsgf);
+				return;	
+			}
+			ActorUser user = gs.getUserBank().getUser(requid);
+			if (user == null)
+			{
+				boolean b = newMember(command.getRequestingUser());
+				if (!b)
+				{
+					GregorianCalendar stamp = new GregorianCalendar();
+					System.err.println(Thread.currentThread().getName() + " || AbstractBot.makeOnetimeEvent_complete || ERROR: Data for member " + Long.toHexString(requid) + " could not be retrieved! | " + FileBuffer.formatTimeAmerican(stamp));
+					sendMessage(ch, bmsgf);
+					return;	
+				}
+				user = gs.getUserBank().getUser(requid);
+			}
+			TimeZone tz = user.getTimeZone();
+			//Load easy variables
+			OneTimeEvent e = new OneTimeEvent(requid);
+			e.setName(command.getEventName());
+			e.setReqChannel(command.getRequesterChannelID());
+			e.setTargChannel(command.getTargetChannelID());
+			//Calculate when next event would be
+			GregorianCalendar etime = new GregorianCalendar();
+			etime.setTimeZone(tz);
+			etime.set(command.getYear(), command.getMonth(), command.getDay(), command.getHour(), command.getMinute());
+			e.setEventTime(etime.getTimeInMillis(), tz);
+			//Figure out targets
+				//Looks for usernames, nicknames, and UIDs
+			//Also make user profiles for all targets if not there
+			if (!command.isGroupEvent())
+			{
+				e.setGroupEvent(false);
+				List<String> targets = command.getTargetUsers();
+				if (targets != null && !targets.isEmpty())
+				{
+					for (String u : targets)
+					{
+						User byid = null;	
+						try
+						{
+							byid = botcore.getUserById(u);	
+						}
+						catch (Exception ex)
+						{
+							byid = null;
+						}
+						if (byid != null)
+						{
+							long uid = byid.getIdLong();
+							e.addTargetUser(uid);
+							ActorUser t = gs.getUserBank().getUser(uid);
+							if (t == null)
+							{
+								boolean b = newMember(g.getMember(byid));
+								if (!b)
+								{
+									GregorianCalendar stamp = new GregorianCalendar();
+									System.err.println(Thread.currentThread().getName() + " || AbstractBot.makeOnetimeEvent_complete || ERROR: Data for member " + Long.toHexString(uid) + " could not be retrieved! | " + FileBuffer.formatTimeAmerican(stamp));
+									sendMessage(ch, bmsgf);
+									return;	
+								}
+							}
+							continue;
+						}
+						List<Member> byname = g.getMembersByName(u, true);
+						if (byname != null && !byname.isEmpty())
+						{
+							long uid = byname.get(0).getUser().getIdLong();
+							e.addTargetUser(uid);
+							ActorUser t = gs.getUserBank().getUser(uid);
+							if (t == null)
+							{
+								boolean b = newMember(byname.get(0));
+								if (!b)
+								{
+									GregorianCalendar stamp = new GregorianCalendar();
+									System.err.println(Thread.currentThread().getName() + " || AbstractBot.makeOnetimeEvent_complete || ERROR: Data for member " + Long.toHexString(uid) + " could not be retrieved! | " + FileBuffer.formatTimeAmerican(stamp));
+									sendMessage(ch, bmsgf);
+									return;	
+								}
+							}
+							continue;
+						}
+						List<Member> bynickname = g.getMembersByNickname(u, true);
+						if (bynickname != null && !bynickname.isEmpty())
+						{
+							long uid = bynickname.get(0).getUser().getIdLong();
+							e.addTargetUser(uid);
+							ActorUser t = gs.getUserBank().getUser(uid);
+							if (t == null)
+							{
+								boolean b = newMember(bynickname.get(0));
+								if (!b)
+								{
+									GregorianCalendar stamp = new GregorianCalendar();
+									System.err.println(Thread.currentThread().getName() + " || AbstractBot.makeOnetimeEvent_complete || ERROR: Data for member " + Long.toHexString(uid) + " could not be retrieved! | " + FileBuffer.formatTimeAmerican(stamp));
+									sendMessage(ch, bmsgf);
+									return;	
+								}
+							}
+							continue;
+						}
+						System.err.println("AbstractBot.makeOnetimeEvent_complete || ERROR: Unable to find target user: " + u);
+					}
+				}
+			}
+			else
+			{
+				e.setGroupEvent(true);
+			}
+			//Add to schedule
+			s.addEvent(e);
+			//Print message
+			String rawmsgs = botStrings.get(successkey);
+			BotMessage bmsgs = new BotMessage(rawmsgs);
+			bmsgs.substituteString(ReplaceStringType.EVENTNAME, e.getEventName());
+			
+			//Req user name
+			bmsgs.substituteString(ReplaceStringType.REQUSER, command.getUsername());
+
+			//Event time
+			String datestring = brain.formatDateString(etime, true);
+			bmsgs.substituteString(ReplaceStringType.TIME, datestring);
+			
+			//Target name(s)
+			if (rawmsgs.contains(ReplaceStringType.TARGUSER.getString()))
+			{
+				if (command.isGroupEvent())
+				{
+					bmsgs.substituteString(ReplaceStringType.TARGUSER, brain.getEveryoneString());
+				}
+				else
+				{
+					Collection<Long> alltarg = e.getTargetUsers();
+					List<String> tstrlist = new LinkedList<String>();
+					for (Long l : alltarg)
+					{
+						Member m = g.getMemberById(l);
+						tstrlist.add(m.getUser().getName());
+					}
+					bmsgs.substituteString(ReplaceStringType.TARGUSER, brain.formatStringList(tstrlist));		
+				}
+			}
+			sendMessage(ch, bmsgs);
+		}	
 	}
 	
 	public void makeDeadlineEvent_complete(CMD_EventMakeDeadline command, boolean r)
@@ -2587,18 +3588,10 @@ public abstract class AbstractBot implements Bot{
 	
 	public void issueEventReminder(EventAdapter e, int rlevel, long guildID)
 	{
-		String msgkey = BotStrings.getStringKey_Event(e.getType(), StringKey.EVENT_REMIND, null, rlevel);
-		String alkey1 = BotStrings.getStringKey_Event(e.getType(), StringKey.EVENT_ATTENDLIST, null, 1);
-		String alkey2 = BotStrings.getStringKey_Event(e.getType(), StringKey.EVENT_ATTENDLIST, null, 2);
-		String alkey3 = BotStrings.getStringKey_Event(e.getType(), StringKey.EVENT_ATTENDLIST, null, 3);
-		
-		String rawmsg = botStrings.get(msgkey);
-		BotMessage rmsg = new BotMessage(rawmsg);
-		BotMessage tmsg = new BotMessage(rawmsg);
+		long emillis = e.getEventTimeMillis();
 		
 		List<Long> allUsers = e.getTargetUsers();
 		List<Long> comingUsers = e.getAttendingUsers();
-		List<Long> missingUsers = e.getNonAttendingUsers();
 		List<Long> unknownUsers = e.getUnconfirmedUsers();
 		
 		//Need to get timezones. Fun.
@@ -2610,135 +3603,195 @@ public abstract class AbstractBot implements Bot{
 			System.err.println(Thread.currentThread().getName() + " || AbstractBot.issueEventReminder || ERROR: Data for guild " + Long.toHexString(guildID) + " could not be retrieved! | " + FileBuffer.formatTimeAmerican(stamp));
 			return;
 		}
-	
-		//Get users, check to see who has this reminder turned OFF!
 		Guild g = botcore.getGuildById(guildID);
+		
+		//Generate Requser reminder...
 		Member req_user = g.getMemberById(e.getRequestingUser());
 		ActorUser req_data = gs.getUserBank().getUser(e.getRequestingUser());
 		TimeZone req_tz = req_data.getTimeZone();
 		boolean req_on = req_data.reminderOn(e.getType(), rlevel);
-		
-		TimeZone targ_tz = TimeZone.getDefault();
-		//See if all target users have the same timezone
-		Set<TimeZone> ttz = new HashSet<TimeZone>();
-		for (long l : allUsers)
-		{
-			ActorUser targ_data = gs.getUserBank().getUser(l);
-			if (targ_data == null){
-				e.removeTargetUser(l);
-				continue;
-			}
-			ttz.add(targ_data.getTimeZone());
-		}
-		if (ttz.size() == 1)
-		{
-			for (TimeZone tz : ttz) targ_tz = tz;
-		}
-		
-		//Get time strings
-		long emillis = e.getEventTimeMillis();
-		String rtime1 = brain.getReminderTimeString_eventtime(emillis, req_tz);
-		String rtime2 = brain.getReminderTimeString_timeleft(emillis, req_tz);
-		String ttime1 = brain.getReminderTimeString_eventtime(emillis, targ_tz);
-		String ttime2 = brain.getReminderTimeString_timeleft(emillis, targ_tz);
-		
-		//Generate req string
+		BotMessage rmsg = null;
 		if (req_on)
 		{
+			String msgkey_r = BotStrings.getStringKey_Event(e.getType(), StringKey.EVENT_REMIND, StringKey.OP_REQUSER, rlevel);
+			String rawmsg_r = botStrings.get(msgkey_r);
+			rmsg = new BotMessage(rawmsg_r);
+			String rtime1 = brain.getReminderTimeString_eventtime(emillis, req_tz);
+			String rtime2 = brain.getReminderTimeString_timeleft(emillis, req_tz);
+			
 			rmsg.substituteMention(ReplaceStringType.REQUSER_MENTION, req_user);
 			rmsg.substituteString(ReplaceStringType.EVENTNAME, e.getEventName());
 			rmsg.substituteString(ReplaceStringType.GENERALNUM, Long.toUnsignedString(e.getEventID()));
 			rmsg.substituteString(ReplaceStringType.FORMATTED_TIME_RELATIVE, rtime1);
 			rmsg.substituteString(ReplaceStringType.FORMATTED_TIME_LEFT, rtime2);
-			boolean first = true;
-			String list_coming = "";
-			if (!comingUsers.isEmpty())
+			//Replace user names as formatted list
+			if (rawmsg_r.contains(ReplaceStringType.TARGUSER.getString()))
 			{
-				for (long l : comingUsers)
+				if (e.isGroupEvent())
 				{
-					Member m = g.getMemberById(l);
-					if (m != null){
-						if (!first) list_coming += "\n";
-						list_coming += m.getEffectiveName();
-						first = false;
-					}
+					rmsg.substituteString(ReplaceStringType.TARGUSER, brain.getEveryoneString());	
 				}
-			}
-			first = true;
-			String list_ditching = "";
-			if (!missingUsers.isEmpty())
-			{
-				for (long l : missingUsers)
+				else
 				{
-					Member m = g.getMemberById(l);
-					if (m != null){
-						if (!first) list_ditching += "\n";
-						list_ditching += m.getEffectiveName();
-						first = false;
+					List<String> usernames = new LinkedList<String>();
+					for (long l : comingUsers)
+					{
+						Member m = g.getMemberById(l);
+						if (m != null) usernames.add(m.getUser().getName());
 					}
-				}
-			}
-			first = true;
-			String list_unknown = "";
-			if (!unknownUsers.isEmpty())
-			{
-				for (long l : unknownUsers)
-				{
-					Member m = g.getMemberById(l);
-					if (m != null){
-						if (!first) list_unknown += "\n";
-						list_unknown += m.getEffectiveName();
-						first = false;
+					for (long l : unknownUsers)
+					{
+						Member m = g.getMemberById(l);
+						if (m != null) usernames.add(m.getUser().getName());
 					}
+					String formattednamelist = brain.formatStringList(usernames);
+					rmsg.substituteString(ReplaceStringType.TARGUSER, formattednamelist);	
 				}
 			}
 			
-			String msg_coming = botStrings.get(alkey1);
-			String msg_ditching = botStrings.get(alkey2);
-			String msg_unknown = botStrings.get(alkey3);
-			if (!comingUsers.isEmpty())
+			//See if we're adding attendance list
+			if (e.acceptsRSVP())
 			{
-				msg_coming = msg_coming.replace(ReplaceStringType.PLACEHOLDER_1.getString(), list_coming);
-				rmsg.addToEnd("\n\n" + msg_coming);
+				List<Long> missingUsers = e.getNonAttendingUsers();
+				String alkey1 = BotStrings.getStringKey_Event(e.getType(), StringKey.EVENT_ATTENDLIST, null, 1);
+				String alkey2 = BotStrings.getStringKey_Event(e.getType(), StringKey.EVENT_ATTENDLIST, null, 2);
+				String alkey3 = BotStrings.getStringKey_Event(e.getType(), StringKey.EVENT_ATTENDLIST, null, 3);
+				boolean first = true;
+				String list_coming = "";
+				if (!comingUsers.isEmpty())
+				{
+					for (long l : comingUsers)
+					{
+						Member m = g.getMemberById(l);
+						if (m != null){
+							if (!first) list_coming += "\n";
+							list_coming += m.getEffectiveName();
+							first = false;
+						}
+					}
+				}
+				first = true;
+				String list_ditching = "";
+				if (!missingUsers.isEmpty())
+				{
+					for (long l : missingUsers)
+					{
+						Member m = g.getMemberById(l);
+						if (m != null){
+							if (!first) list_ditching += "\n";
+							list_ditching += m.getEffectiveName();
+							first = false;
+						}
+					}
+				}
+				first = true;
+				String list_unknown = "";
+				if (!unknownUsers.isEmpty())
+				{
+					for (long l : unknownUsers)
+					{
+						Member m = g.getMemberById(l);
+						if (m != null){
+							if (!first) list_unknown += "\n";
+							list_unknown += m.getEffectiveName();
+							first = false;
+						}
+					}
+				}
+				
+				String msg_coming = botStrings.get(alkey1);
+				String msg_ditching = botStrings.get(alkey2);
+				String msg_unknown = botStrings.get(alkey3);
+				if (!comingUsers.isEmpty())
+				{
+					//msg_coming = msg_coming.replace(ReplaceStringType.PLACEHOLDER_1.getString(), list_coming);
+					msg_coming += "\n" + list_coming;
+					rmsg.addToEnd("\n\n" + msg_coming);
+				}
+				if (!missingUsers.isEmpty())
+				{
+					//msg_ditching = msg_ditching.replace(ReplaceStringType.PLACEHOLDER_1.getString(), list_ditching);
+					msg_ditching += "\n" + list_ditching;
+					rmsg.addToEnd("\n\n" + msg_ditching);
+				}
+				if (!unknownUsers.isEmpty())
+				{
+					//msg_unknown = msg_unknown.replace(ReplaceStringType.PLACEHOLDER_1.getString(), list_unknown);
+					msg_unknown += "\n" + list_unknown;
+					rmsg.addToEnd("\n\n" + msg_unknown);
+				}
 			}
-			if (!missingUsers.isEmpty())
-			{
-				msg_ditching = msg_ditching.replace(ReplaceStringType.PLACEHOLDER_1.getString(), list_ditching);
-				rmsg.addToEnd("\n\n" + msg_ditching);
-			}
-			if (!unknownUsers.isEmpty())
-			{
-				msg_unknown = msg_unknown.replace(ReplaceStringType.PLACEHOLDER_1.getString(), list_unknown);
-				rmsg.addToEnd("\n\n" + msg_unknown);
-			}	
-		}
-		else rmsg = null;
-		
-		//Generate target string
-		List<IMentionable> mlist = new LinkedList<IMentionable>();
-		for (long l : comingUsers)
-		{
-			Member m = g.getMemberById(l);
-			ActorUser mdata = gs.getUserBank().getUser(l);
-			if (m != null && mdata.reminderOn(e.getType(), rlevel)) mlist.add(m);
-		}
-		for (long l : unknownUsers)
-		{
-			Member m = g.getMemberById(l);
-			ActorUser mdata = gs.getUserBank().getUser(l);
-			if (m != null && mdata.reminderOn(e.getType(), rlevel)) mlist.add(m);
 		}
 		
-		if (!mlist.isEmpty())
+		String msgkey_t;
+		if (e.isGroupEvent()) msgkey_t = BotStrings.getStringKey_Event(e.getType(), StringKey.EVENT_REMIND, StringKey.OP_GROUPUSER, rlevel);
+		else msgkey_t = BotStrings.getStringKey_Event(e.getType(), StringKey.EVENT_REMIND, StringKey.OP_TARGUSER, rlevel);
+		
+		String rawmsg_t = botStrings.get(msgkey_t);
+		BotMessage tmsg = new BotMessage(rawmsg_t);
+		
+		if (e.isGroupEvent())
 		{
-			tmsg.substituteMentions(ReplaceStringType.TARGUSER_MENTION, mlist);
+			Role everyone = g.getPublicRole();
+			String ttime1 = brain.getReminderTimeString_eventtime(emillis, req_tz);
+			String ttime2 = brain.getReminderTimeString_timeleft(emillis, req_tz);
+			tmsg.substituteString(ReplaceStringType.REQUSER, req_user.getUser().getName());
+			tmsg.substituteMention(ReplaceStringType.TARGUSER_MENTION, everyone);
 			tmsg.substituteString(ReplaceStringType.EVENTNAME, e.getEventName());
 			tmsg.substituteString(ReplaceStringType.GENERALNUM, Long.toUnsignedString(e.getEventID()));
 			tmsg.substituteString(ReplaceStringType.FORMATTED_TIME_RELATIVE, ttime1);
-			tmsg.substituteString(ReplaceStringType.FORMATTED_TIME_LEFT, ttime2);	
+			tmsg.substituteString(ReplaceStringType.FORMATTED_TIME_LEFT, ttime2);
 		}
-		else tmsg = null;
+		else
+		{
+			TimeZone targ_tz = TimeZone.getDefault();
+			//See if all target users have the same timezone
+			Set<TimeZone> ttz = new HashSet<TimeZone>();
+			for (long l : allUsers)
+			{
+				ActorUser targ_data = gs.getUserBank().getUser(l);
+				if (targ_data == null){
+					e.removeTargetUser(l);
+					continue;
+				}
+				ttz.add(targ_data.getTimeZone());
+			}
+			if (ttz.size() == 1)
+			{
+				for (TimeZone tz : ttz) targ_tz = tz;
+			}
+			
+			//Get time strings
+			String ttime1 = brain.getReminderTimeString_eventtime(emillis, targ_tz);
+			String ttime2 = brain.getReminderTimeString_timeleft(emillis, targ_tz);
 		
+			//Generate target string
+			List<IMentionable> mlist = new LinkedList<IMentionable>();
+			for (long l : comingUsers)
+			{
+				Member m = g.getMemberById(l);
+				ActorUser mdata = gs.getUserBank().getUser(l);
+				if (m != null && mdata.reminderOn(e.getType(), rlevel)) mlist.add(m);
+			}
+			for (long l : unknownUsers)
+			{
+				Member m = g.getMemberById(l);
+				ActorUser mdata = gs.getUserBank().getUser(l);
+				if (m != null && mdata.reminderOn(e.getType(), rlevel)) mlist.add(m);
+			}
+			
+			if (!mlist.isEmpty())
+			{
+				tmsg.substituteString(ReplaceStringType.REQUSER, req_user.getUser().getName());
+				tmsg.substituteMentions(ReplaceStringType.TARGUSER_MENTION, mlist);
+				tmsg.substituteString(ReplaceStringType.EVENTNAME, e.getEventName());
+				tmsg.substituteString(ReplaceStringType.GENERALNUM, Long.toUnsignedString(e.getEventID()));
+				tmsg.substituteString(ReplaceStringType.FORMATTED_TIME_RELATIVE, ttime1);
+				tmsg.substituteString(ReplaceStringType.FORMATTED_TIME_LEFT, ttime2);	
+			}
+			else tmsg = null;
+		}
+	
 		//Send messages
 		if (rmsg != null) sendMessage(e.getRequesterChannel(), rmsg);
 		if (tmsg != null) sendMessage(e.getTargetChannel(), tmsg);
@@ -2751,6 +3804,243 @@ public abstract class AbstractBot implements Bot{
 		BotMessage msg = new BotMessage(rawmsg);
 		msg.substituteString(ReplaceStringType.REQUSER, username);
 		sendMessage(chID, msg);
+	}
+	
+		// ---- RSVP
+	
+	public BotMessage getGeneralRSVPFailMessage()
+	{
+		//Gets the message of every type and determines which is most likely...
+		EventType[] types = EventType.values();
+		for (EventType t : types)
+		{
+			if (t == EventType.BIRTHDAY) continue;
+			String key = BotStrings.getStringKey_Event(t, StringKey.EVENT_CONFIRMATTEND, StringKey.OP_FAIL, 0);
+			String raw = botStrings.get(key);
+			if (raw.equals(BotStrings.STRINGNOTFOUND_ENG)) continue;
+			return new BotMessage(raw);
+		}
+		return new BotMessage("RSVP FAILED");
+	}
+	
+	public BotMessage getGeneralRetrieveRSVPFailMessage()
+	{
+		//Gets the message of every type and determines which is most likely...
+		EventType[] types = EventType.values();
+		for (EventType t : types)
+		{
+			if (t == EventType.BIRTHDAY) continue;
+			String key = BotStrings.getStringKey_Event(t, StringKey.EVENT_CHECKRSVP, StringKey.OP_FAIL, 0);
+			String raw = botStrings.get(key);
+			if (raw.equals(BotStrings.STRINGNOTFOUND_ENG)) continue;
+			return new BotMessage(raw);
+		}
+		return new BotMessage("RSVP FAILED");
+	}
+	
+	public CalendarEvent retrieveEvent(long eventID, long guildID)
+	{
+		GuildSettings gs = brain.getGuild(guildID);
+		if (gs == null)
+		{
+			GregorianCalendar stamp = new GregorianCalendar();
+			System.err.println(Thread.currentThread().getName() + " || AbstractBot.retrieveEvent || ERROR: Data for guild " + Long.toHexString(guildID) + " could not be retrieved! | " + FileBuffer.formatTimeAmerican(stamp));
+			return null;
+		}
+		
+		//Get event
+		Schedule s = gs.getSchedule();
+		if (s == null)
+		{
+			GregorianCalendar stamp = new GregorianCalendar();
+			System.err.println(Thread.currentThread().getName() + " || AbstractBot.retrieveEvent || ERROR: Schedule for guild " + Long.toHexString(guildID) + " could not be retrieved! | " + FileBuffer.formatTimeAmerican(stamp));
+			return null;
+		}
+		
+		return s.getEvent(eventID);
+	}
+	
+	public void RSVPEvent(long chID, Member mem, CalendarEvent ce, Attendance att)
+	{
+		Guild g = mem.getGuild();
+		long gid = g.getIdLong();
+		//CalendarEvent ce = retrieveEvent(eventID, gid);
+		
+		if (ce == null)
+		{
+			BotMessage fmsg = getGeneralRSVPFailMessage();
+			sendMessage(chID, fmsg);
+			return;		
+		}
+		
+		//See if event accepts RSVPs
+		if (!ce.acceptsRSVP())
+		{
+			String key = BotStrings.getStringKey_Event(ce.getType(), StringKey.EVENT_CONFIRMATTEND, StringKey.OP_FAIL, 0);
+			String raw = botStrings.get(key);
+			BotMessage fmsg = new BotMessage(raw);
+			sendMessage(chID, fmsg);
+			return;
+		}
+		
+		//See if user is requesting user
+		long uid = mem.getUser().getIdLong();
+		if (uid == ce.getRequestingUser())
+		{
+			String key = BotStrings.getStringKey_Event(ce.getType(), StringKey.EVENT_CONFIRMATTEND, StringKey.OP_FAIL, 1);
+			String raw = botStrings.get(key);
+			BotMessage fmsg = new BotMessage(raw);
+			sendMessage(chID, fmsg);
+			return;
+		}
+	
+		//Get current user attendance to see if user was invited
+		if (!(ce instanceof EventAdapter))
+		{
+			String key = BotStrings.getStringKey_Event(ce.getType(), StringKey.EVENT_CONFIRMATTEND, StringKey.OP_FAIL, 0);
+			String raw = botStrings.get(key);
+			BotMessage fmsg = new BotMessage(raw);
+			sendMessage(chID, fmsg);
+			return;
+		}
+		EventAdapter e = (EventAdapter)ce;
+		Attendance a = e.getTargetUserAttendance(uid);
+		if (a == null)
+		{
+			String key = BotStrings.getStringKey_Event(ce.getType(), StringKey.EVENT_CONFIRMATTEND, StringKey.OP_FAIL, 2);
+			String raw = botStrings.get(key);
+			BotMessage fmsg = new BotMessage(raw);
+			sendMessage(chID, fmsg);
+			return;
+		}
+		
+		//If all checks passed, set attendance
+		e.setTargetUserAttendance(uid, att);
+	
+		//Send user message
+		StringKey option = StringKey.OP_NO;
+		if (att == Attendance.YES) option = StringKey.OP_YES;
+		String key = BotStrings.getStringKey_Event(e.getType(), StringKey.EVENT_CONFIRMATTEND, option, 0);
+		String raw = botStrings.get(key);
+		BotMessage tmsg = new BotMessage(raw);
+		tmsg.substituteString(ReplaceStringType.REQUSER, mem.getUser().getName());
+		tmsg.substituteString(ReplaceStringType.EVENTNAME, e.getEventName());
+		tmsg.substituteString(ReplaceStringType.GENERALNUM, Long.toUnsignedString(e.getEventID()));
+		if (raw.contains(ReplaceStringType.FORMATTED_TIME_RELATIVE.getString()))
+		{
+			TimeZone ttz = TimeZone.getDefault();
+			ActorUser tuser = brain.getUser(gid, uid);
+			if (tuser != null) ttz = tuser.getTimeZone();
+			String ftime = brain.getReminderTimeString_eventtime(e.getEventTime(), ttz);
+			tmsg.substituteString(ReplaceStringType.FORMATTED_TIME_RELATIVE, ftime);
+		}
+		sendMessage(chID, tmsg);
+		
+		//Send event host message
+		long rid = e.getRequestingUser();
+		Member host = g.getMemberById(rid);
+		if (host == null)
+		{
+			GregorianCalendar stamp = new GregorianCalendar();
+			System.err.println(Thread.currentThread().getName() + " || AbstractBot.RSVPEvent || ERROR: Member " + Long.toHexString(rid) + " not in this guild! | " + FileBuffer.formatTimeAmerican(stamp));
+		}
+		key = BotStrings.getStringKey_Event(e.getType(), StringKey.EVENT_NOTIFYATTEND, option, 0);
+		raw = botStrings.get(key);
+		BotMessage rmsg = new BotMessage(raw);
+		rmsg.substituteString(ReplaceStringType.REQUSER, host.getUser().getName());
+		rmsg.substituteMention(ReplaceStringType.REQUSER_MENTION, host);
+		rmsg.substituteString(ReplaceStringType.TARGUSER, mem.getUser().getName());
+		rmsg.substituteString(ReplaceStringType.EVENTNAME, e.getEventName());
+		tmsg.substituteString(ReplaceStringType.GENERALNUM, Long.toUnsignedString(e.getEventID()));
+		if (raw.contains(ReplaceStringType.FORMATTED_TIME_RELATIVE.getString()))
+		{
+			TimeZone rtz = TimeZone.getDefault();
+			ActorUser ruser = brain.getUser(gid, rid);
+			if (ruser != null) rtz = ruser.getTimeZone();
+			String ftime = brain.getReminderTimeString_eventtime(e.getEventTime(), rtz);
+			rmsg.substituteString(ReplaceStringType.FORMATTED_TIME_RELATIVE, ftime);
+		}
+		sendMessage(e.getRequesterChannel(), rmsg);
+	}
+	
+	public void checkRSVP(long chID, Member mem, CalendarEvent ce)
+	{
+		Guild g = mem.getGuild();
+		long gid = g.getIdLong();
+		//CalendarEvent ce = retrieveEvent(eventID, gid);
+		
+		if (ce == null)
+		{
+			BotMessage fmsg = getGeneralRetrieveRSVPFailMessage();
+			sendMessage(chID, fmsg);
+			return;		
+		}
+
+		//See if event accepts RSVPs
+		if (!ce.acceptsRSVP())
+		{
+			String key = BotStrings.getStringKey_Event(ce.getType(), StringKey.EVENT_CHECKRSVP, StringKey.OP_FAIL, 0);
+			String raw = botStrings.get(key);
+			BotMessage fmsg = new BotMessage(raw);
+			sendMessage(chID, fmsg);
+			return;
+		}
+		
+		Attendance a = Attendance.UNKNOWN;
+		boolean isreq = false;
+		
+		//See if user is requesting user
+		long uid = mem.getUser().getIdLong();
+		if (uid == ce.getRequestingUser())
+		{
+			a = Attendance.YES;
+			isreq = true;
+		}
+		
+		if (!(ce instanceof EventAdapter))
+		{
+			String key = BotStrings.getStringKey_Event(ce.getType(), StringKey.EVENT_CHECKRSVP, StringKey.OP_FAIL, 0);
+			String raw = botStrings.get(key);
+			BotMessage fmsg = new BotMessage(raw);
+			sendMessage(chID, fmsg);
+			return;
+		}
+	
+		//Get current user attendance to see if user was invited
+		EventAdapter e = (EventAdapter)ce;
+		if (!isreq)
+		{
+			a = e.getTargetUserAttendance(uid);
+			if (a == null)
+			{
+				String key = BotStrings.getStringKey_Event(ce.getType(), StringKey.EVENT_CHECKRSVP, StringKey.OP_FAIL, 1);
+				String raw = botStrings.get(key);
+				BotMessage fmsg = new BotMessage(raw);
+				sendMessage(chID, fmsg);
+				return;
+			}	
+		}
+		
+		//Send user message
+		StringKey option = StringKey.OP_UNKNOWN;
+		if (a == Attendance.YES) option = StringKey.OP_YES;
+		if (a == Attendance.NO) option = StringKey.OP_NO;
+		String key = BotStrings.getStringKey_Event(e.getType(), StringKey.EVENT_CHECKRSVP, option, 0);
+		String raw = botStrings.get(key);
+		BotMessage tmsg = new BotMessage(raw);
+		tmsg.substituteString(ReplaceStringType.REQUSER, mem.getUser().getName());
+		tmsg.substituteString(ReplaceStringType.EVENTNAME, e.getEventName());
+		tmsg.substituteString(ReplaceStringType.GENERALNUM, Long.toUnsignedString(e.getEventID()));
+		if (raw.contains(ReplaceStringType.FORMATTED_TIME_RELATIVE.getString()))
+		{
+			TimeZone ttz = TimeZone.getDefault();
+			ActorUser tuser = brain.getUser(gid, uid);
+			if (tuser != null) ttz = tuser.getTimeZone();
+			String ftime = brain.getReminderTimeString_eventtime(e.getEventTime(), ttz);
+			tmsg.substituteString(ReplaceStringType.FORMATTED_TIME_RELATIVE, ftime);
+		}
+		sendMessage(chID, tmsg);
+		
 	}
 	
 	/* ----- Cleaning ----- */

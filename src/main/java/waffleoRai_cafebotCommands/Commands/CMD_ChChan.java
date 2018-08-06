@@ -77,4 +77,5 @@ public class CMD_ChChan extends CommandAdapter{
 	{
 		return "chchan";
 	}
+
 }

@@ -7,6 +7,8 @@ import waffleoRai_schedulebot.EventType;
 
 public class BotStrings {
 	
+	public static final String STRINGNOTFOUND_ENG = "[STRING NOT FOUND]";
+	
 	//Groups
 	public static final String KEY_MAINGROUP_BOTSTRINGS = "botstrings";
 	public static final String KEY_GROUP_GENERAL = ".generalbotstrings";
@@ -55,6 +57,14 @@ public class BotStrings {
 	//Group: Greetings
 	public static final String KEY_GREET_CHCHAN_SUCCESS = ".confirm_chset_success";
 	public static final String KEY_GREET_CHCHAN_FAILURE = ".confirm_chset_failure";
+	public static final String KEY_GREET_CHECKG_ON = ".checkgsettingon";
+	public static final String KEY_GREET_CHECKG_OFF = ".checkgsettingoff";
+	public static final String KEY_GREET_CHECKGP_ON = ".checkpsettingon";
+	public static final String KEY_GREET_CHECKGP_OFF = ".checkpsettingoff";
+	public static final String KEY_GREET_CHECKF_ON = ".checkfsettingon";
+	public static final String KEY_GREET_CHECKF_OFF = ".checkfsettingoff";
+	public static final String KEY_GREET_CHECKFP_ON = ".checkfpsettingon";
+	public static final String KEY_GREET_CHECKFP_OFF = ".checkfpsettingoff";
 	
 	//Group: Event Manage
 	public static final String KEY_VIEWEVENTS_ALLUSER = ".viewuserevents";
@@ -88,6 +98,9 @@ public class BotStrings {
 	public static final String KEY_NOTIFYATTEND_0 = "rt";
 	public static final String KEY_NOTIFYATTEND_1 = "tr";
 	public static final String KEY_NOTIFYATTEND_2 = "tt";
+	public static final String KEY_NOTIFYCANCEL = ".notifycancel";
+	public static final String KEY_NOTIFYCANCELINSTANCE = ".notifycancelinstance";
+	public static final String KEY_CHECKRSVP_STEM = ".checkrsvp";
 	
 	//Group: Clean
 	public static final String KEY_USERALL_PROMPT = ".cmme_confirm";
@@ -132,7 +145,12 @@ public class BotStrings {
 			base += KEY_CONFIRMATTEND_STEM;
 			if (op1 == StringKey.OP_YES) return base + "_yes";
 			else if (op1 == StringKey.OP_NO) return base + "_no";
-			else if (op1 == StringKey.OP_FAIL) return base + "_fail";
+			else if (op1 == StringKey.OP_FAIL){
+				base += "_fail";
+				if (op2 == 1) return base + "r";
+				if (op2 == 2) return base + "n";
+				return base;
+			}
 			break;
 		case EVENT_CONFIRMCREATE:
 			base += KEY_CONFIRMCREATE_STEM;
@@ -154,9 +172,35 @@ public class BotStrings {
 			else if (op1 == StringKey.OP_NO) return base + "no";
 			break;
 		case EVENT_REMIND:
-			return base + KEY_EVENTREMIND_STEM + Integer.toString(op2);
+			String rbase = base + KEY_EVENTREMIND_STEM + Integer.toString(op2);
+			switch (op1)
+			{
+			case OP_REQUSER: return rbase+"r";
+			case OP_TARGUSER: return rbase+"t";
+			case OP_GROUPUSER: return rbase+"g";
+			default: return null;
+			}
 		case EVENT_ATTENDLIST:
 			return base + KEY_ATTENDLIST_STEM + Integer.toString(op2);
+		case EVENT_NOTIFYCANCEL:
+			return base + KEY_NOTIFYCANCEL;
+		case EVENT_NOTIFYCANCELINSTANCE:
+			return base + KEY_NOTIFYCANCELINSTANCE;
+		case EVENT_CHECKRSVP:
+			String nbase = base + KEY_CHECKRSVP_STEM;
+			switch (op1)
+			{
+			case OP_YES:
+				return nbase + "_yes";
+			case OP_NO:
+				return nbase + "_no";
+			case OP_UNKNOWN:
+				return nbase + "_unk";
+			case OP_FAIL:
+				if (op2 != 0) return nbase + "_failn";
+				else return nbase + "_fail";
+			default: return null;
+			}
 		default:
 			return null;
 		}

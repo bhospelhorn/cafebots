@@ -10,8 +10,8 @@ import waffleoRai_schedulebot.EventType;
 /**
  * Switch on/off reminder(s) (sor) parser
  * @author Blythe Hospelhorn
- * @version 1.1.0
- * @since July 22, 2018
+ * @version 1.2.0
+ * @since August 5, 2018
  */
 public class PRS_SOR implements Parser{
 	
@@ -19,6 +19,7 @@ public class PRS_SOR implements Parser{
 	public static final String ALLOFF = "alloff";
 	public static final String DEFAULT = "defo";
 	public static final String DEFAULT2 = "default";
+	public static final String VIEW = "view";
 
 	@Override
 	public Command generateCommand(String[] args, MessageReceivedEvent event) {
@@ -35,6 +36,12 @@ public class PRS_SOR implements Parser{
 		else if (args[1].equals(DEFAULT) || args[1].equals(DEFAULT2))
 		{
 			return new CMD_SOR(event.getChannel(), event.getMember(), true, true, event.getMessageIdLong());
+		}
+		else if (args[1].equals(VIEW))
+		{
+			if (args.length < 3) return new CMD_BadCommandMessage(event.getChannel(), event.getMessageIdLong());
+			EventType t = EventType.getEventType(args[2]);
+			return new CMD_SOR(event.getChannel(), t, event.getMessageIdLong());
 		}
 		else
 		{

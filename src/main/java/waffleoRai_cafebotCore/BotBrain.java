@@ -24,16 +24,20 @@ import waffleoRai_cafebotCommands.BotScheduler;
 import waffleoRai_cafebotCommands.Command;
 import waffleoRai_cafebotCommands.MessageListener;
 import waffleoRai_cafebotCommands.ParseCore;
+import waffleoRai_schedulebot.Birthday;
+import waffleoRai_schedulebot.BiweeklyEvent;
 import waffleoRai_schedulebot.CalendarEvent;
+import waffleoRai_schedulebot.DeadlineEvent;
 import waffleoRai_schedulebot.EventType;
+import waffleoRai_schedulebot.MonthlyDOMEvent;
+import waffleoRai_schedulebot.MonthlyDOWEvent;
+import waffleoRai_schedulebot.OneTimeEvent;
 import waffleoRai_schedulebot.ReminderMap;
 import waffleoRai_schedulebot.ReminderTime;
 import waffleoRai_schedulebot.Schedule;
+import waffleoRai_schedulebot.WeeklyEvent;
 
 public class BotBrain {
-	
-	//TODO: Change level replacement string...
-	//TODO: !!!!! Change all disk saving parsers/serializers to read/write UNSIGNED long!!
 	
 	/* ----- Constants ----- */
 	
@@ -296,6 +300,12 @@ public class BotBrain {
 		return eubank.getUser(userID);
 	}
 	
+	public GuildSettings getGuild(long guildID)
+	{
+		GuildSettings gs = userdata.getGuildSettings(guildID);
+		return gs;
+	}
+	
 	public int getIndexOfBotAtPosition(int pindex)
 	{
 		return this.shiftManager.getBotAtPosition(pindex);
@@ -402,6 +412,11 @@ public class BotBrain {
 		System.err.println(Thread.currentThread().getName() + " || BotBrain.redirectCommand || Command redirection failed: " + cmd.toString() + " bottype = " + bottype);
 	}
 		
+	public void redirectEventCommand(Command cmd, EventType type)
+	{
+		parser.redirectEventCommand(cmd, type);
+	}
+	
 	public void blacklist(long uid, int bot)
 	{
 		parser.blacklist(uid, bot);
@@ -511,6 +526,12 @@ public class BotBrain {
 		return true;
 	}
 	
+	public String formatDateString(GregorianCalendar date, boolean includetz)
+	{
+		DateFormatter df = Language.getDateFormatter(language);
+		return df.formatTime(date, false, includetz);
+	}
+	
 	public String formatTimeString_clocktime(int hours, int minutes)
 	{
 		return String.format("%02d:%02d", hours, minutes);
@@ -537,8 +558,31 @@ public class BotBrain {
 		return df.getTimeLeft(eventTime, tz);
 	}
 	
-	/* ----- Schedule ----- */
+	public void requestCancellationNotification(CalendarEvent e, boolean instance, long guild)
+	{
+		parser.command_EventCancellation(e, instance, guild);
+	}
 	
+	public String formatStringList(List<String> strings)
+	{
+		DateFormatter df = Language.getDateFormatter(language);
+		return df.formatStringList(strings);
+	}
+
+	public String getEveryoneString()
+	{
+		DateFormatter df = Language.getDateFormatter(language);
+		return df.getEveryoneString();
+	}
+	
+	public String formatNth(int number)
+	{
+		DateFormatter df = Language.getDateFormatter(language);
+		return df.formatSequentialNumber(number);
+	}
+	
+	/* ----- Schedule ----- */
+		
 	public String cancelEvent(Member m, long eventID)
 	{
 		//Return the event name if success - null if failure
@@ -566,6 +610,14 @@ public class BotBrain {
 		return s.cancelEvent(eid);
 	}
 	
+	public boolean cancelEventInstance(long gid, long eid)
+	{
+		GuildSettings gs = userdata.getGuildSettings(gid);
+		if (gs == null) return false;
+		Schedule s = gs.getSchedule();
+		return s.cancelEventInstance(eid);
+	}
+	
 	public CalendarEvent getEvent(long gid, long eventID)
 	{
 		GuildSettings gs = userdata.getGuildSettings(gid);
@@ -579,8 +631,8 @@ public class BotBrain {
 	{
 		String keystem = "commonstrings.timeframe";
 		ReminderTime rt = getReminderTime(t, level);
-		if (rt == null) return "";
-		if (!rt.isSet()) return "";
+		if (rt == null) return "NULL";
+		if (!rt.isSet()) return "NULL";
 		String s = "";
 		boolean first = true;
 		int y = rt.getYears();
@@ -643,6 +695,29 @@ public class BotBrain {
 			first = false;
 		}
 		return s;
+	}
+	
+	public int getReminderCount(EventType t)
+	{
+		switch(t)
+		{
+		case BIRTHDAY:
+			return Birthday.STD_REMINDER_COUNT;
+		case BIWEEKLY:
+			return BiweeklyEvent.STD_REMINDER_COUNT;
+		case DEADLINE:
+			return DeadlineEvent.STD_REMINDER_COUNT;
+		case MONTHLYA:
+			return MonthlyDOMEvent.STD_REMINDER_COUNT;
+		case MONTHLYB:
+			return MonthlyDOWEvent.STD_REMINDER_COUNT;
+		case ONETIME:
+			return OneTimeEvent.STD_REMINDER_COUNT;
+		case WEEKLY:
+			return WeeklyEvent.STD_REMINDER_COUNT;
+		default:
+			return 0;
+		}
 	}
 	
 	/* ----- Requesting Addition ----- */

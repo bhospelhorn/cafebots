@@ -20,6 +20,7 @@ public class CMD_EventMakeWeekly extends CommandAdapter{
 	private String tChannel;
 	private long tChannel_resolved;
 	private List<String> targetUsers;
+	private boolean groupEvent;
 	
 	private int hour;
 	private int minutes;
@@ -36,6 +37,23 @@ public class CMD_EventMakeWeekly extends CommandAdapter{
 		tChannel = null;
 		hour = 12;
 		minutes = 0;
+		groupEvent = false;
+		super.setCommandMessageID(cmdID);
+	}
+	
+	public CMD_EventMakeWeekly(MessageChannel ch, Member req, int dayOfWeek, long cmdID)
+	{
+		System.err.println(Thread.currentThread().getName() + " || CMD_EventMakeWeekly.<init> || DEBUG - Called!");
+		comChannel = ch;
+		requestingUser = req;
+		DOW = dayOfWeek;
+		targetUsers = null;
+		eventName = null;
+		rChannel = null;
+		tChannel = null;
+		hour = 12;
+		minutes = 0;
+		groupEvent = true;
 		super.setCommandMessageID(cmdID);
 	}
 	
@@ -77,6 +95,11 @@ public class CMD_EventMakeWeekly extends CommandAdapter{
 	public String getTargetChannelName()
 	{
 		return tChannel;
+	}
+	
+	public boolean isGroupEvent()
+	{
+		return groupEvent;
 	}
 	
 	public void resolveRequesterChannel(long cid)

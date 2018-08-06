@@ -32,6 +32,20 @@ public class TimeTest {
 		now.add(Calendar.DAY_OF_MONTH, 20);
 		nmil = now.getTimeInMillis();
 		System.out.println("Default Constructor Mod: " + FileBuffer.formatTimeAmerican(now));
+		System.out.println("Day of week: " + now.get(Calendar.DAY_OF_WEEK));
+		System.out.println("Millis: " + nmil);
+		
+		now.set(Calendar.DAY_OF_MONTH, 2);
+		nmil = now.getTimeInMillis();
+		System.out.println("Default Constructor Mod: " + FileBuffer.formatTimeAmerican(now));
+		System.out.println("Day of week: " + now.get(Calendar.DAY_OF_WEEK));
+		System.out.println("Millis: " + nmil);
+		
+		now.set(Calendar.WEEK_OF_MONTH, 2);
+		now.set(Calendar.DAY_OF_WEEK, Calendar.WEDNESDAY);
+		nmil = now.getTimeInMillis();
+		System.out.println("Default Constructor Mod: " + FileBuffer.formatTimeAmerican(now));
+		System.out.println("Day of week: " + now.get(Calendar.DAY_OF_WEEK));
 		System.out.println("Millis: " + nmil);
 		
 	}

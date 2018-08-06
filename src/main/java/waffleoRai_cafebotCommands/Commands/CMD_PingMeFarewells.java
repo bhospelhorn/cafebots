@@ -5,14 +5,14 @@ import net.dv8tion.jda.core.entities.MessageChannel;
 import waffleoRai_cafebotCommands.CommandAdapter;
 import waffleoRai_cafebotCore.AbstractBot;
 
-public class CMD_PingMeGreetings extends CommandAdapter{
+public class CMD_PingMeFarewells extends CommandAdapter {
 	
 	private Member req_user;
 	private boolean setting;
 	private MessageChannel channel;
 	//private MessageChannel targetchannel; //Just ping to channel of cmd?
 	
-	public CMD_PingMeGreetings(boolean dir, Member user, MessageChannel ch, long cmdID)
+	public CMD_PingMeFarewells(boolean dir, Member user, MessageChannel ch, long cmdID)
 	{
 		req_user = user;
 		setting = dir;
@@ -31,13 +31,13 @@ public class CMD_PingMeGreetings extends CommandAdapter{
 	 */
 	public void execute(AbstractBot bot) 
 	{
-		bot.setUserPingGreetings(channel.getIdLong(), req_user, setting);
+		bot.setUserPingFarewells(channel.getIdLong(), req_user, setting);
 	}
 
 	@Override
 	public String toString()
 	{
-		return "pingGreetings";
+		return "pingFarewells";
 	}
 
 	@Override

@@ -7,6 +7,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
@@ -23,6 +24,8 @@ import waffleoRai_cafebotCommands.ParseCore;
 import waffleoRai_cafebotCore.UserBank;
 
 public class Schedule {
+	
+	//TODO: Is it cleaning up past events?
 	
 	public static final int[] MONTHDAYS = {31, 29, 31, 30,
 										   31, 30, 31, 31,
@@ -178,22 +181,33 @@ public class Schedule {
 	
 	public List<CalendarEvent> getRequestedEvents(long userID)
 	{
-		//TODO: Write
-		
 		List<CalendarEvent> myevents = new LinkedList<CalendarEvent>();
 		//Birthdays...
 		Birthday b = user_bday_map.get(userID);
 		if (b != null) myevents.add(b);
-		
+		Collection<EventAdapter> events = eventmap.getAllEvents();
+		for (EventAdapter e : events)
+		{
+			if (e.getRequestingUser() == userID) myevents.add(e);
+		}
 		Collections.sort(myevents);
 		return myevents;
 	}
 	
 	public List<CalendarEvent> getTargetEvents(long userID)
 	{
-		//TODO: Write
 		List<CalendarEvent> myevents = new LinkedList<CalendarEvent>();
-		
+		Collection<EventAdapter> events = eventmap.getAllEvents();
+		for (EventAdapter e : events)
+		{
+			if (e.isGroupEvent()){
+				myevents.add(e);
+				continue;
+			}
+			Attendance a = e.getTargetUserAttendance(userID);
+			if (a == Attendance.YES) myevents.add(e);
+			else if (a == Attendance.UNKNOWN) myevents.add(e);
+		}
 		Collections.sort(myevents);
 		return myevents;
 	}
@@ -202,6 +216,14 @@ public class Schedule {
 	{
 		if (reminders == null) throw new IllegalStateException();
 		return reminders.getTime(type, level);
+	}
+	
+	public static int getNumberReminders(EventType type)
+	{
+		if (reminders == null) throw new IllegalStateException();
+		ReminderTime[] rtarr = reminders.get(type);
+		if (rtarr == null) return 0;
+		return rtarr.length;
 	}
 	
 	/* ----- Setters ----- */
@@ -242,6 +264,20 @@ public class Schedule {
 			return map.keySet();
 		}
 	
+		public synchronized Collection<EventAdapter> getAllEvents()
+		{
+			Collection<CalendarEvent> vals = map.values();
+			List<EventAdapter> events = new LinkedList<EventAdapter>();
+			for (CalendarEvent ce : vals)
+			{
+				if (ce instanceof EventAdapter)
+				{
+					events.add((EventAdapter)ce);
+				}
+			}
+			return events;
+		}
+		
 	}
 	
 	public boolean cancelEvent(long eID)
@@ -254,8 +290,27 @@ public class Schedule {
 			bday_map.remove(b.getMonth(), b.getDay(), b.getUserID());
 			user_bday_map.remove(b.getUserID());
 		}
-		//TODO: Add other event types
-		
+		return true;
+	}
+	
+	public boolean cancelEventInstance(long eID)
+	{
+		CalendarEvent e = eventmap.remove(eID);
+		if (e == null) return false;
+		if (e instanceof Birthday)
+		{
+			//Birthday b = (Birthday)e;
+			return false; //For now, it won't do instance deletions of birthdays
+		}
+		else
+		{
+			if (!e.isRecurring()) return false;
+			if (!(e instanceof EventAdapter)) return false;
+			EventAdapter ea = (EventAdapter)e;
+			CalendarEvent nextEvent = ea.spawnSequel();
+			EventAdapter nxt = (EventAdapter)nextEvent;
+			addEvent(nxt);
+		}
 		return true;
 	}
 	

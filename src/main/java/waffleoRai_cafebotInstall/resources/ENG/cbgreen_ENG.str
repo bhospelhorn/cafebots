@@ -42,16 +42,16 @@ TYPES
   monthlydow
 
 #SOR Help 3
-Each individual type has 3-5 reminder levels. To see what the times are for each, you can re-enter the sor command with the type argument, but without the level argument.
+Each individual type has 3-5 reminder levels. To see what the times are for each, you can use the command "!sor view [type]".
 
 #SOR Off
-No problem, %r! I will no longer send you %l reminders for %t events!
+No problem, %r! I will no longer send you %l reminders for %y events!
 
 #SOR Off All
 No problem, %r! I will no longer send you reminders events!
 
 #SOR On
-No problem, %r! I will re-enable your %l reminders for %t events!
+No problem, %r! I will re-enable your %l reminders for %y events!
 
 #SOR On All
 No problem, %r! I will re-enable your event reminders!
@@ -108,7 +108,7 @@ Universal Commands:
     Wipe all of your messages from this channel that were posted in the past 24 hours.
 !myevents
     View a list of all events you are scheduled for.
-!ecancel [eventID]
+!ecancel [eventID] (instance) (silent)
     Cancel an event you created.
 !onetime yyyy mm dd hh:mm \"eventname\" rchannel tchannel target1 (target2+)
     Create a one-time event. Type !event arghelp for more info.
@@ -239,7 +239,7 @@ New member greetings are currently ON for this server.
 New member greetings are currently OFF for this server.
 
 #Check pings (on)
-At the moment, you are set to be notified (by mention) every time a new member joins the server.
+At the moment, you (%r) are set to be notified (by mention) every time a new member joins the server via %C.
 
 #Check pings (off)
 You are currently NOT set to be notified when a new member joins the server.
@@ -595,7 +595,7 @@ Farewell messages are set to ON
 Farewell messages are set to OFF
 
 #Check farewell ping setting - on
-Farewell ping setting for user %r : ON
+Farewell ping setting for user %r : ON (%C)
 
 #Check farewell ping setting - off
 Farewell ping setting for user %r : OFF
@@ -620,5 +620,79 @@ I am sorry, %r. I was not able to change the setting for command autoclean. Plea
 
 #SOR Restore Default
 Hello, %r! I have reset your reminders to default settings!
-	
+
+#Event - any (Universal reminder - Targets)
+%U
+Reminder: You have an event "%e" %F, which is %f from now.
+If you would like to RSVP, use the command "!attend %N"
+If you would like to notify the host that you cannot attend, please use the command "!cantgo %N"
+You can change your RSVP at any time.
+
+#Event - any (Universal reminder - ReqUser)
+Hello %R
+This is a reminder that your event "%e" is %F, which is %f from now.
+If you would like to cancel this event, you may use the !ecancel command to do so.
+
+#Event - any (Universal reminder - Group)
+%U
+Don't forget about the upcoming event "%e" %F.
+Only %f left.
+
+#Event - any (Attendee List - Attendees)
+Attending Users:
+
+#Event - any (Attendee List - Declined)
+Declining Users:
+
+#Event - any (Attendee List - Unknown)
+Reply Pending:
+
+#Event - any (Confirm Attend)
+Understood, %r. I have recorded you as attending event %n.
+
+#Event - any (Confirm Decline)
+Understood, %r. I have recorded you as not attending event %n.
+
+#Event - any (Confirm Attendance Fail)
+ERROR: Could not record event RSVP
+
+#Event - any (Confirm Attendance Fail - Because ReqUser)
+The host cannot RSVP to their own event. The host is attending by default. If the host wishes to cancel the event, they may do so using the !ecancel %n command.
+
+#Event - any (Notify requester - target attending)
+Hello %R. %u has just confirmed that they will attend "%e" %F.
+
+#Event - any (Notify requester - target declining)
+Hello %R. %u has just confirmed that they will not be attending "%e" %F.
+
+#Event - any (Cancel event permanent - notify all)
+Hello %U
+Event "%e" has been cancelled by the host.
+Apologies for any inconvenience or disappointment this may cause.
+
+#Event - any (Cancel event instance - notify all)
+Hello %U
+It appears that "%e" scheduled for %F has been cancelled by the host.
+Subsequent "%e" event are still scheduled as usual.
+
+#Event - any (Check RSVP - Attending)
+Hello %r. You are currently registered to attend "%e" %F.
+
+#Event - any (Check RSVP - Ditching)
+Hello %r. You previously declined attendance to "%e" %F.
+
+#Event - any (Check RSVP - Unknown)
+Hello %r. You have not registered your attendance for "%e" %F.
+To notify the host that you intend to go, please use the command "!attend %n".
+Likewise, to notify the host that you cannot make it, please use the command "!cantgo %n".
+
+#Event - any (Check RSVP - Fail)
+ERROR: Could not retrieve RSVP status.
+
+#Event - any (Confirm Attendance Fail - Because not invited)
+You are not on the list of participants for event %n. As a result, you cannot RSVP.
+
+#Event - any (Check RSVP - Fail - Because not invited)
+You are not on the list of participants for event %n. As a result, you cannot RSVP.
+
 #ADD HERE...

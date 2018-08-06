@@ -104,6 +104,45 @@ public class BotMessage {
 			}
 		}
 		
+		public void substituteFormattedMentions(ReplaceStringType t, Collection<IMentionable> olist, String delim, String lastdelim, String twodelim)
+		{
+			if (ismention) return; //Can't split
+			if (subcomps == null)
+			{
+				int mentions = olist.size();
+				String[] sarr = str.split(t.getString().toString());
+				if (sarr != null && sarr.length > 1)
+				{
+					subcomps = new ArrayList<MessageComp>(sarr.length + ((sarr.length - 1)*mentions*2));
+					for (int i = 0; i < sarr.length; i++)
+					{
+						if (i > 0){
+							int j = 0;
+							for (IMentionable o : olist)
+							{
+								subcomps.add(new MessageComp(o));
+								if (mentions > 2)
+								{
+									if (j < mentions-1) subcomps.add(new MessageComp(delim));
+									if (j == mentions-2) subcomps.add(new MessageComp(lastdelim));
+								}
+								else
+								{
+									if (j < 1) subcomps.add(new MessageComp(twodelim));
+								}
+								j++;
+							}
+						};
+						subcomps.add(new MessageComp(sarr[i]));
+					}
+				}
+			}
+			else
+			{
+				for (MessageComp c : subcomps) c.substituteMentions(t, olist);
+			}
+		}
+		
 		public void addToBuilder(MessageBuilder builder)
 		{
 			if (subcomps == null)
@@ -141,6 +180,11 @@ public class BotMessage {
 	public void substituteMentions(ReplaceStringType target, Collection<IMentionable> olist)
 	{
 		rootcomp.substituteMentions(target, olist);
+	}
+	
+	public void substituteFormattedMentions(ReplaceStringType target, Collection<IMentionable> olist, String delimiter, String finalDelim, String twodelim)
+	{
+		rootcomp.substituteFormattedMentions(target, olist, delimiter, finalDelim, twodelim);
 	}
 	
 	public void addToEnd(String str)

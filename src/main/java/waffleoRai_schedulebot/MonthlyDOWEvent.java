@@ -1,5 +1,7 @@
 package waffleoRai_schedulebot;
 
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
 import waffleoRai_Utils.FileBuffer.UnsupportedFileTypeException;
@@ -75,5 +77,71 @@ public class MonthlyDOWEvent extends EventAdapter{
 	{
 		return MAX_REMINDERS;
 	}
+	
+	public boolean acceptsRSVP()
+	{
+		return true;
+	}
+	
+	public boolean isRecurring()
+	{
+		return true;
+	}
+	
+	public void setName(String ename)
+	{
+		super.setEventName(ename);
+	}
+	
+	public void setReqChannel(long chid)
+	{
+		super.setRequesterChannel(chid);
+	}
+	
+	public void setTargChannel(long chid)
+	{
+		super.setTargetChannel(chid);
+	}
+	
+	public void setEventTime(int dayOfWeek, int week, int hour, int minute, TimeZone tz)
+	{
+		GregorianCalendar now = new GregorianCalendar();
+		now.setTimeZone(tz);
+		GregorianCalendar next = new GregorianCalendar();
+		next.setTimeZone(tz);
+		
+		int wom = now.get(Calendar.WEEK_OF_MONTH);
+		int dow = now.get(Calendar.DAY_OF_WEEK);
+		boolean findnextmonth = false;
+		if (wom == week)
+		{
+			//Past day of week?
+			if (dow == dayOfWeek)
+			{
+				//Past time?
+				int hr = now.get(Calendar.HOUR_OF_DAY);
+				if (hr > hour) findnextmonth = true;
+				else if (hr == hour)
+				{
+					int min = now.get(Calendar.MINUTE);	
+					if (min > minute) findnextmonth = true;
+				}
+			}
+			if (dow > dayOfWeek) findnextmonth = true;
+		}
+		else if (wom > week) findnextmonth = true;
+		
+		if (findnextmonth)
+		{
+			next.add(Calendar.MONTH, 1);
+		}
+		next.set(Calendar.WEEK_OF_MONTH, week);
+		next.set(Calendar.DAY_OF_WEEK, dow);
+		
+		super.setEventTime(next);
+		determineNextReminder();
+	}
+	
+	
 	
 }

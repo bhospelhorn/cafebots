@@ -5,15 +5,24 @@ import java.util.Map;
 
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import waffleoRai_cafebotCommands.parsers.PRS_AddBirthday;
+import waffleoRai_cafebotCommands.parsers.PRS_AttendEvent;
 import waffleoRai_cafebotCommands.parsers.PRS_CancelEvent;
 import waffleoRai_cafebotCommands.parsers.PRS_ChChan;
+import waffleoRai_cafebotCommands.parsers.PRS_CheckGreetingStatus;
+import waffleoRai_cafebotCommands.parsers.PRS_CheckRSVP;
 import waffleoRai_cafebotCommands.parsers.PRS_CleanMessages_1;
 import waffleoRai_cafebotCommands.parsers.PRS_CleanMessages_2;
 import waffleoRai_cafebotCommands.parsers.PRS_CleanMessages_3;
+import waffleoRai_cafebotCommands.parsers.PRS_DeclineEvent;
+import waffleoRai_cafebotCommands.parsers.PRS_EventBiweekly;
 import waffleoRai_cafebotCommands.parsers.PRS_EventHelp;
+import waffleoRai_cafebotCommands.parsers.PRS_EventMonthlyDOM;
+import waffleoRai_cafebotCommands.parsers.PRS_EventMonthlyDOW;
+import waffleoRai_cafebotCommands.parsers.PRS_EventOnetime;
 import waffleoRai_cafebotCommands.parsers.PRS_EventWeekly;
 import waffleoRai_cafebotCommands.parsers.PRS_GetTZ;
 import waffleoRai_cafebotCommands.parsers.PRS_Help;
+import waffleoRai_cafebotCommands.parsers.PRS_PingMeFarewells;
 import waffleoRai_cafebotCommands.parsers.PRS_PingMeGreetings;
 import waffleoRai_cafebotCommands.parsers.PRS_SOR;
 import waffleoRai_cafebotCommands.parsers.PRS_SaySomething;
@@ -63,12 +72,12 @@ public interface Parser {
 		pmap.put("cleanmeday", new PRS_CleanMessages_2());
 		pmap.put("myevents", new PRS_SeeEvents());
 		pmap.put("ecancel", new PRS_CancelEvent());
-		pmap.put("onetime", null);
+		pmap.put("onetime", new PRS_EventOnetime());
 		pmap.put("deadline", null);
 		pmap.put("weekly", new PRS_EventWeekly());
-		pmap.put("biweekly", null);
-		pmap.put("monthlyday", null);
-		pmap.put("monthlydow", null);
+		pmap.put("biweekly", new PRS_EventBiweekly());
+		pmap.put("monthlyday", new PRS_EventMonthlyDOM());
+		pmap.put("monthlydow", new PRS_EventMonthlyDOW());
 		pmap.put("birthday", new PRS_AddBirthday());
 		pmap.put("gettz", new PRS_GetTZ());
 		pmap.put("changetz", new PRS_SetTZ());
@@ -91,16 +100,18 @@ public interface Parser {
 		pmap.put("setGreetings", new PRS_SetGreetings());
 		pmap.put("pingGreetings", new PRS_PingMeGreetings());
 		pmap.put("setFarewells", new PRS_SetFarewells());
-		pmap.put("pingFarewells", null); //TODO
-		pmap.put("checkg", null); //TODO
+		pmap.put("pingFarewells", new PRS_PingMeFarewells());
+		pmap.put("checkg", new PRS_CheckGreetingStatus());
 		pmap.put("audconf", null);
 		pmap.put("cmdclean", null);
 		pmap.put("autocmdclean", null);
 		
 		pmap.put("accept", null);
 		pmap.put("decline", null);
-		pmap.put("attending", null);
-		pmap.put("cantgo", null);
+		
+		pmap.put("attend", new PRS_AttendEvent());
+		pmap.put("cantgo", new PRS_DeclineEvent());
+		pmap.put("checkrsvp", new PRS_CheckRSVP());
 		
 		pmap.put("saysomething", new PRS_SaySomething());
 		pmap.put("bringmeagene", null);

@@ -35,6 +35,8 @@
 		<cannotunderstand>546,1</cannotunderstand>
 		<theygotit>549,1</theygotit>
 		<userno_general>552,1</userno_general>
+		<getgene1>197,1</getgene1>
+		<getgene2>197,1</getgene2>
 	</generalbotstrings>
 	<userquery>
 		<audconf_y>182,1</audconf_y>
@@ -168,23 +170,38 @@
 		<confirmcreate_fail>372,1</confirmcreate_fail>
 		<moreargs>84,3</moreargs>
 		<bad_channel>89,1</bad_channel>
-		<remind1>197,1</remind1>
-		<remind2>197,1</remind2>
-		<remind3>197,1</remind3>
-		<remind4>197,1</remind4>
-		<remind5>197,1</remind5>
+		<remind1t>197,1</remind1t>
+		<remind2t>197,1</remind2t>
+		<remind3t>197,1</remind3t>
+		<remind4t>197,1</remind4t>
+		<remind5t>197,1</remind5t>
+		<remind1r>197,1</remind1r>
+		<remind2r>197,1</remind2r>
+		<remind3r>197,1</remind3r>
+		<remind4r>197,1</remind4r>
+		<remind5r>197,1</remind5r>
+		<remind1g>197,1</remind1g>
+		<remind2g>197,1</remind2g>
+		<remind3g>197,1</remind3g>
+		<remind4g>197,1</remind4g>
+		<remind5g>197,1</remind5g>
 		<attendlist1>197,1</attendlist1>
 		<attendlist2>197,1</attendlist2>
 		<attendlist3>197,1</attendlist3>
 		<confirmattend_yes>197,1</confirmattend_yes>
-		<confirmattend_fail>197,1</confirmattend_fail>
 		<confirmattend_no>197,1</confirmattend_no>
-		<notifyattend_rt_yes>197,1</notifyattend_rt_yes>
-		<notifyattend_rt_no>197,1</notifyattend_rt_no>
+		<confirmattend_fail>197,1</confirmattend_fail>
+		<confirmattend_failr>197,1</confirmattend_failr>
+		<confirmattend_failn>197,1</confirmattend_failn>
 		<notifyattend_tr_yes>197,1</notifyattend_tr_yes>
 		<notifyattend_tr_no>197,1</notifyattend_tr_no>
-		<notifyattend_tt_yes>197,1</notifyattend_tt_yes>
-		<notifyattend_tt_no>197,1</notifyattend_tt_no>
+		<notifycancel>197,1</notifycancel>
+		<notifycancelinstance>197,1</notifycancelinstance>
+		<checkrsvp_yes>197,1</checkrsvp_yes>
+		<checkrsvp_no>197,1</checkrsvp_no>
+		<checkrsvp_unk>197,1</checkrsvp_unk>
+		<checkrsvp_fail>197,1</checkrsvp_fail>
+		<checkrsvp_failn>197,1</checkrsvp_failn>
 	</event_onetime>
 	<event_deadline>
 		<confirmcreate>360,1</confirmcreate>
@@ -193,23 +210,38 @@
 		<confirmcreate_fail>369,1</confirmcreate_fail>
 		<moreargs>375,4</moreargs>
 		<bad_channel>381,1</bad_channel>
-		<remind1>197,1</remind1>
-		<remind2>197,1</remind2>
-		<remind3>197,1</remind3>
-		<remind4>197,1</remind4>
-		<remind5>197,1</remind5>
+		<remind1t>197,1</remind1t>
+		<remind2t>197,1</remind2t>
+		<remind3t>197,1</remind3t>
+		<remind4t>197,1</remind4t>
+		<remind5t>197,1</remind5t>
+		<remind1r>197,1</remind1r>
+		<remind2r>197,1</remind2r>
+		<remind3r>197,1</remind3r>
+		<remind4r>197,1</remind4r>
+		<remind5r>197,1</remind5r>
+		<remind1g>197,1</remind1g>
+		<remind2g>197,1</remind2g>
+		<remind3g>197,1</remind3g>
+		<remind4g>197,1</remind4g>
+		<remind5g>197,1</remind5g>
 		<attendlist1>197,1</attendlist1>
 		<attendlist2>197,1</attendlist2>
 		<attendlist3>197,1</attendlist3>
 		<confirmattend_yes>197,1</confirmattend_yes>
-		<confirmattend_fail>197,1</confirmattend_fail>
 		<confirmattend_no>197,1</confirmattend_no>
-		<notifyattend_rt_yes>197,1</notifyattend_rt_yes>
-		<notifyattend_rt_no>197,1</notifyattend_rt_no>
+		<confirmattend_fail>197,1</confirmattend_fail>
+		<confirmattend_failr>197,1</confirmattend_failr>
+		<confirmattend_failn>197,1</confirmattend_failn>
 		<notifyattend_tr_yes>197,1</notifyattend_tr_yes>
 		<notifyattend_tr_no>197,1</notifyattend_tr_no>
-		<notifyattend_tt_yes>197,1</notifyattend_tt_yes>
-		<notifyattend_tt_no>197,1</notifyattend_tt_no>
+		<notifycancel>197,1</notifycancel>
+		<notifycancelinstance>197,1</notifycancelinstance>
+		<checkrsvp_yes>197,1</checkrsvp_yes>
+		<checkrsvp_no>197,1</checkrsvp_no>
+		<checkrsvp_unk>197,1</checkrsvp_unk>
+		<checkrsvp_fail>197,1</checkrsvp_fail>
+		<checkrsvp_failn>197,1</checkrsvp_failn>
 	</event_deadline>
 	<event_weekly>
 		<confirmcreate>384,1</confirmcreate>
@@ -218,23 +250,38 @@
 		<confirmcreate_fail>393,1</confirmcreate_fail>
 		<moreargs>396,4</moreargs>
 		<bad_channel>402,1</bad_channel>
-		<remind1>197,1</remind1>
-		<remind2>197,1</remind2>
-		<remind3>197,1</remind3>
-		<remind4>197,1</remind4>
-		<remind5>197,1</remind5>
+		<remind1t>197,1</remind1t>
+		<remind2t>197,1</remind2t>
+		<remind3t>197,1</remind3t>
+		<remind4t>197,1</remind4t>
+		<remind5t>197,1</remind5t>
+		<remind1r>197,1</remind1r>
+		<remind2r>197,1</remind2r>
+		<remind3r>197,1</remind3r>
+		<remind4r>197,1</remind4r>
+		<remind5r>197,1</remind5r>
+		<remind1g>197,1</remind1g>
+		<remind2g>197,1</remind2g>
+		<remind3g>197,1</remind3g>
+		<remind4g>197,1</remind4g>
+		<remind5g>197,1</remind5g>
 		<attendlist1>197,1</attendlist1>
 		<attendlist2>197,1</attendlist2>
 		<attendlist3>197,1</attendlist3>
 		<confirmattend_yes>197,1</confirmattend_yes>
-		<confirmattend_fail>197,1</confirmattend_fail>
 		<confirmattend_no>197,1</confirmattend_no>
-		<notifyattend_rt_yes>197,1</notifyattend_rt_yes>
-		<notifyattend_rt_no>197,1</notifyattend_rt_no>
+		<confirmattend_fail>197,1</confirmattend_fail>
+		<confirmattend_failr>197,1</confirmattend_failr>
+		<confirmattend_failn>197,1</confirmattend_failn>
 		<notifyattend_tr_yes>197,1</notifyattend_tr_yes>
 		<notifyattend_tr_no>197,1</notifyattend_tr_no>
-		<notifyattend_tt_yes>197,1</notifyattend_tt_yes>
-		<notifyattend_tt_no>197,1</notifyattend_tt_no>
+		<notifycancel>197,1</notifycancel>
+		<notifycancelinstance>197,1</notifycancelinstance>
+		<checkrsvp_yes>197,1</checkrsvp_yes>
+		<checkrsvp_no>197,1</checkrsvp_no>
+		<checkrsvp_unk>197,1</checkrsvp_unk>
+		<checkrsvp_fail>197,1</checkrsvp_fail>
+		<checkrsvp_failn>197,1</checkrsvp_failn>
 	</event_weekly>
 	<event_biweekly>
 		<confirmcreate>405,1</confirmcreate>
@@ -243,23 +290,38 @@
 		<confirmcreate_fail>414,1</confirmcreate_fail>
 		<moreargs>417,4</moreargs>
 		<bad_channel>423,1</bad_channel>
-		<remind1>197,1</remind1>
-		<remind2>197,1</remind2>
-		<remind3>197,1</remind3>
-		<remind4>197,1</remind4>
-		<remind5>197,1</remind5>
+		<remind1t>197,1</remind1t>
+		<remind2t>197,1</remind2t>
+		<remind3t>197,1</remind3t>
+		<remind4t>197,1</remind4t>
+		<remind5t>197,1</remind5t>
+		<remind1r>197,1</remind1r>
+		<remind2r>197,1</remind2r>
+		<remind3r>197,1</remind3r>
+		<remind4r>197,1</remind4r>
+		<remind5r>197,1</remind5r>
+		<remind1g>197,1</remind1g>
+		<remind2g>197,1</remind2g>
+		<remind3g>197,1</remind3g>
+		<remind4g>197,1</remind4g>
+		<remind5g>197,1</remind5g>
 		<attendlist1>197,1</attendlist1>
 		<attendlist2>197,1</attendlist2>
 		<attendlist3>197,1</attendlist3>
 		<confirmattend_yes>197,1</confirmattend_yes>
-		<confirmattend_fail>197,1</confirmattend_fail>
 		<confirmattend_no>197,1</confirmattend_no>
-		<notifyattend_rt_yes>197,1</notifyattend_rt_yes>
-		<notifyattend_rt_no>197,1</notifyattend_rt_no>
+		<confirmattend_fail>197,1</confirmattend_fail>
+		<confirmattend_failr>197,1</confirmattend_failr>
+		<confirmattend_failn>197,1</confirmattend_failn>
 		<notifyattend_tr_yes>197,1</notifyattend_tr_yes>
 		<notifyattend_tr_no>197,1</notifyattend_tr_no>
-		<notifyattend_tt_yes>197,1</notifyattend_tt_yes>
-		<notifyattend_tt_no>197,1</notifyattend_tt_no>
+		<notifycancel>197,1</notifycancel>
+		<notifycancelinstance>197,1</notifycancelinstance>
+		<checkrsvp_yes>197,1</checkrsvp_yes>
+		<checkrsvp_no>197,1</checkrsvp_no>
+		<checkrsvp_unk>197,1</checkrsvp_unk>
+		<checkrsvp_fail>197,1</checkrsvp_fail>
+		<checkrsvp_failn>197,1</checkrsvp_failn>
 	</event_biweekly>
 	<event_monthlya>
 		<confirmcreate>426,1</confirmcreate>
@@ -268,23 +330,38 @@
 		<confirmcreate_fail>435,1</confirmcreate_fail>
 		<moreargs>438,4</moreargs>
 		<bad_channel>444,1</bad_channel>
-		<remind1>197,1</remind1>
-		<remind2>197,1</remind2>
-		<remind3>197,1</remind3>
-		<remind4>197,1</remind4>
-		<remind5>197,1</remind5>
+		<remind1t>197,1</remind1t>
+		<remind2t>197,1</remind2t>
+		<remind3t>197,1</remind3t>
+		<remind4t>197,1</remind4t>
+		<remind5t>197,1</remind5t>
+		<remind1r>197,1</remind1r>
+		<remind2r>197,1</remind2r>
+		<remind3r>197,1</remind3r>
+		<remind4r>197,1</remind4r>
+		<remind5r>197,1</remind5r>
+		<remind1g>197,1</remind1g>
+		<remind2g>197,1</remind2g>
+		<remind3g>197,1</remind3g>
+		<remind4g>197,1</remind4g>
+		<remind5g>197,1</remind5g>
 		<attendlist1>197,1</attendlist1>
 		<attendlist2>197,1</attendlist2>
 		<attendlist3>197,1</attendlist3>
 		<confirmattend_yes>197,1</confirmattend_yes>
-		<confirmattend_fail>197,1</confirmattend_fail>
 		<confirmattend_no>197,1</confirmattend_no>
-		<notifyattend_rt_yes>197,1</notifyattend_rt_yes>
-		<notifyattend_rt_no>197,1</notifyattend_rt_no>
+		<confirmattend_fail>197,1</confirmattend_fail>
+		<confirmattend_failr>197,1</confirmattend_failr>
+		<confirmattend_failn>197,1</confirmattend_failn>
 		<notifyattend_tr_yes>197,1</notifyattend_tr_yes>
 		<notifyattend_tr_no>197,1</notifyattend_tr_no>
-		<notifyattend_tt_yes>197,1</notifyattend_tt_yes>
-		<notifyattend_tt_no>197,1</notifyattend_tt_no>
+		<notifycancel>197,1</notifycancel>
+		<notifycancelinstance>197,1</notifycancelinstance>
+		<checkrsvp_yes>197,1</checkrsvp_yes>
+		<checkrsvp_no>197,1</checkrsvp_no>
+		<checkrsvp_unk>197,1</checkrsvp_unk>
+		<checkrsvp_fail>197,1</checkrsvp_fail>
+		<checkrsvp_failn>197,1</checkrsvp_failn>
 	</event_monthlya>
 	<event_monthlyb>
 		<confirmcreate>447,1</confirmcreate>
@@ -293,23 +370,38 @@
 		<confirmcreate_fail>456,1</confirmcreate_fail>
 		<moreargs>459,4</moreargs>
 		<bad_channel>465,1</bad_channel>
-		<remind1>197,1</remind1>
-		<remind2>197,1</remind2>
-		<remind3>197,1</remind3>
-		<remind4>197,1</remind4>
-		<remind5>197,1</remind5>
+		<remind1t>197,1</remind1t>
+		<remind2t>197,1</remind2t>
+		<remind3t>197,1</remind3t>
+		<remind4t>197,1</remind4t>
+		<remind5t>197,1</remind5t>
+		<remind1r>197,1</remind1r>
+		<remind2r>197,1</remind2r>
+		<remind3r>197,1</remind3r>
+		<remind4r>197,1</remind4r>
+		<remind5r>197,1</remind5r>
+		<remind1g>197,1</remind1g>
+		<remind2g>197,1</remind2g>
+		<remind3g>197,1</remind3g>
+		<remind4g>197,1</remind4g>
+		<remind5g>197,1</remind5g>
 		<attendlist1>197,1</attendlist1>
 		<attendlist2>197,1</attendlist2>
 		<attendlist3>197,1</attendlist3>
 		<confirmattend_yes>197,1</confirmattend_yes>
-		<confirmattend_fail>197,1</confirmattend_fail>
 		<confirmattend_no>197,1</confirmattend_no>
-		<notifyattend_rt_yes>197,1</notifyattend_rt_yes>
-		<notifyattend_rt_no>197,1</notifyattend_rt_no>
+		<confirmattend_fail>197,1</confirmattend_fail>
+		<confirmattend_failr>197,1</confirmattend_failr>
+		<confirmattend_failn>197,1</confirmattend_failn>
 		<notifyattend_tr_yes>197,1</notifyattend_tr_yes>
 		<notifyattend_tr_no>197,1</notifyattend_tr_no>
-		<notifyattend_tt_yes>197,1</notifyattend_tt_yes>
-		<notifyattend_tt_no>197,1</notifyattend_tt_no>
+		<notifycancel>197,1</notifycancel>
+		<notifycancelinstance>197,1</notifycancelinstance>
+		<checkrsvp_yes>197,1</checkrsvp_yes>
+		<checkrsvp_no>197,1</checkrsvp_no>
+		<checkrsvp_unk>197,1</checkrsvp_unk>
+		<checkrsvp_fail>197,1</checkrsvp_fail>
+		<checkrsvp_failn>197,1</checkrsvp_failn>
 	</event_monthlyb>
 	<cleanmessages>
 		<cmme_confirm>468,1</cmme_confirm>

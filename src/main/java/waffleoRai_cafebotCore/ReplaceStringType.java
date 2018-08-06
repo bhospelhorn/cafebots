@@ -27,6 +27,7 @@ public enum ReplaceStringType {
 	EVENTLEVEL("%l"),
 	
 	GENERALNUM("%n"),
+	ALTNUM("%N"),
 	GUILDNAME("%G"),
 	BOTNAME("%s"),
 	

@@ -14,6 +14,9 @@ import waffleoRai_schedulebot.EventType;
  * 
  * 1.0.0 -> 1.1.0 | July 20, 2018
  * 	Added command message ID note
+ * 
+ * 1.1.0 -> 1.2.0 | August 5, 2018
+ * 	Added view functionality
  */
 
 /**
@@ -22,9 +25,11 @@ import waffleoRai_schedulebot.EventType;
  * <br>sor [etype] [rlevel]
  * <br>sor alloff
  * <br>sor allon
+ * <br>sor defo
+ * <br>sor view [etype]
  * @author Blythe Hospelhorn
- * @version 1.1.0
- * @since July 20, 2018
+ * @version 1.2.0
+ * @since August 5, 2018
  */
 public class CMD_SOR extends CommandAdapter {
 	
@@ -79,6 +84,19 @@ public class CMD_SOR extends CommandAdapter {
 		super.setCommandMessageID(cmdID);
 	}
 	
+	/**
+	 * Construct a SOR command for viewing reminder times for a particular event type.
+	 * @param ch Channel to send message to.
+	 * @param t Type of event to view reminder times for.
+	 * @param cmdID ID of command message.
+	 */
+	public CMD_SOR(MessageChannel ch, EventType t, long cmdID)
+	{
+		channel = ch;
+		type = t;
+		super.setCommandMessageID(cmdID);
+	}
+	
 	@Override
 	public long getChannelID()
 	{
@@ -94,7 +112,13 @@ public class CMD_SOR extends CommandAdapter {
 	/**
 	 * @throws NullPointerException If bot is null.
 	 */
-	public void execute(AbstractBot bot) {
+	public void execute(AbstractBot bot) 
+	{
+		if (user == null)
+		{
+			bot.printReminderTimes(channel.getIdLong(), type);
+			return;
+		}
 		if (all)
 		{
 			if(dir) bot.sorAllOn(channel.getIdLong(), user);

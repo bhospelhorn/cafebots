@@ -18,13 +18,16 @@ import waffleoRai_cafebotCommands.Commands.CMD_BadCommandMessage;
 import waffleoRai_cafebotCommands.Commands.CMD_IssueReminder;
 import waffleoRai_cafebotCommands.Commands.CMD_MemberFarewell;
 import waffleoRai_cafebotCommands.Commands.CMD_NewMemberNotify;
+import waffleoRai_cafebotCommands.Commands.CMD_NotifyCancellation;
 import waffleoRai_cafebotCommands.Commands.CMD_OtherBotHandledMessage;
 import waffleoRai_cafebotCommands.Commands.CMD_ParserBlockWarn;
 import waffleoRai_cafebotCommands.Commands.CMD_WishBirthday;
 import waffleoRai_cafebotCore.AbstractBot;
 import waffleoRai_cafebotRoles.ActorRole;
 import waffleoRai_schedulebot.Birthday;
+import waffleoRai_schedulebot.CalendarEvent;
 import waffleoRai_schedulebot.EventAdapter;
+import waffleoRai_schedulebot.EventType;
 
 /*
  * UPDATES
@@ -713,6 +716,79 @@ public class ParseCore {
 			return;
 		}
 		b.getCommandQueue().addCommand(cmd);
+		
+	}
+	
+	public void command_EventCancellation(CalendarEvent e, boolean instance, long guild)
+	{
+		int bot = 1;
+		switch (e.getType())
+		{
+		case BIRTHDAY:
+			bot = scheduler.sendCommandTo(CMD_WISHBIRTHDAY);
+			break;
+		case BIWEEKLY:
+			bot = scheduler.sendCommandTo(CMD_REM_BIWEEKLY);
+			break;
+		case DEADLINE:
+			bot = scheduler.sendCommandTo(CMD_REM_DEADLINE);
+			break;
+		case MONTHLYA:
+			bot = scheduler.sendCommandTo(CMD_REM_MONTHLYA);
+			break;
+		case MONTHLYB:
+			bot = scheduler.sendCommandTo(CMD_REM_MONTHLYB);
+			break;
+		case ONETIME:
+			bot = scheduler.sendCommandTo(CMD_REM_ONETIME);
+			break;
+		case WEEKLY:
+			bot = scheduler.sendCommandTo(CMD_REM_WEEKLY);
+			break;
+		default:
+			break;
+		}
+		
+		Command cmd = new CMD_NotifyCancellation(e, instance, guild);
+		AbstractBot b = mybots[bot];
+		if (b == null)
+		{
+			System.err.println("ParseCore.command_EventReminder || Bot " + bot + " does not exist!");
+			return;
+		}
+		b.getCommandQueue().addCommand(cmd);
+	}
+	
+	public void redirectEventCommand(Command cmd, EventType t)
+	{
+		int bot = 0;
+		switch (t)
+		{
+		case BIRTHDAY:
+			bot = scheduler.sendCommandTo(CMD_WISHBIRTHDAY);
+			break;
+		case BIWEEKLY:
+			bot = scheduler.sendCommandTo(CMD_REM_BIWEEKLY);
+			break;
+		case DEADLINE:
+			bot = scheduler.sendCommandTo(CMD_REM_DEADLINE);
+			break;
+		case MONTHLYA:
+			bot = scheduler.sendCommandTo(CMD_REM_MONTHLYA);
+			break;
+		case MONTHLYB:
+			bot = scheduler.sendCommandTo(CMD_REM_MONTHLYB);
+			break;
+		case ONETIME:
+			bot = scheduler.sendCommandTo(CMD_REM_ONETIME);
+			break;
+		case WEEKLY:
+			bot = scheduler.sendCommandTo(CMD_REM_WEEKLY);
+			break;
+		default: return;
+		}
+		
+		this.issueDirectCommand(bot, cmd);
 		
 	}
 	
