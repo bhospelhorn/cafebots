@@ -6,9 +6,8 @@ Therefore, I shall include a comprehensive list here instead.
 
 ### Prefixes
 For the message listener to recognize a sent message as a command and even bother to process it, the message must meet one of two requirements:
-
-  A. It must begin with "!" OR
-  B. It must contain mentions of one or more bot accounts connected to the core.
+  - A. It must begin with "!" OR
+  - B. It must contain mentions of one or more bot accounts connected to the core.
   
 Note that if it contains both, the command may not parse correctly.
 
@@ -29,6 +28,12 @@ qchan birthday
     Check which channel is set as the birthday wishes channel.
 qchan greeting
     Check which channel is set as the greetings/farewell channel.
+checkg greeting (me)
+    Check greeting status for this guild/server. If optional "me" arg is included, 
+    check if greeting pings are on for user.
+checkg farewell (me)
+    Check farewell status for this guild/server. If optional "me" arg is included, 
+    check if farewell pings are on for user.
 ```
 
 User Profile Management
@@ -210,7 +215,7 @@ Channels can be specified by channel names or long UIDs. Don't include the # in 
 Users
 
 ```
-target[n] - Usernames or UIDs of users to include as event participants. You may included as many users as you wish, including none.
+target[n] - Usernames or UIDs of users to include as event participants. You may include as many users as you wish, including none.
 
 To make the event a universal event, you can substitute "everybody", "all", or "group" for the target1 argument. This will cause reminders for this event to ping @everyone. Note that if you include any additional participants after this argument, they will be ignored.
 ```
