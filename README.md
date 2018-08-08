@@ -166,6 +166,8 @@ audconf [user] [bool]
 Permissions
 
 ```
+checkperm
+    Check which roles have admin permissions. The server owner always has admin permissions.
 addperm [discordrole]
     Add admin permissions for a Discord role.
 remperm [discordrole]
