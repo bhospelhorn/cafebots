@@ -17,13 +17,16 @@ import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.MessageChannel;
+import net.dv8tion.jda.core.entities.Role;
 import net.dv8tion.jda.core.entities.User;
 import waffleoRai_Utils.FileBuffer;
 import waffleoRai_Utils.FileBuffer.UnsupportedFileTypeException;
 import waffleoRai_cafebotCommands.BotScheduler;
 import waffleoRai_cafebotCommands.Command;
+import waffleoRai_cafebotCommands.JoinListener;
 import waffleoRai_cafebotCommands.MessageListener;
 import waffleoRai_cafebotCommands.ParseCore;
+import waffleoRai_cafebotCommands.RoleChangeListener;
 import waffleoRai_schedulebot.Birthday;
 import waffleoRai_schedulebot.BiweeklyEvent;
 import waffleoRai_schedulebot.CalendarEvent;
@@ -91,8 +94,12 @@ public class BotBrain {
 		//Here, the listeners are generated and given to the master bot.
 		MessageListener ml = new MessageListener(parser, verbose);
 		GreetingListener gl = new GreetingListener(parser, verbose);
+		JoinListener jl = new JoinListener(verbose, this);
+		RoleChangeListener rl = new RoleChangeListener(verbose, this);
 		bots[1].addListener(ml);
 		bots[1].addListener(gl);
+		bots[1].addListener(jl);
+		bots[1].addListener(rl);
 		//Logs in all bots and starts all threads
 		parser.block();
 		//Will go ahead and start them all, but this method blocks until everything is ready.
@@ -873,6 +880,13 @@ public class BotBrain {
 		if (gs == null) return false;
 		ActorUser u = gs.getUserBank().getUser(uid);
 		return (u != null);
+	}
+	
+	/* ----- Role Updates ----- */
+	
+	public void processRoleUpdate(Member member, List<Role> roles, boolean add)
+	{
+		parser.processRoleChange(member, roles, add);
 	}
 	
 	/* ----- Force Save ----- */

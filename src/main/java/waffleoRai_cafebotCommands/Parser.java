@@ -8,6 +8,8 @@ import waffleoRai_cafebotCommands.parsers.PRS_AddBirthday;
 import waffleoRai_cafebotCommands.parsers.PRS_AttendEvent;
 import waffleoRai_cafebotCommands.parsers.PRS_CancelEvent;
 import waffleoRai_cafebotCommands.parsers.PRS_ChChan;
+import waffleoRai_cafebotCommands.parsers.PRS_ChangeRoleAdmin;
+import waffleoRai_cafebotCommands.parsers.PRS_CheckAdminRoles;
 import waffleoRai_cafebotCommands.parsers.PRS_CheckGreetingStatus;
 import waffleoRai_cafebotCommands.parsers.PRS_CheckRSVP;
 import waffleoRai_cafebotCommands.parsers.PRS_CleanMessages_1;
@@ -15,6 +17,7 @@ import waffleoRai_cafebotCommands.parsers.PRS_CleanMessages_2;
 import waffleoRai_cafebotCommands.parsers.PRS_CleanMessages_3;
 import waffleoRai_cafebotCommands.parsers.PRS_DeclineEvent;
 import waffleoRai_cafebotCommands.parsers.PRS_EventBiweekly;
+import waffleoRai_cafebotCommands.parsers.PRS_EventDeadline;
 import waffleoRai_cafebotCommands.parsers.PRS_EventHelp;
 import waffleoRai_cafebotCommands.parsers.PRS_EventMonthlyDOM;
 import waffleoRai_cafebotCommands.parsers.PRS_EventMonthlyDOW;
@@ -73,7 +76,7 @@ public interface Parser {
 		pmap.put("myevents", new PRS_SeeEvents());
 		pmap.put("ecancel", new PRS_CancelEvent());
 		pmap.put("onetime", new PRS_EventOnetime());
-		pmap.put("deadline", null);
+		pmap.put("deadline", new PRS_EventDeadline());
 		pmap.put("weekly", new PRS_EventWeekly());
 		pmap.put("biweekly", new PRS_EventBiweekly());
 		pmap.put("monthlyday", new PRS_EventMonthlyDOM());
@@ -88,8 +91,9 @@ public interface Parser {
 		pmap.put("amiaudconf", null);
 		pmap.put("qchan", new PRS_qChan());
 		
-		pmap.put("addperm", null);
-		pmap.put("remperm", null);
+		pmap.put("checkperm", new PRS_CheckAdminRoles());
+		pmap.put("addperm", new PRS_ChangeRoleAdmin(true));
+		pmap.put("remperm", new PRS_ChangeRoleAdmin(false));
 		pmap.put("chchan", new PRS_ChChan());
 		pmap.put("makerole", null);
 		pmap.put("seeroles", null);

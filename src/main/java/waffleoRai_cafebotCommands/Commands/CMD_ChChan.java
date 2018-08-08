@@ -13,6 +13,9 @@ import waffleoRai_cafebotCore.AbstractBot;
  * 
  * 1.0.0 -> 1.1.0 | July 20, 2018
  * 	Added command message ID note
+ * 
+ * 1.1.0 -> 1.1.1 | August 7, 2018
+ * 	Added more command cleaning stuff
  */
 
 /**
@@ -22,8 +25,8 @@ import waffleoRai_cafebotCore.AbstractBot;
  * <br>chchan greeting [channelName]
  * <br><i>These commands are for guild admins only.</i>
  * @author Blythe Hospelhorn
- * @version 1.1.0
- * @since July 20, 2018
+ * @version 1.1.1
+ * @since August 7, 2018
  */
 public class CMD_ChChan extends CommandAdapter{
 
@@ -70,6 +73,7 @@ public class CMD_ChChan extends CommandAdapter{
 	public void execute(AbstractBot bot) {
 		if (bday) bot.setBirthdayChannel(cmd_channel.getIdLong(), trg_channel, user);
 		else bot.setGreetingChannel(cmd_channel.getIdLong(), trg_channel, user);
+		super.cleanAfterMyself(bot);
 	}
 	
 	@Override
@@ -78,4 +82,9 @@ public class CMD_ChChan extends CommandAdapter{
 		return "chchan";
 	}
 
+	public long getGuildID()
+	{
+		return user.getGuild().getIdLong();
+	}
+	
 }

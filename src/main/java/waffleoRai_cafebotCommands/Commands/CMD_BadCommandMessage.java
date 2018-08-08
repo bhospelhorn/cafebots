@@ -1,5 +1,6 @@
 package waffleoRai_cafebotCommands.Commands;
 
+import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.MessageChannel;
 import waffleoRai_cafebotCommands.CommandAdapter;
 import waffleoRai_cafebotCore.AbstractBot;
@@ -12,6 +13,9 @@ import waffleoRai_cafebotCore.AbstractBot;
  * 
  * 1.0.0 -> 1.1.0 | July 20, 2018
  * 	Added command message ID note
+ * 
+ * 1.1.0 -> 1.2.0 | August 7, 2018
+ * 	Command cleanup stuff
  */
 
 /**
@@ -19,12 +23,13 @@ import waffleoRai_cafebotCore.AbstractBot;
  * "command was not understood" message to the requested channel.
  * <br>This event cannot be induced via command line. It is internal only.
  * @author Blythe Hospelhorn
- * @version 1.1.0
- * @since July 20, 2018
+ * @version 1.2.0
+ * @since August 7, 2018
  */
 public class CMD_BadCommandMessage extends CommandAdapter {
 
 	private MessageChannel channel;
+	private Guild guild;
 
 	/**
 	 * Construct a BadCommandMessage command by providing the channel to send
@@ -33,9 +38,10 @@ public class CMD_BadCommandMessage extends CommandAdapter {
 	 * the bad command was received on and the bot reply should be sent to.
 	 * @param cmdID Long UID of the message the command was sent in.
 	 */
-	public CMD_BadCommandMessage(MessageChannel ch, long cmdID)
+	public CMD_BadCommandMessage(MessageChannel ch, Guild g, long cmdID)
 	{
 		channel = ch;
+		guild = g;
 		super.setCommandMessageID(cmdID);
 	}
 	
@@ -56,13 +62,18 @@ public class CMD_BadCommandMessage extends CommandAdapter {
 	 */
 	public void execute(AbstractBot bot) {
 		bot.displayBadCommandMessage(channel.getIdLong());
-		
+		cleanAfterMyself(bot);
 	}
 
 	@Override
 	public String toString()
 	{
 		return "idontunderstand";
+	}
+	
+	public long getGuildID()
+	{
+		return guild.getIdLong();
 	}
 	
 }

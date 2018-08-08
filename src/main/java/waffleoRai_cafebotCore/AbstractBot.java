@@ -38,6 +38,7 @@ import net.dv8tion.jda.core.hooks.ListenerAdapter;
 import net.dv8tion.jda.core.managers.Presence;
 import waffleoRai_Utils.FileBuffer;
 import waffleoRai_cafebotCommands.*;
+import waffleoRai_cafebotCommands.Commands.CMD_ChangeRoleAdmin;
 import waffleoRai_cafebotCommands.Commands.CMD_EventMakeBiweekly;
 import waffleoRai_cafebotCommands.Commands.CMD_EventMakeDeadline;
 import waffleoRai_cafebotCommands.Commands.CMD_EventMakeMonthlyDOM;
@@ -48,6 +49,7 @@ import waffleoRai_schedulebot.Attendance;
 import waffleoRai_schedulebot.Birthday;
 import waffleoRai_schedulebot.BiweeklyEvent;
 import waffleoRai_schedulebot.CalendarEvent;
+import waffleoRai_schedulebot.DeadlineEvent;
 import waffleoRai_schedulebot.EventAdapter;
 import waffleoRai_schedulebot.EventType;
 import waffleoRai_schedulebot.MonthlyDOMEvent;
@@ -595,6 +597,27 @@ public abstract class AbstractBot implements Bot{
 		botcore.shutdown();
 	}
 
+	/* ----- Complain ----- */
+	
+	public String printMessageToSTDERR(String funcname, String message)
+	{
+		GregorianCalendar stamp = new GregorianCalendar();
+		String threadname = Thread.currentThread().getName();
+		String errorid = Long.toHexString(stamp.getTimeInMillis());
+		String errmsg = "--- ERROR " + errorid + " | Thread: " + threadname + "\n";
+		errmsg += "--- ERROR " + errorid + " | Method: " + funcname + "\n";
+		errmsg += "--- ERROR " + errorid + " | Timestamp: " + FileBuffer.formatTimeAmerican(stamp) + "\n";
+		errmsg += "--- ERROR " + errorid + " | Message: " + message;
+		System.err.println(errmsg);
+		return errmsg;
+	}
+	
+	public void notifyInternalError(long discordChannel, String funcname, String message)
+	{
+		String errmsg = printMessageToSTDERR(funcname, message);
+		internalErrorMessage(discordChannel, errmsg);
+	}
+	
 	/* ----- Userdata Management ----- */
 	
 	/**
@@ -605,9 +628,13 @@ public abstract class AbstractBot implements Bot{
 	public boolean newGuild(Guild g)
 	{
 		//Blocks until addition detected or timeout...
-		if (g == null) return false;
+		if (g == null){
+			System.out.println(Thread.currentThread().getName() + " || AbstractBot.newGuild || ERROR: Cannot add null guild!");
+			return false;
+		}
 		int cycles = 0;
 		long gid = g.getIdLong();
+		if (brain.hasGuild(gid)) return true;
 		brain.requestGuildAddition(g);
 		boolean added = (brain.hasGuild(gid));
 		while (!added && cycles < 120)
@@ -623,6 +650,10 @@ public abstract class AbstractBot implements Bot{
 			added = (brain.hasGuild(gid));
 			cycles++;
 		}
+		if (added == false)
+		{
+			System.out.println(Thread.currentThread().getName() + " || AbstractBot.newGuild || ERROR: Guild add timeout!");
+		}
 		return added;
 	}
 	
@@ -634,10 +665,17 @@ public abstract class AbstractBot implements Bot{
 	 */
 	public boolean newMember(Member m)
 	{
+		if (m == null)
+		{
+			System.out.println(Thread.currentThread().getName() + " || AbstractBot.newMember || ERROR: Cannot add null member!");
+			return false;
+		}
 		//Blocks until addition detected or timeout...
 		int cycles = 0;
 		long gid = m.getGuild().getIdLong();
 		long uid = m.getUser().getIdLong();
+		//Check if member is already there...
+		if (brain.hasMember(gid, uid)) return true;
 		brain.requestMemberAddition(m);
 		boolean added = (brain.hasMember(gid, uid));
 		while (!added && cycles < 120)
@@ -652,6 +690,10 @@ public abstract class AbstractBot implements Bot{
 			}
 			added = (brain.hasMember(gid, uid));
 			cycles++;
+		}
+		if (added == false)
+		{
+			System.out.println(Thread.currentThread().getName() + " || AbstractBot.newMember || ERROR: User add timeout!");
 		}
 		return added;
 	}
@@ -817,6 +859,15 @@ public abstract class AbstractBot implements Bot{
 		}
 	}
 	
+	private void insufficientPermissionsMessage(long channel, Member filthycommoner)
+	{
+		String message = botStrings.get(KEY_MAINGROUP_BOTSTRINGS + KEY_GROUP_GENERAL + KEY_NOADMINPERM);
+		BotMessage msg = new BotMessage(message);
+		msg.substituteMention(ReplaceStringType.REQUSER_MENTION, filthycommoner);
+		msg.substituteString(ReplaceStringType.REQUSER, filthycommoner.getUser().getName());
+		sendMessage(channel, msg);
+	}
+	
 	private void insufficientPermissionsMessage(MessageChannel channel, Member filthycommoner)
 	{
 		String message = botStrings.get(KEY_MAINGROUP_BOTSTRINGS + KEY_GROUP_GENERAL + KEY_NOADMINPERM);
@@ -828,6 +879,15 @@ public abstract class AbstractBot implements Bot{
 		msg.substituteMention(ReplaceStringType.REQUSER_MENTION, filthycommoner);
 		msg.substituteString(ReplaceStringType.REQUSER, filthycommoner.getUser().getName());
 		sendMessage(channel, msg);
+	}
+	
+	private void internalErrorMessage(long channelID, String appendage)
+	{
+		String key = BotStrings.getInternalErrorKey();
+		String ieMessage = botStrings.get(key);
+		BotMessage bmsg = new BotMessage(ieMessage);
+		bmsg.addToEnd("\n\n" + appendage);
+		sendMessage(channelID, bmsg);
 	}
 	
 	private TextChannel getChannel(long channelID)
@@ -1703,6 +1763,215 @@ public abstract class AbstractBot implements Bot{
 		//Send!
 		sendMessage(channelID, bmsg);
 		
+	}
+	
+	/* ----- Commands : Admin Permissions ----- */
+	
+	public void processRoleUpdate(Member m, List<Role> roles, boolean added)
+	{
+		//Error Prep
+		String methodname = "AbstractBot.processRoleUpdate";
+		
+		//Get guild ID
+		long gid = m.getGuild().getIdLong();
+		
+		//Get guild settings
+		GuildSettings gs = brain.getGuild(gid);
+		if (gs == null)
+		{
+			printMessageToSTDERR(methodname, "Data for guild " + gid + " could not be retrieved!");
+			return;
+		}
+		
+		//Update permissions
+		if (added)
+		{
+			for (Role r : roles)
+			{
+				gs.updateAdminPermissions_add(r, m);
+			}
+		}
+		else
+		{
+			gs.updateAdminPermissions_remove(m);
+		}
+		
+	}
+	
+	public void promptChangeAdminPermission(CMD_ChangeRoleAdmin command)
+	{
+		//Error Prep
+		String methodname = "AbstractBot.promptChangeAdminPermission";
+		
+		//Nab arguments
+		Member req = command.getMember();
+		long chID = command.getChannelID();
+		String role = command.getRoleArgument();
+		
+		//Get guild and user IDs
+		Guild guild = req.getGuild();
+		long gid = req.getGuild().getIdLong();
+		long uid = req.getUser().getIdLong();
+		
+		//Get guild settings and req user settings
+		GuildSettings gs = brain.getGuild(gid);
+		if (gs == null)
+		{
+			notifyInternalError(chID, methodname, "Data for guild " + gid + " could not be retrieved!");
+			return;
+		}
+		ActorUser reqprofile = gs.getUser(uid);
+		if (reqprofile == null)
+		{
+			notifyInternalError(chID, methodname, "Data for user " + uid + " could not be retrieved!");
+			return;
+		}
+		
+		//Check if user is admin. Reject request if not.
+		if (!reqprofile.isAdmin())
+		{
+			insufficientPermissionsMessage(chID, req);
+			return;
+		}
+		
+		//Attempt to parse role string into Role
+		Role myrole = null;
+		try
+		{
+			//Try lookup by ID
+			myrole = guild.getRoleById(role);
+		}
+		catch (Exception e)
+		{
+			//Try lookup by name
+			List<Role> rolelist = guild.getRolesByName(role, true);
+			if (rolelist == null || rolelist.isEmpty()){
+				displayBadCommandMessage(chID);
+				printMessageToSTDERR(methodname, "Role \"" + role + "\" was not recognized.");
+				return;
+			}
+			myrole = rolelist.get(0);
+		}
+		
+		command.resolveRole(myrole);
+		
+		//Generate message
+		String key = "";
+		if (command.addPerm()) key = BotStrings.KEY_MAINGROUP_BOTSTRINGS + BotStrings.KEY_GROUP_PERMMANAGE + BotStrings.KEY_PERMS_CONFIRMADD;
+		else key = BotStrings.KEY_MAINGROUP_BOTSTRINGS + BotStrings.KEY_GROUP_PERMMANAGE + BotStrings.KEY_PERMS_CONFIRMREM;
+		BotMessage bmsg = new BotMessage(botStrings.get(key));
+		bmsg.substituteString(ReplaceStringType.ROLE, myrole.getName());
+
+		MessageChannel chan = getChannel(chID);
+		
+		//Request response
+		brain.requestResponse(this.localIndex, req.getUser(), command, chan);
+		
+		//Print message
+		sendMessage(chan, bmsg);
+	}
+	
+	public void addAdminPermission(long chID, Guild g, Role role)
+	{
+		//Error Prep
+		String methodname = "AbstractBot.addAdminPermission";
+		
+		//Get guild ID
+		long gid = g.getIdLong();
+		
+		//Get guild settings
+		GuildSettings gs = brain.getGuild(gid);
+		if (gs == null)
+		{
+			notifyInternalError(chID, methodname, "Data for guild " + gid + " could not be retrieved!");
+			return;
+		}
+		
+		//Get users with this role
+		List<Member> rollin = g.getMembersWithRoles(role);
+		
+		//Add role to list of roles that has admin permissions in guild (and give all users with that role admin permissions)
+		gs.grantAdminPermissions(role, rollin);
+		
+		//Print message
+		String key = BotStrings.KEY_MAINGROUP_BOTSTRINGS + BotStrings.KEY_GROUP_PERMMANAGE + BotStrings.KEY_PERMS_CONFIRM;
+		BotMessage bmsg = new BotMessage(botStrings.get(key));
+		bmsg.substituteString(ReplaceStringType.ROLE, role.getName());
+		sendMessage(chID, bmsg);
+		
+	}
+	
+	public void removeAdminPermission(long chID, Guild g, Role role)
+	{
+		//Error prep
+		String methodname = "AbstractBot.removeAdminPermission";
+		
+		//Get guild ID
+		long gid = g.getIdLong();
+		
+		//Get guild settings
+		GuildSettings gs = brain.getGuild(gid);
+		if (gs == null)
+		{
+			notifyInternalError(chID, methodname, "Data for guild " + gid + " could not be retrieved!");
+			return;
+		}
+		
+		//Get users with this role
+		List<Member> rollin = g.getMembersWithRoles(role);
+		
+		//Add role to list of roles that has admin permissions in guild (and give all users with that role admin permissions)
+		gs.revokeAdminPermissions(role, rollin);
+		
+		//Print message
+		String key = BotStrings.KEY_MAINGROUP_BOTSTRINGS + BotStrings.KEY_GROUP_PERMMANAGE + BotStrings.KEY_PERMS_CONFIRMNEG;
+		BotMessage bmsg = new BotMessage(botStrings.get(key));
+		bmsg.substituteString(ReplaceStringType.ROLE, role.getName());
+		sendMessage(chID, bmsg);
+	}
+	
+	public void checkAdminRoles(long chID, Guild g)
+	{
+		//Error prep
+		String methodname = "AbstractBot.checkAdminRoles";
+		
+		//Get guild ID
+		long gid = g.getIdLong();
+		
+		//Get guild settings
+		GuildSettings gs = brain.getGuild(gid);
+		if (gs == null)
+		{
+			notifyInternalError(chID, methodname, "Data for guild " + gid + " could not be retrieved!");
+			return;
+		}
+		
+		//Get admin role ID list
+		List<Long> adminroles = gs.getAdminRoleList();
+		
+		//Convert to list of roles
+		List<Role> roles = new LinkedList<Role>();
+		for (long rid : adminroles)
+		{
+			Role r = g.getRoleById(rid);
+			if (r != null) roles.add(r);
+		}
+		
+		//Retrieve bot string
+		String key = BotStrings.KEY_MAINGROUP_BOTSTRINGS + BotStrings.KEY_GROUP_PERMMANAGE + BotStrings.KEY_PERMS_QUERY;
+		String str = botStrings.get(key);
+		BotMessage bmsg = new BotMessage(str);
+		
+		//Add list
+		String rolelist = "[*]" + g.getOwner().getEffectiveName();
+		for (Role r : roles)
+		{
+			rolelist += "\n" + r.getName();
+		}
+		bmsg.addToEnd(rolelist);
+		
+		//Print message
+		sendMessage(chID, bmsg);
 	}
 	
 	/* ----- Commands : Change Status ----- */
@@ -2741,7 +3010,46 @@ public abstract class AbstractBot implements Bot{
 	
 	public void makeDeadlineEvent_prompt(CMD_EventMakeDeadline command)
 	{
+		List<TextChannel> possible_rchan = botcore.getTextChannelsByName(command.getRequesterChannelName(), true);
+		List<TextChannel> possible_tchan = botcore.getTextChannelsByName(command.getTargetChannelName(), true);
+		if (possible_rchan == null || possible_rchan.isEmpty() || possible_tchan == null || possible_tchan.isEmpty())
+		{
+			String badchan_key = BotStrings.getStringKey_Event(EventType.DEADLINE, StringKey.EVENT_BADCHAN, null, 0);
+			String rawmsg = botStrings.get(badchan_key);
+			BotMessage bmsg = new BotMessage(rawmsg);
+			sendMessage(command.getChannelID(), bmsg);
+		}
+		command.resolveRequesterChannel(possible_rchan.get(0).getIdLong());
+		command.resolveTargetChannel(possible_tchan.get(0).getIdLong());
+		//Try to get user profile
+		ActorUser requser = brain.getUser(command.getGuildID(), command.getUserID());
+		TimeZone rtz = TimeZone.getDefault();
+		if (requser != null) rtz = requser.getTimeZone();
 		
+		//If channels pass, then display prompt
+		String promptkey = BotStrings.getStringKey_Event(EventType.DEADLINE, StringKey.EVENT_CONFIRMCREATE, null, 0);
+		String rawmsg = botStrings.get(promptkey);
+		BotMessage bmsg = new BotMessage(rawmsg);
+		
+		//Req user name
+		bmsg.substituteString(ReplaceStringType.REQUSER, command.getUsername());
+		
+		//Event name
+		bmsg.substituteString(ReplaceStringType.EVENTNAME, command.getEventName());
+		
+		//Event time
+		GregorianCalendar etime = new GregorianCalendar();
+		etime.setTimeZone(rtz);
+		etime.set(command.getYear(), command.getMonth(), command.getDay(), command.getHour(), command.getMinute());
+		String datestring = brain.formatDateString(etime, true);
+		bmsg.substituteString(ReplaceStringType.TIME, datestring);
+		
+		//Target name(s)
+		bmsg.substituteString(ReplaceStringType.TARGUSER, brain.formatStringList(command.getTargetUsers()));
+		
+		MessageChannel ch = this.getChannel(command.getChannelID());
+		brain.requestResponse(this.localIndex, command.getRequestingUser().getUser(), command, ch);
+		sendMessage(ch, bmsg);
 	}
 	
 	public void makeWeeklyEvent_complete(CMD_EventMakeWeekly command, boolean r)
@@ -3583,7 +3891,191 @@ public abstract class AbstractBot implements Bot{
 	
 	public void makeDeadlineEvent_complete(CMD_EventMakeDeadline command, boolean r)
 	{
-		
+		brain.unblacklist(command.getRequestingUser().getUser().getIdLong(), localIndex);
+		if (!r)
+		{
+			String cancelkey = BotStrings.getStringKey_Event(EventType.DEADLINE, StringKey.EVENT_CONFIRMCREATE, StringKey.OP_NO, 0);
+			String rawmsg = botStrings.get(cancelkey);
+			BotMessage bmsg = new BotMessage(rawmsg);
+			bmsg.substituteString(ReplaceStringType.EVENTNAME, command.getEventName());
+			sendMessage(command.getChannelID(), bmsg);
+		}
+		else
+		{
+			String successkey = BotStrings.getStringKey_Event(EventType.DEADLINE, StringKey.EVENT_CONFIRMCREATE, StringKey.OP_YES, 0);
+			String failkey = BotStrings.getStringKey_Event(EventType.DEADLINE, StringKey.EVENT_CONFIRMCREATE, StringKey.OP_FAIL, 0);
+			String rawmsgf = botStrings.get(failkey);
+			BotMessage bmsgf = new BotMessage(rawmsgf);
+			//Get channel
+			MessageChannel ch = this.getChannel(command.getChannelID());
+			//Get guild and user info
+			long requid = command.getUserID();
+			Guild g = command.getRequestingUser().getGuild();
+			long gid = g.getIdLong();
+			GuildSettings gs = brain.getUserData().getGuildSettings(gid);
+			if (gs == null)
+			{
+				boolean b = newGuild(g);
+				if (!b)
+				{
+					GregorianCalendar stamp = new GregorianCalendar();
+					System.err.println(Thread.currentThread().getName() + " || AbstractBot.makeDeadlineEvent_complete || ERROR: Data for guild " + Long.toHexString(gid) + " could not be retrieved! | " + FileBuffer.formatTimeAmerican(stamp));
+					sendMessage(ch, bmsgf);
+					return;	
+				}
+				gs = brain.getUserData().getGuildSettings(gid);
+			}
+			Schedule s = gs.getSchedule();
+			if (s == null)
+			{
+				GregorianCalendar stamp = new GregorianCalendar();
+				System.err.println(Thread.currentThread().getName() + " || AbstractBot.makeDeadlineEvent_complete || ERROR: Guild schedule could not be retrieved! | " + FileBuffer.formatTimeAmerican(stamp));
+				sendMessage(ch, bmsgf);
+				return;	
+			}
+			ActorUser user = gs.getUserBank().getUser(requid);
+			if (user == null)
+			{
+				boolean b = newMember(command.getRequestingUser());
+				if (!b)
+				{
+					GregorianCalendar stamp = new GregorianCalendar();
+					System.err.println(Thread.currentThread().getName() + " || AbstractBot.makeDeadlineEvent_complete || ERROR: Data for member " + Long.toHexString(requid) + " could not be retrieved! | " + FileBuffer.formatTimeAmerican(stamp));
+					sendMessage(ch, bmsgf);
+					return;	
+				}
+				user = gs.getUserBank().getUser(requid);
+			}
+			TimeZone tz = user.getTimeZone();
+			//Load easy variables
+			DeadlineEvent e = new DeadlineEvent(requid);
+			e.setName(command.getEventName());
+			e.setReqChannel(command.getRequesterChannelID());
+			e.setTargChannel(command.getTargetChannelID());
+			//Calculate when next event would be
+			GregorianCalendar etime = new GregorianCalendar();
+			etime.setTimeZone(tz);
+			etime.set(command.getYear(), command.getMonth(), command.getDay(), command.getHour(), command.getMinute());
+			e.setEventTime(etime.getTimeInMillis(), tz);
+			//Figure out targets
+				//Looks for usernames, nicknames, and UIDs
+			//Also make user profiles for all targets if not there
+			if (!command.isGroupEvent())
+			{
+				e.setGroupEvent(false);
+				List<String> targets = command.getTargetUsers();
+				if (targets != null && !targets.isEmpty())
+				{
+					for (String u : targets)
+					{
+						User byid = null;	
+						try
+						{
+							byid = botcore.getUserById(u);	
+						}
+						catch (Exception ex)
+						{
+							byid = null;
+						}
+						if (byid != null)
+						{
+							long uid = byid.getIdLong();
+							e.addTargetUser(uid);
+							ActorUser t = gs.getUserBank().getUser(uid);
+							if (t == null)
+							{
+								boolean b = newMember(g.getMember(byid));
+								if (!b)
+								{
+									GregorianCalendar stamp = new GregorianCalendar();
+									System.err.println(Thread.currentThread().getName() + " || AbstractBot.makeDeadlineEvent_complete || ERROR: Data for member " + Long.toHexString(uid) + " could not be retrieved! | " + FileBuffer.formatTimeAmerican(stamp));
+									sendMessage(ch, bmsgf);
+									return;	
+								}
+							}
+							continue;
+						}
+						List<Member> byname = g.getMembersByName(u, true);
+						if (byname != null && !byname.isEmpty())
+						{
+							long uid = byname.get(0).getUser().getIdLong();
+							e.addTargetUser(uid);
+							ActorUser t = gs.getUserBank().getUser(uid);
+							if (t == null)
+							{
+								boolean b = newMember(byname.get(0));
+								if (!b)
+								{
+									GregorianCalendar stamp = new GregorianCalendar();
+									System.err.println(Thread.currentThread().getName() + " || AbstractBot.makeDeadlineEvent_complete || ERROR: Data for member " + Long.toHexString(uid) + " could not be retrieved! | " + FileBuffer.formatTimeAmerican(stamp));
+									sendMessage(ch, bmsgf);
+									return;	
+								}
+							}
+							continue;
+						}
+						List<Member> bynickname = g.getMembersByNickname(u, true);
+						if (bynickname != null && !bynickname.isEmpty())
+						{
+							long uid = bynickname.get(0).getUser().getIdLong();
+							e.addTargetUser(uid);
+							ActorUser t = gs.getUserBank().getUser(uid);
+							if (t == null)
+							{
+								boolean b = newMember(bynickname.get(0));
+								if (!b)
+								{
+									GregorianCalendar stamp = new GregorianCalendar();
+									System.err.println(Thread.currentThread().getName() + " || AbstractBot.makeDeadlineEvent_complete || ERROR: Data for member " + Long.toHexString(uid) + " could not be retrieved! | " + FileBuffer.formatTimeAmerican(stamp));
+									sendMessage(ch, bmsgf);
+									return;	
+								}
+							}
+							continue;
+						}
+						System.err.println("AbstractBot.makeDeadlineEvent_complete || ERROR: Unable to find target user: " + u);
+					}
+				}
+			}
+			else
+			{
+				e.setGroupEvent(true);
+			}
+			//Add to schedule
+			s.addEvent(e);
+			//Print message
+			String rawmsgs = botStrings.get(successkey);
+			BotMessage bmsgs = new BotMessage(rawmsgs);
+			bmsgs.substituteString(ReplaceStringType.EVENTNAME, e.getEventName());
+			
+			//Req user name
+			bmsgs.substituteString(ReplaceStringType.REQUSER, command.getUsername());
+
+			//Event time
+			String datestring = brain.formatDateString(etime, true);
+			bmsgs.substituteString(ReplaceStringType.TIME, datestring);
+			
+			//Target name(s)
+			if (rawmsgs.contains(ReplaceStringType.TARGUSER.getString()))
+			{
+				if (command.isGroupEvent())
+				{
+					bmsgs.substituteString(ReplaceStringType.TARGUSER, brain.getEveryoneString());
+				}
+				else
+				{
+					Collection<Long> alltarg = e.getTargetUsers();
+					List<String> tstrlist = new LinkedList<String>();
+					for (Long l : alltarg)
+					{
+						Member m = g.getMemberById(l);
+						tstrlist.add(m.getUser().getName());
+					}
+					bmsgs.substituteString(ReplaceStringType.TARGUSER, brain.formatStringList(tstrlist));		
+				}
+			}
+			sendMessage(ch, bmsgs);
+		}
 	}
 	
 	public void issueEventReminder(EventAdapter e, int rlevel, long guildID)
@@ -4228,6 +4720,22 @@ public abstract class AbstractBot implements Bot{
 		bmsg.substituteString(ReplaceStringType.REQUSER, mem.getUser().getName());
 		brain.blacklist(mem.getUser().getIdLong(), localIndex);
 		sendMessage(ch, bmsg);
+	}
+	
+	public void queueCommandMessageForCleaning(long messageID, long guildID)
+	{
+		if (guildID == -1) return;
+		if (messageID == -1) return;
+		String methodname = "AbstractBot.queueCommandMessageForCleaning";
+		
+		GuildSettings gs = brain.getGuild(guildID);
+		if (gs == null)
+		{
+			printMessageToSTDERR(methodname, "Data for guild " + guildID + " could not be retrieved!");
+			return;
+		}
+		
+		gs.queueCommandMessage(messageID);
 	}
 	
 	/* ----- User Response Handling ----- */

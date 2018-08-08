@@ -45,12 +45,18 @@ public class CMD_CheckGreetingStatus extends CommandAdapter{
 		{
 			bot.checkGreetingStatus(channel.getIdLong(), member.getGuild(), farewell);
 		}
+		super.cleanAfterMyself(bot);
 	}
 
 	@Override
 	public String toString()
 	{
 		return "checkg";
+	}
+	
+	public long getGuildID()
+	{
+		return member.getGuild().getIdLong();
 	}
 	
 

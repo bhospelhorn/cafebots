@@ -32,6 +32,7 @@ public class CMD_PingMeFarewells extends CommandAdapter {
 	public void execute(AbstractBot bot) 
 	{
 		bot.setUserPingFarewells(channel.getIdLong(), req_user, setting);
+		super.cleanAfterMyself(bot);
 	}
 
 	@Override
@@ -46,4 +47,8 @@ public class CMD_PingMeFarewells extends CommandAdapter {
 		return channel.getIdLong();
 	}
 
+	public long getGuildID()
+	{
+		return req_user.getGuild().getIdLong();
+	}
 }

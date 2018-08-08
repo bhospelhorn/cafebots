@@ -68,7 +68,7 @@ public class CMD_WishBirthday extends CommandAdapter{
 	/**
 	 * @throws NullPointerException If bot is null.
 	 */
-	public void execute_rerequest(AbstractBot bot) {
+	public void execute_rerequest(AbstractBot bot, long msgid) {
 		bot.wishBirthday(bday.getRequestingUser(), guild, cointoss);
 	}
 	
@@ -78,4 +78,8 @@ public class CMD_WishBirthday extends CommandAdapter{
 		return ParseCore.CMD_WISHBIRTHDAY;
 	}
 
+	public long getGuildID()
+	{
+		return guild;
+	}
 }

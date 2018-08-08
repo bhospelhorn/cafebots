@@ -117,6 +117,7 @@ public class CMD_SOR extends CommandAdapter {
 		if (user == null)
 		{
 			bot.printReminderTimes(channel.getIdLong(), type);
+			super.cleanAfterMyself(bot);
 			return;
 		}
 		if (all)
@@ -129,7 +130,7 @@ public class CMD_SOR extends CommandAdapter {
 			bot.sorDefo(channel.getIdLong(), user);
 		}
 		else bot.sor(channel.getIdLong(), user, type, level);
-		
+		super.cleanAfterMyself(bot);
 	}
 	
 	@Override
@@ -138,4 +139,8 @@ public class CMD_SOR extends CommandAdapter {
 		return "sor";
 	}
 
+	public long getGuildID()
+	{
+		return user.getGuild().getIdLong();
+	}
 }

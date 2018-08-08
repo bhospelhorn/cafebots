@@ -51,5 +51,9 @@ public class CMD_NotifyCancellation extends CommandAdapter{
 		return "notifycancel";
 	}
 	
+	public long getGuildID()
+	{
+		return guildID;
+	}
 	
 }

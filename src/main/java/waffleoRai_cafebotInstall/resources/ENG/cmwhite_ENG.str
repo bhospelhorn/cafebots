@@ -463,4 +463,8 @@ Number of Exons: %5
 
 Curious? Well, I'm too lazy to generate a proper link for you, but here's a database you can use to look up more information: https://www.ncbi.nlm.nih.gov/gene/
 
+#Internal error
+Uh. Huh. Well... this is embarrassing. Looks like we got some kind of internal error here.
+Dunno what you can do about it, but here's the stderr message if you're interested...
+
 #ADD HERE...

@@ -66,7 +66,7 @@ public class CMD_UpdateStatusAtShift extends CommandAdapter{
 	/**
 	 * @throws NullPointerException If bot is null.
 	 */
-	public void execute_rerequest(AbstractBot bot) {
+	public void execute_rerequest(AbstractBot bot, long msgid) {
 		bot.changeShiftStatus(m, pos, on);
 	}
 	

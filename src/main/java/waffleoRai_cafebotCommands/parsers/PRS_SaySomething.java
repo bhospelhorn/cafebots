@@ -15,7 +15,7 @@ public class PRS_SaySomething implements Parser{
 	
 	public Command generateCommand(String[] args, MessageReceivedEvent event)
 	{
-		return new CMD_SaySomething(event.getChannel(), event.getMessageIdLong());
+		return new CMD_SaySomething(event.getChannel(), event.getGuild(), event.getMessageIdLong());
 	}
 
 }

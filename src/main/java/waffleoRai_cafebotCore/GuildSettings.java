@@ -355,6 +355,101 @@ public class GuildSettings {
 	{
 		auto_cmd_clear = on;
 	}
+
+	/* ----- Admin Permissions ----- */
+	
+	public synchronized void updateAdminPermissions_add(Role role, Member member)
+	{
+		//See if any roles are in the admin role list. If so, make member an admin
+		long uid = member.getUser().getIdLong();
+		ActorUser user = users.getUser(uid);
+		if (user == null) return;
+		if (user.isAdmin()) return;
+		long rid = role.getIdLong();
+		for (long r : adminRoles)
+		{
+			if (rid == r)
+			{
+				user.setAdmin(true);
+				return;
+			}
+		}
+	}
+	
+	public synchronized void updateAdminPermissions_remove(Member member)
+	{
+		long uid = member.getUser().getIdLong();
+		ActorUser user = users.getUser(uid);
+		if (user == null) return;
+		if (!user.isAdmin()) return;
+		List<Role> mroles = member.getRoles();
+		for (Role r : mroles)
+		{
+			long rid = r.getIdLong();
+			for (long ar : adminRoles)
+			{
+				if (rid == ar) return;
+			}
+		}
+		user.setAdmin(false);
+	}
+	
+	public synchronized void grantAdminPermissions(Role role, List<Member> members)
+	{
+		adminRoles.add(role.getIdLong());
+		for (Member m : members)
+		{
+			long uid = m.getUser().getIdLong();
+			ActorUser user = users.getUser(uid);
+			user.setAdmin(true);
+		}
+	}
+	
+	public synchronized void revokeAdminPermissions(Role role, List<Member> members)
+	{
+		adminRoles.remove(role.getId());
+		boolean exempt = false;
+		for (Member m : members)
+		{
+			exempt = false;
+			//First see if user is exempt
+			if (m.isOwner()) continue;
+			List<Role> mroles = m.getRoles();
+			for (Role r : mroles)
+			{
+				if (adminRoles.contains(r.getIdLong())){
+					exempt = true;
+					break;
+				}
+			}
+			//Revoke role if not
+			if (!exempt)
+			{
+				long uid = m.getUser().getIdLong();
+				ActorUser user = users.getUser(uid);
+				user.setAdmin(false);	
+			}
+		}
+	}
+	
+	public synchronized List<Long> getAdminRoleList()
+	{
+		List<Long> copy = new LinkedList<Long>();
+		copy.addAll(adminRoles);
+		return copy;
+	}
+	
+	/* ----- Command Cleaning ----- */
+	
+	public LongQueue getCommandQueue()
+	{
+		return recentCommands;
+	}
+	
+	public void queueCommandMessage(long messageID)
+	{
+		recentCommands.add(messageID);
+	}
 	
 	/* ----- Data Backup ----- */
 	

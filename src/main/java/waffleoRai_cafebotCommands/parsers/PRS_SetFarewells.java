@@ -13,11 +13,11 @@ public class PRS_SetFarewells implements Parser{
 	
 	@Override
 	public Command generateCommand(String[] args, MessageReceivedEvent event) {
-		if (args.length < 2) return new CMD_BadCommandMessage(event.getChannel(), event.getMessageIdLong());
+		if (args.length < 2) return new CMD_BadCommandMessage(event.getChannel(), event.getGuild(), event.getMessageIdLong());
 		boolean on = false;
 		if (args[1].equals(OPTION_ON)) on = true;
 		else if (args[1].equals(OPTION_OFF)) on = false;
-		else return new CMD_BadCommandMessage(event.getChannel(), event.getMessageIdLong());
+		else return new CMD_BadCommandMessage(event.getChannel(), event.getGuild(), event.getMessageIdLong());
 		return new CMD_SetFarewells(on, event.getMember(), event.getChannel(), event.getMessageIdLong());
 	}
 

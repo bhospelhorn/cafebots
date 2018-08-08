@@ -1,5 +1,6 @@
 package waffleoRai_cafebotCommands.Commands;
 
+import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.MessageChannel;
 import waffleoRai_cafebotCommands.CommandAdapter;
 import waffleoRai_cafebotCore.AbstractBot;
@@ -28,15 +29,17 @@ public class CMD_SaySomething extends CommandAdapter{
 	public static final String STANDARD_CMD = "saysomething";
 	
 	private long targetChannel;
+	private Guild guild;
 	
 	/**
 	 * Construct a SaySomething command.
 	 * @param cmdChan Channel command was issued on and reply should be sent to.
 	 * @param cmdID Long UID of the message the command was sent in.
 	 */
-	public CMD_SaySomething(MessageChannel cmdChan, long cmdID)
+	public CMD_SaySomething(MessageChannel cmdChan, Guild g, long cmdID)
 	{
 		targetChannel = cmdChan.getIdLong();
+		guild = g;
 		super.setCommandMessageID(cmdID);
 	}
 	
@@ -58,12 +61,18 @@ public class CMD_SaySomething extends CommandAdapter{
 	public void execute(AbstractBot bot) {
 		if (bot == null) return;
 		bot.saySomething(targetChannel);
+		super.cleanAfterMyself(bot);
 	}
 	
 	@Override
 	public String toString()
 	{
 		return "saysomething";
+	}
+	
+	public long getGuildID()
+	{
+		return guild.getIdLong();
 	}
 
 }

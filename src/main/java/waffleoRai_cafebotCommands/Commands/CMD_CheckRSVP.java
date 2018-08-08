@@ -43,6 +43,7 @@ public class CMD_CheckRSVP extends CommandAdapter{
 		{
 			event = bot.retrieveEvent(eventID, member.getGuild().getIdLong());
 			bot.redirectEventCommand(this, event.getType());
+			super.cleanAfterMyself(bot);
 		}
 		else
 		{
@@ -54,6 +55,11 @@ public class CMD_CheckRSVP extends CommandAdapter{
 	public String toString()
 	{
 		return "checkrsvp";
+	}
+	
+	public long getGuildID()
+	{
+		return member.getGuild().getIdLong();
 	}
 
 }

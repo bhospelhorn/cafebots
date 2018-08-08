@@ -1,7 +1,7 @@
 package waffleoRai_cafebotCommands.Commands;
 
+import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.MessageChannel;
-import net.dv8tion.jda.core.entities.User;
 import waffleoRai_cafebotCommands.CommandAdapter;
 import waffleoRai_cafebotCore.AbstractBot;
 
@@ -14,6 +14,9 @@ import waffleoRai_cafebotCore.AbstractBot;
  * 1.0.0 -> 1.1.0 | July 20, 2018
  * 	Added command message ID note
  * 
+ * 1.1.0 -> 1.1.1 | August 7, 2018
+ * 	More command cleaning updates
+ * 
  */
 
 
@@ -23,24 +26,24 @@ import waffleoRai_cafebotCore.AbstractBot;
  * <br>eventhelp arghelp
  * <br>eventhelp sorhelp
  * @author Blythe Hospelhorn
- * @version 1.1.0
- * @since July 20, 2018
+ * @version 1.1.1
+ * @since August 7, 2018
  */
 public class CMD_Eventhelp extends CommandAdapter{
 
 	private MessageChannel channel;
-	private User user;
+	private Member user;
 	private boolean useSOR;
 	
 	/**
 	 * Construct an Eventhelp command.
 	 * @param ch Channel command was issued on and reply should be sent to.
-	 * @param u User who issued the command, as a JDA User object.
+	 * @param u User who issued the command, as a JDA Member object.
 	 * @param sor True if help on the sor command was requested. False if help on the
 	 * event creation command arguments was requested.
 	 * @param cmdID Long UID of the message the command was sent in.
 	 */
-	public CMD_Eventhelp(MessageChannel ch, User u, boolean sor, long cmdID)
+	public CMD_Eventhelp(MessageChannel ch, Member u, boolean sor, long cmdID)
 	{
 		channel = ch;
 		user = u;
@@ -56,7 +59,7 @@ public class CMD_Eventhelp extends CommandAdapter{
 	
 	public long getUserID()
 	{
-		return user.getIdLong();
+		return user.getUser().getIdLong();
 	}
 	
 	@Override
@@ -64,14 +67,20 @@ public class CMD_Eventhelp extends CommandAdapter{
 	 * @throws NullPointerException If bot is null.
 	 */
 	public void execute(AbstractBot bot) {
-		if(useSOR) bot.displaySORHelp(channel.getIdLong(), user.getName());
-		else bot.displayEventArgsHelp(channel.getIdLong(), user.getName());
+		if(useSOR) bot.displaySORHelp(channel.getIdLong(), user.getUser().getName());
+		else bot.displayEventArgsHelp(channel.getIdLong(), user.getUser().getName());
+		super.cleanAfterMyself(bot);
 	}
 
 	@Override
 	public String toString()
 	{
 		return "eventhelp";
+	}
+	
+	public long getGuildID()
+	{
+		return user.getGuild().getIdLong();
 	}
 	
 }

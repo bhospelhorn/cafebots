@@ -59,7 +59,7 @@ public class CMD_Help extends CommandAdapter{
 	 */
 	public void execute(AbstractBot bot) {
 		bot.displayHelp(getChannelID(), member);
-		
+		super.cleanAfterMyself(bot);
 	}
 	
 	@Override
@@ -68,4 +68,9 @@ public class CMD_Help extends CommandAdapter{
 		return "help";
 	}
 
+	public long getGuildID()
+	{
+		return member.getGuild().getIdLong();
+	}
+	
 }

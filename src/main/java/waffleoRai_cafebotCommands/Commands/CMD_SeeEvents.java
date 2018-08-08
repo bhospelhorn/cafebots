@@ -59,12 +59,18 @@ public class CMD_SeeEvents extends CommandAdapter{
 	 */
 	public void execute(AbstractBot bot) {
 		bot.displayAllUserEvents(channel.getIdLong(), user);
+		super.cleanAfterMyself(bot);
 	}
 	
 	@Override
 	public String toString()
 	{
 		return "myevents";
+	}
+	
+	public long getGuildID()
+	{
+		return user.getGuild().getIdLong();
 	}
 
 }

@@ -54,5 +54,9 @@ public class CMD_MemberFarewell extends CommandAdapter{
 		return ParseCore.CMD_FAREWELLMEMBER;
 	}
 
+	public long getGuildID()
+	{
+		return user.getGuild().getIdLong();
+	}
 	
 }

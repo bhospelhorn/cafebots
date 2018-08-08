@@ -26,12 +26,12 @@ public class PRS_EventHelp implements Parser{
 
 	@Override
 	public Command generateCommand(String[] args, MessageReceivedEvent event) {
-		if (args.length < 2 || args[1] == null) return new CMD_BadCommandMessage(event.getChannel(), event.getMessageIdLong());
+		if (args.length < 2 || args[1] == null) return new CMD_BadCommandMessage(event.getChannel(), event.getGuild(), event.getMessageIdLong());
 		
-		if (args[1].equals(ARGHELP)) return new CMD_Eventhelp(event.getChannel(), event.getAuthor(), false, event.getMessageIdLong());
-		if (args[1].equals(SORHELP)) return new CMD_Eventhelp(event.getChannel(), event.getAuthor(), true, event.getMessageIdLong());
+		if (args[1].equals(ARGHELP)) return new CMD_Eventhelp(event.getChannel(), event.getMember(), false, event.getMessageIdLong());
+		if (args[1].equals(SORHELP)) return new CMD_Eventhelp(event.getChannel(), event.getMember(), true, event.getMessageIdLong());
 		
-		return new CMD_BadCommandMessage(event.getChannel(), event.getMessageIdLong());
+		return new CMD_BadCommandMessage(event.getChannel(), event.getGuild(), event.getMessageIdLong());
 	}
 
 }

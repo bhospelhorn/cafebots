@@ -44,6 +44,7 @@ public class CMD_DeclineEvent extends CommandAdapter{
 		{
 			event = bot.retrieveEvent(eventID, member.getGuild().getIdLong());
 			bot.redirectEventCommand(this, event.getType());
+			super.cleanAfterMyself(bot);
 		}
 		else
 		{
@@ -55,6 +56,11 @@ public class CMD_DeclineEvent extends CommandAdapter{
 	public String toString()
 	{
 		return "cantgo";
+	}
+	
+	public long getGuildID()
+	{
+		return member.getGuild().getIdLong();
 	}
 
 }

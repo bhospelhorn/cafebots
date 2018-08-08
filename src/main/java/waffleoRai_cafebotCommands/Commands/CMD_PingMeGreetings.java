@@ -32,6 +32,7 @@ public class CMD_PingMeGreetings extends CommandAdapter{
 	public void execute(AbstractBot bot) 
 	{
 		bot.setUserPingGreetings(channel.getIdLong(), req_user, setting);
+		super.cleanAfterMyself(bot);
 	}
 
 	@Override
@@ -44,6 +45,11 @@ public class CMD_PingMeGreetings extends CommandAdapter{
 	public long getChannelID()
 	{
 		return channel.getIdLong();
+	}
+	
+	public long getGuildID()
+	{
+		return req_user.getGuild().getIdLong();
 	}
 
 }

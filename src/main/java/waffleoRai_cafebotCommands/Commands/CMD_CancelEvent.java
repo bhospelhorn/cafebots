@@ -56,6 +56,7 @@ public class CMD_CancelEvent extends CommandAdapter{
 	 */
 	public void execute(AbstractBot bot) {
 		bot.cancelEvent_prompt(channel.getIdLong(), user, event, this);
+		cleanAfterMyself(bot);
 	}
 	
 	@Override
@@ -73,18 +74,23 @@ public class CMD_CancelEvent extends CommandAdapter{
 	/**
 	 * @throws NullPointerException If bot is null.
 	 */
-	public void execute_confirm(AbstractBot bot) {
+	public void execute_confirm(AbstractBot bot, long msgid) {
 		bot.cancelEvent(channel.getIdLong(), user.getGuild().getIdLong(), event, getUserID(), silent, !cancelAll);
-		
+		bot.queueCommandMessageForCleaning(msgid, getGuildID());
 	}
 	
 	@Override
 	/**
 	 * @throws NullPointerException If bot is null.
 	 */
-	public void execute_reject(AbstractBot bot) {
+	public void execute_reject(AbstractBot bot, long msgid) {
 		bot.cancelEvent_cancel(channel.getIdLong(), user.getGuild().getIdLong(), event, getUserID());
-		
+		bot.queueCommandMessageForCleaning(msgid, getGuildID());
+	}
+	
+	public long getGuildID()
+	{
+		return user.getGuild().getIdLong();
 	}
 	
 	@Override

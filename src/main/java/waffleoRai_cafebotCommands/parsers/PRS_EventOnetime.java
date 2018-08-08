@@ -18,7 +18,7 @@ public class PRS_EventOnetime implements Parser{
 	public Command generateCommand(String[] args, MessageReceivedEvent event) 
 	{
 		if (args.length < 8){
-			return new CMD_InsufficientArgs(event.getChannel().getIdLong(), EventType.ONETIME, event.getAuthor().getName(), event.getMessageIdLong());
+			return new CMD_InsufficientArgs(event.getChannel().getIdLong(), EventType.ONETIME, event.getAuthor().getName(), event.getGuild().getIdLong(), event.getMessageIdLong());
 		}
 		
 		String rawyear = args[1];
@@ -41,12 +41,12 @@ public class PRS_EventOnetime implements Parser{
 		}
 		catch (NumberFormatException e)
 		{
-			return new CMD_InsufficientArgs(event.getChannel().getIdLong(), EventType.ONETIME, event.getAuthor().getName(), event.getMessageIdLong());
+			return new CMD_InsufficientArgs(event.getChannel().getIdLong(), EventType.ONETIME, event.getAuthor().getName(), event.getGuild().getIdLong(), event.getMessageIdLong());
 		}
 		
 		String[] time = rawtime.split(":");
 		if (time.length != 2){
-			return new CMD_InsufficientArgs(event.getChannel().getIdLong(), EventType.ONETIME, event.getAuthor().getName(), event.getMessageIdLong());
+			return new CMD_InsufficientArgs(event.getChannel().getIdLong(), EventType.ONETIME, event.getAuthor().getName(), event.getGuild().getIdLong(), event.getMessageIdLong());
 		}
 		int hr = 0;
 		int min = 0;
@@ -57,7 +57,7 @@ public class PRS_EventOnetime implements Parser{
 		}
 		catch (NumberFormatException e)
 		{
-			return new CMD_InsufficientArgs(event.getChannel().getIdLong(), EventType.ONETIME, event.getAuthor().getName(), event.getMessageIdLong());
+			return new CMD_InsufficientArgs(event.getChannel().getIdLong(), EventType.ONETIME, event.getAuthor().getName(), event.getGuild().getIdLong(), event.getMessageIdLong());
 		}
 
 		boolean group = false;

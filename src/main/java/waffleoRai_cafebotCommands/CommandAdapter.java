@@ -46,14 +46,14 @@ public abstract class CommandAdapter implements Command{
 	/**
 	 * @throws NullPointerException If bot is null.
 	 */
-	public void execute_confirm(AbstractBot bot) {
-		//Does nothing.
+	public void execute_confirm(AbstractBot bot, long msgid) {
+		bot.queueCommandMessageForCleaning(msgid, getGuildID());
 	}
 
 	@Override
-	public void execute_reject(AbstractBot bot) {
+	public void execute_reject(AbstractBot bot, long msgid) {
 		bot.displayGeneralCancel(getChannelID(), "user");
-		
+		bot.queueCommandMessageForCleaning(msgid, getGuildID());
 	}
 
 	@Override
@@ -62,15 +62,17 @@ public abstract class CommandAdapter implements Command{
 	 */
 	public void execute_timeout(AbstractBot bot) {
 		bot.timeoutPrompt(getChannelID(), getUserID());
+		
 	}
 
 	@Override
 	/**
 	 * @throws NullPointerException If bot is null.
 	 */
-	public void execute_rerequest(AbstractBot bot) {
+	public void execute_rerequest(AbstractBot bot, long msgid) {
 		bot.displayRerequestMessage(getChannelID());
 		bot.queueRerequest(this, this.getChannelID(), this.getUserID());
+		bot.queueCommandMessageForCleaning(msgid, getGuildID());
 	}
 	
 	protected void setCommandMessageID(long cmdID)
@@ -81,6 +83,16 @@ public abstract class CommandAdapter implements Command{
 	public long getCommandMessageID() 
 	{
 		return command_message_ID;
+	}
+	
+	public long getGuildID()
+	{
+		return -1;
+	}
+	
+	public void cleanAfterMyself(AbstractBot bot)
+	{
+		bot.queueCommandMessageForCleaning(getCommandMessageID(), getGuildID());
 	}
 
 }

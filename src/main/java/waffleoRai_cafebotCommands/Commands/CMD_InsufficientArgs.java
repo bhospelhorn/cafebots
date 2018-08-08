@@ -25,13 +25,14 @@ public class CMD_InsufficientArgs extends CommandAdapter{
 	private long chid;
 	private EventType type;
 	private String username;
+	private long gid;
 	
 	/**
 	 * Construct an InsufficientArgs command.
 	 * @param channelID Discord long UID of channel command was issued on and reply should be sent to.
 	 * @param et EventType of event creation attempt.
 	 */
-	public CMD_InsufficientArgs(long channelID, EventType et, String uname, long cmdID)
+	public CMD_InsufficientArgs(long channelID, EventType et, String uname, long guildID, long cmdID)
 	{
 		chid = channelID;
 		type = et;
@@ -91,6 +92,7 @@ public class CMD_InsufficientArgs extends CommandAdapter{
 	public void execute(AbstractBot bot) 
 	{
 		pickFunct(bot);
+		super.cleanAfterMyself(bot);
 	}
 
 	@Override
@@ -99,5 +101,9 @@ public class CMD_InsufficientArgs extends CommandAdapter{
 		return "insufargs";
 	}
 
+	public long getGuildID()
+	{
+		return gid;
+	}
 	
 }

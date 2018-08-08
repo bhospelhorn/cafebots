@@ -37,6 +37,7 @@
 		<userno_general>552,1</userno_general>
 		<getgene1>197,1</getgene1>
 		<getgene2>197,1</getgene2>
+		<internalerror>612,2</internalerror>
 	</generalbotstrings>
 	<userquery>
 		<audconf_y>182,1</audconf_y>

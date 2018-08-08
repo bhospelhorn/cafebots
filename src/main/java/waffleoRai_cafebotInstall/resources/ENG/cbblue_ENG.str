@@ -337,7 +337,7 @@ Oh, %r? I have cleaned out all of the messaged you asked me to clean out from %C
 Excuse me, %r. It seems that I was unable to remove the messages you wanted to remove from %C. Perhaps you should have another look at the channel permissions.
 
 #Clean CMDs - success
-%r? I wanted to bring to your attention the matter of my cleaning up all bot commands recognized since the last core boot. I have completed the task more or less successfully. No need for any compensation - supposedly, your satisfaction is all I need.
+%r? I wanted to bring to your attention the matter of my cleaning up all bot commands recognized since the last core boot. I have completed the task more or less successfully. OH NO, no need for any compensation! Your satisfaction is ALL I need!
 
 #Clean CMDs - failure
 Oh, %r? It is my duty to inform you that for whatever reason, I was unable to remove all of the command messages sent to the bot core as requested. My apologies.
@@ -483,5 +483,8 @@ Here are some commands only admins can use:
 !audconf [user] [bool]
     Set whether a user has confirmed audio.
 
+#Internal Error
+Well. It appears that I... owe you an apology. I seem to have made a misstep - or at least the botcore did.
+Either way, I shall accept responsibility for this malfunction. Below, I will provide you with the error message I received.
 
 #ADD HERE...

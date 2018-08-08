@@ -1,7 +1,7 @@
 package waffleoRai_cafebotCommands.Commands;
 
+import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.MessageChannel;
-import net.dv8tion.jda.core.entities.User;
 import waffleoRai_cafebotCommands.CommandAdapter;
 import waffleoRai_cafebotCore.AbstractBot;
 
@@ -13,6 +13,9 @@ import waffleoRai_cafebotCore.AbstractBot;
  * 
  * 1.0.0 -> 1.1.0 | July 20, 2018
  * 	Added command message ID note
+ * 
+ * 1.1.0 -> 1.1.1 | August 7, 2018
+ *  More command cleaning updating
  */
 
 
@@ -21,13 +24,13 @@ import waffleoRai_cafebotCore.AbstractBot;
  * <br><br><b>Standard Command:</b>
  * <br>seealltz
  * @author Blythe Hospelhorn
- * @version 1.1.0
- * @since July 20, 2018
+ * @version 1.1.1
+ * @since August 7, 2018
  */
 public class CMD_SeeTZ extends CommandAdapter{
 
 	private MessageChannel ch;
-	private User user;
+	private Member user;
 	
 	/**
 	 * Construct a SeeTZ (See All Timezones) command.
@@ -35,7 +38,7 @@ public class CMD_SeeTZ extends CommandAdapter{
 	 * @param u User who issued the command, as a JDA User object.
 	 * @param cmdID Long UID of the message the command was sent in.
 	 */
-	public CMD_SeeTZ(MessageChannel channel, User u, long cmdID)
+	public CMD_SeeTZ(MessageChannel channel, Member u, long cmdID)
 	{
 		ch = channel;
 		user = u;
@@ -50,7 +53,7 @@ public class CMD_SeeTZ extends CommandAdapter{
 	
 	public long getUserID()
 	{
-		return user.getIdLong();
+		return user.getUser().getIdLong();
 	}
 	
 	@Override
@@ -58,14 +61,19 @@ public class CMD_SeeTZ extends CommandAdapter{
 	 * @throws NullPointerException If bot is null.
 	 */
 	public void execute(AbstractBot bot) {
-		bot.postTimezoneList(ch.getIdLong(), user.getName());
-		
+		bot.postTimezoneList(ch.getIdLong(), user.getUser().getName());
+		super.cleanAfterMyself(bot);
 	}
 	
 	@Override
 	public String toString()
 	{
 		return "seealltz";
+	}
+	
+	public long getGuildID()
+	{
+		return user.getGuild().getIdLong();
 	}
 
 }

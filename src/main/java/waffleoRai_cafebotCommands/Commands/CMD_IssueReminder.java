@@ -34,4 +34,9 @@ public class CMD_IssueReminder extends CommandAdapter{
 		return event.getRequestingUser();
 	}
 	
+	public long getGuildID()
+	{
+		return guildID;
+	}
+	
 }

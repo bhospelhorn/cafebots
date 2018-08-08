@@ -23,7 +23,7 @@ public class PRS_SOR implements Parser{
 
 	@Override
 	public Command generateCommand(String[] args, MessageReceivedEvent event) {
-		if (args.length < 2) return new CMD_BadCommandMessage(event.getChannel(), event.getMessageIdLong());
+		if (args.length < 2) return new CMD_BadCommandMessage(event.getChannel(), event.getGuild(), event.getMessageIdLong());
 		
 		if (args[1].equals(ALLOFF))
 		{
@@ -39,19 +39,19 @@ public class PRS_SOR implements Parser{
 		}
 		else if (args[1].equals(VIEW))
 		{
-			if (args.length < 3) return new CMD_BadCommandMessage(event.getChannel(), event.getMessageIdLong());
+			if (args.length < 3) return new CMD_BadCommandMessage(event.getChannel(), event.getGuild(), event.getMessageIdLong());
 			EventType t = EventType.getEventType(args[2]);
 			return new CMD_SOR(event.getChannel(), t, event.getMessageIdLong());
 		}
 		else
 		{
 			//Type Level
-			if (args.length < 3) return new CMD_BadCommandMessage(event.getChannel(), event.getMessageIdLong());
+			if (args.length < 3) return new CMD_BadCommandMessage(event.getChannel(), event.getGuild(), event.getMessageIdLong());
 			EventType t = EventType.getEventType(args[1]);
-			if (t == null) return new CMD_BadCommandMessage(event.getChannel(), event.getMessageIdLong());
+			if (t == null) return new CMD_BadCommandMessage(event.getChannel(), event.getGuild(), event.getMessageIdLong());
 			int l = -1;
 			try{l = Integer.parseInt(args[2]);}
-			catch(NumberFormatException e){return new CMD_BadCommandMessage(event.getChannel(), event.getMessageIdLong());}
+			catch(NumberFormatException e){return new CMD_BadCommandMessage(event.getChannel(), event.getGuild(), event.getMessageIdLong());}
 			return new CMD_SOR(event.getChannel(), event.getMember(), t, l, event.getMessageIdLong());
 		}
 		

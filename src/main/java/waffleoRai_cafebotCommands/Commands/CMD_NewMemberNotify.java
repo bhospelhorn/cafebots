@@ -12,6 +12,9 @@ import waffleoRai_cafebotCore.AbstractBot;
  * Creation | June 17, 2018
  * Version 1.0.0 Documentation | July 1, 2018
  * 
+ * 1.0.0 -> 1.1.0 | August 6, 2018
+ * 	Now adds member profile as well
+ * 
  */
 
 /**
@@ -19,8 +22,8 @@ import waffleoRai_cafebotCore.AbstractBot;
  * and pinging requesting admins to alert them to the new arrival.
  * <br>This event cannot be induced via command line. It is internal only.
  * @author Blythe Hospelhorn
- * @version 1.0.0
- * @since July 1, 2018
+ * @version 1.1.0
+ * @since August 6, 2018
  */
 public class CMD_NewMemberNotify extends CommandAdapter{
 
@@ -50,48 +53,17 @@ public class CMD_NewMemberNotify extends CommandAdapter{
 	public void execute(AbstractBot bot) {
 		bot.greetNewUser(guild, user);
 		bot.pingUserArrival(guild, user);
+		bot.newMember(user);
 	}
 
-	@Override
-	/**
-	 * @throws NullPointerException If bot is null.
-	 */
-	public void execute_confirm(AbstractBot bot) {
-		bot.greetNewUser(guild, user);
-		bot.pingUserArrival(guild, user);
-	}
-
-	@Override
-	/**
-	 * @throws NullPointerException If bot is null.
-	 */
-	public void execute_reject(AbstractBot bot) {
-		bot.greetNewUser(guild, user);
-		bot.pingUserArrival(guild, user);
-	}
-
-	@Override
-	/**
-	 * @throws NullPointerException If bot is null.
-	 */
-	public void execute_timeout(AbstractBot bot) {
-		bot.greetNewUser(guild, user);
-		bot.pingUserArrival(guild, user);
-	}
-
-	@Override
-	/**
-	 * @throws NullPointerException If bot is null.
-	 */
-	public void execute_rerequest(AbstractBot bot) {
-		bot.greetNewUser(guild, user);
-		bot.pingUserArrival(guild, user);
-	}
-	
 	@Override
 	public String toString()
 	{
 		return ParseCore.CMD_GREETNEWMEMBER;
 	}
 
+	public long getGuildID()
+	{
+		return guild.getIdLong();
+	}
 }

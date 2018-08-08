@@ -166,19 +166,22 @@ public class CMD_EventMakeWeekly extends CommandAdapter{
 	public void execute(AbstractBot bot) 
 	{
 		bot.makeWeeklyEvent_prompt(this);
+		super.cleanAfterMyself(bot);
 	}
 	
 	@Override
 	/**
 	 * @throws NullPointerException If bot is null.
 	 */
-	public void execute_confirm(AbstractBot bot) {
+	public void execute_confirm(AbstractBot bot, long msgid) {
 		bot.makeWeeklyEvent_complete(this, true);
+		bot.queueCommandMessageForCleaning(msgid, getGuildID());
 	}
 
 	@Override
-	public void execute_reject(AbstractBot bot) {
+	public void execute_reject(AbstractBot bot, long msgid) {
 		bot.makeWeeklyEvent_complete(this, false);
+		bot.queueCommandMessageForCleaning(msgid, getGuildID());
 	}
 
 	@Override
@@ -187,4 +190,9 @@ public class CMD_EventMakeWeekly extends CommandAdapter{
 		return "weekly";
 	}
 
+	public long getGuildID()
+	{
+		return requestingUser.getGuild().getIdLong();
+	}
+	
 }

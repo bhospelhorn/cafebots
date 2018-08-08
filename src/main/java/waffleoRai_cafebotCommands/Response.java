@@ -11,13 +11,16 @@ import waffleoRai_cafebotCore.AbstractBot;
  * Creation | June 9, 2018
  * Version 1.0.0 Documentation | July 1, 2018
  * 
+ * 1.0.0 -> 1.1.0 | August 7, 2018
+ * 	Added message ID
+ * 
  */
 
 /**
  * An object containing information on a user response to a bot command prompt.
  * @author Blythe Hospelhorn
- * @version 1.0.0
- * @since July 1, 2018
+ * @version 1.1.0
+ * @since August 7, 2018
  */
 public class Response {
 	
@@ -31,6 +34,7 @@ public class Response {
 	
 	private Command cmd;
 	private int response;
+	private long messageID;
 	
 	private static Map<String, Integer> rMap; //Map of interpretable strings to response enums
 	
@@ -38,11 +42,13 @@ public class Response {
 	 * Construct a Response to Command c.
 	 * @param c Command to respond to.
 	 * @param r Response to command (see Response class constants).
+	 * @param messageUID UID of message sent in Discord containing response
 	 */
- 	public Response(Command c, int r)
+ 	public Response(Command c, int r, long messageUID)
 	{
 		cmd = c;
 		response = r;
+		messageID = messageUID;
 	}
 	
  	/**
@@ -55,16 +61,16 @@ public class Response {
 		switch(response)
 		{
 		case RESPONSE_YES:
-			cmd.execute_confirm(bot);
+			cmd.execute_confirm(bot, messageID);
 			break;
 		case RESPONSE_NO:
-			cmd.execute_reject(bot);
+			cmd.execute_reject(bot, messageID);
 			break;
 		case RESPONSE_TIMEOUT:
 			cmd.execute_timeout(bot);
 			break;
 		case RESPONSE_INVALID:
-			cmd.execute_rerequest(bot);
+			cmd.execute_rerequest(bot, messageID);
 			break;
 		}
 	}
@@ -102,6 +108,11 @@ public class Response {
 		Integer i = rMap.get(s.toLowerCase());
 		if (i == null) return RESPONSE_INVALID;
 		return i;
+	}
+	
+	public long getMessageID()
+	{
+		return messageID;
 	}
 	
 }

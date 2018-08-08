@@ -16,6 +16,9 @@ import net.dv8tion.jda.core.entities.User;
  * Creation | June 9, 2018
  * Version 1.0.0 Documentation | July 1, 2018
  * 
+ * 1.0.0 -> 1.1.0 | August 7, 2018
+ * 	Added message ID tracking
+ * 
  */
 
 /**
@@ -35,8 +38,8 @@ import net.dv8tion.jda.core.entities.User;
  * <br><br><i>Outstanding Issues:</i>
  * <br>
  * @author Blythe Hospelhorn
- * @version 1.0.0
- * @since July 1, 2018
+ * @version 1.1.0
+ * @since August 7, 2018
  */
 public class ResponseQueue {
 	
@@ -137,7 +140,7 @@ public class ResponseQueue {
 						if (card.checkTime() >= TIMEOUT_APPR_SECONDS)
 						{
 							removeCard(l);
-							Response r = new Response(card.getCommand(), Response.RESPONSE_TIMEOUT);
+							Response r = new Response(card.getCommand(), Response.RESPONSE_TIMEOUT, -1);
 							addToQueue(r);
 						}
 					}	
@@ -286,7 +289,7 @@ public class ResponseQueue {
 	 * @param u User that sent the response.
 	 * @param c Channel the response was sent from.
 	 */
-	public synchronized void respond(int response, User u, MessageChannel c)
+	public synchronized void respond(int response, User u, MessageChannel c, long msgid)
 	{
 		long chanid = getPendingChannel(u);
 		if (chanid != c.getIdLong())
@@ -297,13 +300,13 @@ public class ResponseQueue {
 		switch(response)
 		{
 		case Response.RESPONSE_YES:
-			respondYes(u);
+			respondYes(u, msgid);
 			break;
 		case Response.RESPONSE_NO:
-			respondNo(u);
+			respondNo(u, msgid);
 			break;
 		case Response.RESPONSE_INVALID:
-			respondInvalid(u);
+			respondInvalid(u, msgid);
 			break;
 		case Response.RESPONSE_TIMEOUT:
 			forceTimeout(u);
@@ -316,12 +319,12 @@ public class ResponseQueue {
 	 * for that user, the bot will reply accordingly.
 	 * @param u User sending response.
 	 */
-	public synchronized void respondYes(User u)
+	public synchronized void respondYes(User u, long msgid)
 	{
 		long uid = u.getIdLong();
 		ResponseCard c = pending.remove(uid);
 		if (c == null) return;
-		Response r = new Response(c.getCommand(), Response.RESPONSE_YES);
+		Response r = new Response(c.getCommand(), Response.RESPONSE_YES, msgid);
 		addToQueue(r);
 	}
 	
@@ -330,12 +333,12 @@ public class ResponseQueue {
 	 * for that user, the bot will reply accordingly.
 	 * @param u User sending response.
 	 */
-	public synchronized void respondNo(User u)
+	public synchronized void respondNo(User u, long msgid)
 	{
 		long uid = u.getIdLong();
 		ResponseCard c = pending.remove(uid);
 		if (c == null) return;
-		Response r = new Response(c.getCommand(), Response.RESPONSE_NO);
+		Response r = new Response(c.getCommand(), Response.RESPONSE_NO, msgid);
 		addToQueue(r);
 	}
 	
@@ -344,12 +347,12 @@ public class ResponseQueue {
 	 * Like a proper response, this method also removes the response card from the queue.
 	 * @param u User sending response.
 	 */
-	public synchronized void respondInvalid(User u)
+	public synchronized void respondInvalid(User u, long msgid)
 	{
 		long uid = u.getIdLong();
 		ResponseCard c = pending.remove(uid);
 		if (c == null) return;
-		Response r = new Response(c.getCommand(), Response.RESPONSE_INVALID);
+		Response r = new Response(c.getCommand(), Response.RESPONSE_INVALID, msgid);
 		addToQueue(r);
 	}
 	
@@ -363,7 +366,7 @@ public class ResponseQueue {
 		long uid = u.getIdLong();
 		ResponseCard c = pending.remove(uid);
 		if (c == null) return;
-		Response r = new Response(c.getCommand(), Response.RESPONSE_TIMEOUT);
+		Response r = new Response(c.getCommand(), Response.RESPONSE_TIMEOUT, -1);
 		addToQueue(r);
 	}
 	

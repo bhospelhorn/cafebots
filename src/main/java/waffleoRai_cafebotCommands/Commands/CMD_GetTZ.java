@@ -60,12 +60,18 @@ public class CMD_GetTZ extends CommandAdapter{
 	 */
 	public void execute(AbstractBot bot) {
 		bot.getUserTimezone(channel.getIdLong(), user);
+		super.cleanAfterMyself(bot);
 	}
 
 	@Override
 	public String toString()
 	{
 		return "gettz";
+	}
+	
+	public long getGuildID()
+	{
+		return user.getGuild().getIdLong();
 	}
 	
 }

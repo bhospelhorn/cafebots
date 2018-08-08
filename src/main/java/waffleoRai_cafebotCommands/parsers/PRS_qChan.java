@@ -19,11 +19,11 @@ public class PRS_qChan implements Parser{
 	
 	@Override
 	public Command generateCommand(String[] args, MessageReceivedEvent event) {
-		if (args.length < 2) return new CMD_BadCommandMessage(event.getChannel(), event.getMessageIdLong());
+		if (args.length < 2) return new CMD_BadCommandMessage(event.getChannel(), event.getGuild(), event.getMessageIdLong());
 		if (args[1].equals(BIRTHDAY)) return new CMD_qChan(event.getChannel(), event.getGuild(), true, event.getMessageIdLong());
 		else if (args[1].equals(GREETING)) return new CMD_qChan(event.getChannel(), event.getGuild(), false, event.getMessageIdLong());
 		
-		return new CMD_BadCommandMessage(event.getChannel(), event.getMessageIdLong());
+		return new CMD_BadCommandMessage(event.getChannel(), event.getGuild(), event.getMessageIdLong());
 	}
 
 }

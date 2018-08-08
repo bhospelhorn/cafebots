@@ -66,6 +66,7 @@ public class CMD_AddBirthday extends CommandAdapter{
 	public void execute(AbstractBot bot) 
 	{
 		bot.setBirthday(user, month, day, replyChannel);
+		cleanAfterMyself(bot);
 	}
 
 	@Override
@@ -73,7 +74,10 @@ public class CMD_AddBirthday extends CommandAdapter{
 	{
 		return "birthday";
 	}
+	
+	public long getGuildID()
+	{
+		return user.getGuild().getIdLong();
+	}
 
-	
-	
 }

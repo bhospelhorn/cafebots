@@ -53,6 +53,15 @@ public class BotStrings {
 	public static final String KEY_SORHELPSTEM = ".sorhelpmessage";
 	public static final String KEY_HELPSTEM_STANDARD = ".helpmessage";
 	public static final String KEY_HELPSTEM_ADMIN = "_admin";
+	public static final String KEY_INTERNALERROR = ".internalerror";
+	
+	//Group: Perm Manage
+	public static final String KEY_PERMS_QUERY = ".query";
+	public static final String KEY_PERMS_CONFIRMADD = ".confirmadd";
+	public static final String KEY_PERMS_CONFIRMREM = ".confirmrem";
+	public static final String KEY_PERMS_CONFIRM = ".confirm";
+	public static final String KEY_PERMS_CONFIRMNEG = ".confirmneg";
+	public static final String KEY_PERMS_REJECT = ".reject";
 	
 	//Group: Greetings
 	public static final String KEY_GREET_CHCHAN_SUCCESS = ".confirm_chset_success";
@@ -207,4 +216,9 @@ public class BotStrings {
 		return null;
 	}
 
+	public static String getInternalErrorKey()
+	{
+		return KEY_MAINGROUP_BOTSTRINGS + KEY_GROUP_GENERAL + KEY_INTERNALERROR;
+	}
+	
 }

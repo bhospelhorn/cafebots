@@ -695,4 +695,8 @@ You are not on the list of participants for event %n. As a result, you cannot RS
 #Event - any (Check RSVP - Fail - Because not invited)
 You are not on the list of participants for event %n. As a result, you cannot RSVP.
 
+#Internal Error
+INTERNAL ERROR ENCOUNTERED
+STDERR MESSAGE:
+
 #ADD HERE...

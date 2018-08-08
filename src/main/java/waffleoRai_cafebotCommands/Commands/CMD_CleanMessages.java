@@ -65,6 +65,7 @@ public class CMD_CleanMessages extends CommandAdapter{
 		{
 			if (userOnly) bot.cleanChannelMessages_allUser_prompt(channel.getIdLong(), user, this);
 		}
+		super.cleanAfterMyself(bot);
 		
 	}
 	
@@ -83,7 +84,7 @@ public class CMD_CleanMessages extends CommandAdapter{
 	/**
 	 * @throws NullPointerException If bot is null.
 	 */
-	public void execute_confirm(AbstractBot bot) {
+	public void execute_confirm(AbstractBot bot, long msgid) {
 		if (dayOnly)
 		{
 			if (userOnly) bot.cleanChannelMessages_allUserDay(channel.getIdLong(), user);
@@ -93,16 +94,16 @@ public class CMD_CleanMessages extends CommandAdapter{
 		{
 			if (userOnly) bot.cleanChannelMessages_allUser(channel.getIdLong(), user);
 		}
-		
+		bot.queueCommandMessageForCleaning(msgid, getGuildID());
 	}
 	
 	@Override
 	/**
 	 * @throws NullPointerException If bot is null.
 	 */
-	public void execute_reject(AbstractBot bot) {
+	public void execute_reject(AbstractBot bot, long msgid) {
 		bot.displayGeneralCancel(getChannelID(), user.getUser().getName());
-		
+		bot.queueCommandMessageForCleaning(msgid, getGuildID());
 	}
 
 	@Override
@@ -114,5 +115,9 @@ public class CMD_CleanMessages extends CommandAdapter{
 		return "";
 	}
 
+	public long getGuildID()
+	{
+		return user.getGuild().getIdLong();
+	}
 	
 }

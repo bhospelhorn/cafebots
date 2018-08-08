@@ -49,6 +49,7 @@ public class CMD_AttendEvent extends CommandAdapter{
 		{
 			bot.RSVPEvent(channel.getIdLong(), member, event, Attendance.YES);
 		}
+		cleanAfterMyself(bot);
 	}
 	
 	@Override
@@ -57,6 +58,9 @@ public class CMD_AttendEvent extends CommandAdapter{
 		return "attend";
 	}
 	
-
+	public long getGuildID()
+	{
+		return member.getGuild().getIdLong();
+	}
 
 }

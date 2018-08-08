@@ -63,7 +63,7 @@ public class CMD_SetTZ extends CommandAdapter {
 	 */
 	public void execute(AbstractBot bot) {
 		bot.setUserTimezone(ch.getIdLong(), user, tz);
-		
+		super.cleanAfterMyself(bot);
 	}
 
 	@Override
@@ -72,4 +72,8 @@ public class CMD_SetTZ extends CommandAdapter {
 		return "changetz";
 	}
 	
+	public long getGuildID()
+	{
+		return user.getGuild().getIdLong();
+	}
 }

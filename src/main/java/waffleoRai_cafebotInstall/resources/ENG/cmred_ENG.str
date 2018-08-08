@@ -607,5 +607,9 @@ Apologies, %r... I was not able to switch command autoclean off for some reason.
 
 #SOR Default
 Ah hello, %r! As you requested, I have reset your reminder ping on/off states to their default values!
+
+#Internal error
+Ah... my deepest apologies! I appear to have encountered some kind of internal error...
+All I can provide you with at this time is the message as it was printed to stderr... Once again, I am very sorry.
 	
 #ADD HERE...

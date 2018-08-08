@@ -68,6 +68,7 @@ public class CMD_qChan extends CommandAdapter{
 	public void execute(AbstractBot bot) {
 		if (bday) bot.displayBirthdayChannel(guild, cmd_channel.getIdLong());
 		else bot.displayGreetingChannel(guild, cmd_channel.getIdLong());
+		super.cleanAfterMyself(bot);
 	}
 	
 	@Override
@@ -76,4 +77,8 @@ public class CMD_qChan extends CommandAdapter{
 		return "qchan";
 	}
 
+	public long getGuildID()
+	{
+		return guild.getIdLong();
+	}
 }

@@ -8,6 +8,7 @@ import java.util.Random;
 
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.MessageChannel;
+import net.dv8tion.jda.core.entities.Role;
 import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.core.events.guild.member.GuildMemberLeaveEvent;
@@ -21,6 +22,7 @@ import waffleoRai_cafebotCommands.Commands.CMD_NewMemberNotify;
 import waffleoRai_cafebotCommands.Commands.CMD_NotifyCancellation;
 import waffleoRai_cafebotCommands.Commands.CMD_OtherBotHandledMessage;
 import waffleoRai_cafebotCommands.Commands.CMD_ParserBlockWarn;
+import waffleoRai_cafebotCommands.Commands.CMD_ProcessRoleUpdate;
 import waffleoRai_cafebotCommands.Commands.CMD_WishBirthday;
 import waffleoRai_cafebotCore.AbstractBot;
 import waffleoRai_cafebotRoles.ActorRole;
@@ -84,6 +86,8 @@ public class ParseCore {
 	public static final String CMD_NOTIFY_AUDCONF = "notify_audconf";
 	public static final String CMD_NOTIFY_ROLECOMPLETE = "notify_rolecomplete";
 	public static final String CMD_NOTIFY_ROLEREVOKED = "notify_roledelete";
+	
+	public static final String CMD_ROLEUPDATE = "onroleupdate";
 	
 	/* ----- Static Variables ----- */
 	
@@ -538,7 +542,7 @@ public class ParseCore {
 					AbstractBot bot = mybots[i];
 					if (bot == null) continue;
 					ResponseQueue rq = bot.getResponseQueue();
-					rq.respond(r, event.getAuthor(), event.getChannel());	
+					rq.respond(r, event.getAuthor(), event.getChannel(), event.getMessageIdLong());	
 				}
 			}
 		}
@@ -561,7 +565,7 @@ public class ParseCore {
 			String[] args = splitArgs(command);
 			Parser p = parserMap.get(args[0]);
 			Command c = null;
-			if (p == null) c = new CMD_BadCommandMessage(event.getChannel(), event.getMessageIdLong());
+			if (p == null) c = new CMD_BadCommandMessage(event.getChannel(), event.getGuild(), event.getMessageIdLong());
 			else c = p.generateCommand(args, event);
 			//Determine which bot(s) to send command to.
 			if (!mentioned.isEmpty())
@@ -792,6 +796,14 @@ public class ParseCore {
 		
 	}
 	
+	public void processRoleChange(Member member, List<Role> roles, boolean add)
+	{
+		int bot = 1;
+		bot = scheduler.sendCommandTo(CMD_ROLEUPDATE);
+		Command cmd = new CMD_ProcessRoleUpdate(member, roles, add);
+		issueDirectCommand(bot, cmd);
+	}
+	
 	/* ----- Response Handling ----- */
 	
 	/**
@@ -951,6 +963,16 @@ public class ParseCore {
 		map.put("pingFarewells", 1);
 		map.put("audconf", 2);
 		map.put("autocmdclean", 1);
+		map.put("checkperm", 1);
+		
+		map.put(CMD_ROLEUPDATE, 1);
+		
+		map.put("attend", 1);
+		map.put("cantgo", 1);
+		map.put("checkrsvp", 1);
+		
+		map.put("accept", 2);
+		map.put("decline", 2);
 		
 		//map.put(CMD_REM_DEADLINE, 8);
 		map.put(CMD_REM_MONTHLYB, 3);

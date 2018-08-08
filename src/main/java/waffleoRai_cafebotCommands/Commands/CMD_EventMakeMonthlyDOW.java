@@ -179,19 +179,22 @@ public class CMD_EventMakeMonthlyDOW extends CommandAdapter{
 	public void execute(AbstractBot bot) 
 	{
 		bot.makeMonthlyBEvent_prompt(this);
+		super.cleanAfterMyself(bot);
 	}
 	
 	@Override
 	/**
 	 * @throws NullPointerException If bot is null.
 	 */
-	public void execute_confirm(AbstractBot bot) {
+	public void execute_confirm(AbstractBot bot, long msgid) {
 		bot.makeMonthlyBEvent_complete(this, true);
+		bot.queueCommandMessageForCleaning(msgid, getGuildID());
 	}
 
 	@Override
-	public void execute_reject(AbstractBot bot) {
+	public void execute_reject(AbstractBot bot, long msgid) {
 		bot.makeMonthlyBEvent_complete(this, false);
+		bot.queueCommandMessageForCleaning(msgid, getGuildID());
 	}
 
 	@Override
@@ -200,6 +203,9 @@ public class CMD_EventMakeMonthlyDOW extends CommandAdapter{
 		return "monthlydow";
 	}
 
-
+	public long getGuildID()
+	{
+		return requestingUser.getGuild().getIdLong();
+	}
 
 }

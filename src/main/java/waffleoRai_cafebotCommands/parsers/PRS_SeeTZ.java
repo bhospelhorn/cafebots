@@ -15,7 +15,7 @@ public class PRS_SeeTZ implements Parser{
 
 	@Override
 	public Command generateCommand(String[] args, MessageReceivedEvent event) {
-		return new CMD_SeeTZ(event.getChannel(), event.getAuthor(), event.getMessageIdLong());
+		return new CMD_SeeTZ(event.getChannel(), event.getMember(), event.getMessageIdLong());
 	}
 
 }

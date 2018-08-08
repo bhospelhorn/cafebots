@@ -189,25 +189,28 @@ public class CMD_EventMakeOnetime extends CommandAdapter{
 	public void execute(AbstractBot bot) 
 	{
 		bot.makeOnetimeEvent_prompt(this);
+		super.cleanAfterMyself(bot);
 	}
 	
 	@Override
 	/**
 	 * @throws NullPointerException If bot is null.
 	 */
-	public void execute_confirm(AbstractBot bot) {
+	public void execute_confirm(AbstractBot bot, long msgid) {
 		bot.makeOnetimeEvent_complete(this, true);
+		bot.queueCommandMessageForCleaning(msgid, getGuildID());
 	}
 
 	@Override
-	public void execute_reject(AbstractBot bot) {
+	public void execute_reject(AbstractBot bot, long msgid) {
 		bot.makeOnetimeEvent_complete(this, false);
+		bot.queueCommandMessageForCleaning(msgid, getGuildID());
 	}
 
 	@Override
 	public String toString()
 	{
-		return "biweekly";
+		return "onetime";
 	}
 
 	public long getGuildID()
@@ -220,4 +223,5 @@ public class CMD_EventMakeOnetime extends CommandAdapter{
 		return requestingUser.getUser().getName();
 	}
 
+	
 }

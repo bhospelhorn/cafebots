@@ -9,6 +9,8 @@ public enum ReplaceStringType {
 	TARGUSER_MENTION("%U"),
 	CHANNEL("%c"),
 	CHANNEL_MENTION("%C"),
+	ROLE("%o"),
+	ROLE_MENTION("%O"),
 	
 	TIME("%T"),
 	TIME_NOTZ("%t"),

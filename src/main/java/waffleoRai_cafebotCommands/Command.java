@@ -11,13 +11,16 @@ import waffleoRai_cafebotCore.AbstractBot;
  * 1.0.0 -> 1.1.0 | July 20, 2018
  * 	Added the getCommandMessageID method
  * 
+ * 1.1.0 -> 1.2.0 | August 7, 2018
+ * 	Added methods for response/command message cleaning
+ * 
  */
 
 /**
  * A basic interface for executable bot commands.
  * @author Blythe Hospelhorn
- * @version 1.1.0
- * @since July 20, 2018
+ * @version 1.2.0
+ * @since August 7, 2018
  */
 public interface Command {
 	
@@ -33,17 +36,19 @@ public interface Command {
 	 * Execute the procedure that should be executed upon user confirmation
 	 * using the referenced bot.
 	 * @param bot Bot to execute this command with.
+	 * @param msgid Long UID of Discord message containing the user response.
 	 * @throws NullPointerException If bot is null.
 	 */
-	public void execute_confirm(AbstractBot bot);
+	public void execute_confirm(AbstractBot bot, long msgid);
 	
 	/**
 	 * Execute the procedure that should be executed upon user cancellation
 	 * using the referenced bot.
 	 * @param bot Bot to execute this command with.
+	 * @param msgid Long UID of Discord message containing the user response.
 	 * @throws NullPointerException If bot is null.
 	 */
-	public void execute_reject(AbstractBot bot);
+	public void execute_reject(AbstractBot bot, long msgid);
 	
 	/**
 	 * Execute the procedure that should be executed upon user prompt timeout
@@ -57,9 +62,10 @@ public interface Command {
 	 * Execute the procedure that should be executed upon automatic rejection
 	 * of user input using the referenced bot.
 	 * @param bot Bot to execute this command with.
+	 * @param msgid Long UID of Discord message containing the user response.
 	 * @throws NullPointerException If bot is null.
 	 */
-	public void execute_rerequest(AbstractBot bot);
+	public void execute_rerequest(AbstractBot bot, long msgid);
 	
 	/**
 	 * Retrieve the long UID of the original message containing the user-issued
@@ -67,5 +73,12 @@ public interface Command {
 	 * @return Long UID of command message, or -1 if there is none.
 	 */
 	public long getCommandMessageID();
+	
+	/**
+	 * Retrieve the long UID of the guild the command was sent in.
+	 * This is used for command cleaning mostly.
+	 * @return Guild UID
+	 */
+	public long getGuildID();
 	
 }

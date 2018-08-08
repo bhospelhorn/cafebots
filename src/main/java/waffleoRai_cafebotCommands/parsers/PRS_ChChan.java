@@ -26,11 +26,11 @@ public class PRS_ChChan implements Parser{
 	
 	@Override
 	public Command generateCommand(String[] args, MessageReceivedEvent event) {
-		if (args.length < 3) return new CMD_BadCommandMessage(event.getChannel(), event.getMessageIdLong());
+		if (args.length < 3) return new CMD_BadCommandMessage(event.getChannel(), event.getGuild(), event.getMessageIdLong());
 		if (args[1].equals(BIRTHDAY)) return new CMD_ChChan(event.getChannel(), event.getMember(), args[2], true, event.getMessageIdLong());
 		else if (args[1].equals(GREETING)) return new CMD_ChChan(event.getChannel(), event.getMember(), args[2], false, event.getMessageIdLong());
 		
-		return new CMD_BadCommandMessage(event.getChannel(), event.getMessageIdLong());
+		return new CMD_BadCommandMessage(event.getChannel(), event.getGuild(), event.getMessageIdLong());
 	}
 
 }
