@@ -19,6 +19,9 @@ import net.dv8tion.jda.core.entities.User;
  * 1.0.0 -> 1.1.0 | August 7, 2018
  * 	Added message ID tracking
  * 
+ * 1.1.0 -> 1.1.1 | August 11, 2018
+ * 	MessageID update
+ * 
  */
 
 /**
@@ -38,8 +41,8 @@ import net.dv8tion.jda.core.entities.User;
  * <br><br><i>Outstanding Issues:</i>
  * <br>
  * @author Blythe Hospelhorn
- * @version 1.1.0
- * @since August 7, 2018
+ * @version 1.1.1
+ * @since August 11, 2018
  */
 public class ResponseQueue {
 	
@@ -140,7 +143,7 @@ public class ResponseQueue {
 						if (card.checkTime() >= TIMEOUT_APPR_SECONDS)
 						{
 							removeCard(l);
-							Response r = new Response(card.getCommand(), Response.RESPONSE_TIMEOUT, -1);
+							Response r = new Response(card.getCommand(), Response.RESPONSE_TIMEOUT, null);
 							addToQueue(r);
 						}
 					}	
@@ -289,7 +292,7 @@ public class ResponseQueue {
 	 * @param u User that sent the response.
 	 * @param c Channel the response was sent from.
 	 */
-	public synchronized void respond(int response, User u, MessageChannel c, long msgid)
+	public synchronized void respond(int response, User u, MessageChannel c, MessageID msgid)
 	{
 		long chanid = getPendingChannel(u);
 		if (chanid != c.getIdLong())
@@ -319,7 +322,7 @@ public class ResponseQueue {
 	 * for that user, the bot will reply accordingly.
 	 * @param u User sending response.
 	 */
-	public synchronized void respondYes(User u, long msgid)
+	public synchronized void respondYes(User u, MessageID msgid)
 	{
 		long uid = u.getIdLong();
 		ResponseCard c = pending.remove(uid);
@@ -333,7 +336,7 @@ public class ResponseQueue {
 	 * for that user, the bot will reply accordingly.
 	 * @param u User sending response.
 	 */
-	public synchronized void respondNo(User u, long msgid)
+	public synchronized void respondNo(User u, MessageID msgid)
 	{
 		long uid = u.getIdLong();
 		ResponseCard c = pending.remove(uid);
@@ -347,7 +350,7 @@ public class ResponseQueue {
 	 * Like a proper response, this method also removes the response card from the queue.
 	 * @param u User sending response.
 	 */
-	public synchronized void respondInvalid(User u, long msgid)
+	public synchronized void respondInvalid(User u, MessageID msgid)
 	{
 		long uid = u.getIdLong();
 		ResponseCard c = pending.remove(uid);
@@ -366,7 +369,7 @@ public class ResponseQueue {
 		long uid = u.getIdLong();
 		ResponseCard c = pending.remove(uid);
 		if (c == null) return;
-		Response r = new Response(c.getCommand(), Response.RESPONSE_TIMEOUT, -1);
+		Response r = new Response(c.getCommand(), Response.RESPONSE_TIMEOUT, null);
 		addToQueue(r);
 	}
 	

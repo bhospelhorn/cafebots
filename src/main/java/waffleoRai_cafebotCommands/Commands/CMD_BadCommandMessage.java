@@ -3,6 +3,7 @@ package waffleoRai_cafebotCommands.Commands;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.MessageChannel;
 import waffleoRai_cafebotCommands.CommandAdapter;
+import waffleoRai_cafebotCommands.MessageID;
 import waffleoRai_cafebotCore.AbstractBot;
 
 /*
@@ -13,8 +14,9 @@ import waffleoRai_cafebotCore.AbstractBot;
  * 
  * 1.0.0 -> 1.1.0 | July 20, 2018
  * 	Added command message ID note
- * 
  * 1.1.0 -> 1.2.0 | August 7, 2018
+ * 	Command cleanup stuff
+ * 1.2.0 -> 1.3.0 | August 11, 2018
  * 	Command cleanup stuff
  */
 
@@ -23,8 +25,8 @@ import waffleoRai_cafebotCore.AbstractBot;
  * "command was not understood" message to the requested channel.
  * <br>This event cannot be induced via command line. It is internal only.
  * @author Blythe Hospelhorn
- * @version 1.2.0
- * @since August 7, 2018
+ * @version 1.3.0
+ * @since August 11, 2018
  */
 public class CMD_BadCommandMessage extends CommandAdapter {
 
@@ -36,13 +38,14 @@ public class CMD_BadCommandMessage extends CommandAdapter {
 	 * the message to.
 	 * @param ch Raw MessageChannel object from captured listener event - the channel
 	 * the bad command was received on and the bot reply should be sent to.
-	 * @param cmdID Long UID of the message the command was sent in.
+	 * @param cmdID ID of the message the command was sent in.
 	 */
 	public CMD_BadCommandMessage(MessageChannel ch, Guild g, long cmdID)
 	{
 		channel = ch;
 		guild = g;
-		super.setCommandMessageID(cmdID);
+		MessageID cmdmsg = new MessageID(cmdID, ch.getIdLong());
+		super.setCommandMessageID(cmdmsg);
 	}
 	
 	@Override

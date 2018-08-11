@@ -4,6 +4,7 @@ import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.MessageChannel;
 import net.dv8tion.jda.core.entities.User;
 import waffleoRai_cafebotCommands.CommandAdapter;
+import waffleoRai_cafebotCommands.MessageID;
 import waffleoRai_cafebotCore.AbstractBot;
 
 public class CMD_ViewAdminRoles extends CommandAdapter{
@@ -17,7 +18,8 @@ public class CMD_ViewAdminRoles extends CommandAdapter{
 		cmd_channel = channel;
 		guild = g;
 		reqUser = author;
-		super.setCommandMessageID(cmdID);
+		MessageID cmdmsg = new MessageID(cmdID, channel.getIdLong());
+		super.setCommandMessageID(cmdmsg);
 	}
 	
 	public long getChannelID()

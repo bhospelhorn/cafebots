@@ -3,6 +3,7 @@ package waffleoRai_cafebotCommands.Commands;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.MessageChannel;
 import waffleoRai_cafebotCommands.CommandAdapter;
+import waffleoRai_cafebotCommands.MessageID;
 import waffleoRai_cafebotCore.AbstractBot;
 import waffleoRai_schedulebot.EventType;
 
@@ -14,9 +15,10 @@ import waffleoRai_schedulebot.EventType;
  * 
  * 1.0.0 -> 1.1.0 | July 20, 2018
  * 	Added command message ID note
- * 
  * 1.1.0 -> 1.2.0 | August 5, 2018
  * 	Added view functionality
+ * 1.2.0 -> 1.2.1 | August 11, 2018
+ * 	MessageID update
  */
 
 /**
@@ -28,8 +30,8 @@ import waffleoRai_schedulebot.EventType;
  * <br>sor defo
  * <br>sor view [etype]
  * @author Blythe Hospelhorn
- * @version 1.2.0
- * @since August 5, 2018
+ * @version 1.2.1
+ * @since August 11, 2018
  */
 public class CMD_SOR extends CommandAdapter {
 	
@@ -59,7 +61,8 @@ public class CMD_SOR extends CommandAdapter {
 		type = null;
 		defo = setdefo;
 		level = -1;
-		super.setCommandMessageID(cmdID);
+		MessageID cmdmsg = new MessageID(cmdID, ch.getIdLong());
+		super.setCommandMessageID(cmdmsg);
 	}
 	
 	/**
@@ -81,7 +84,8 @@ public class CMD_SOR extends CommandAdapter {
 		defo = false;
 		type = t;
 		level = l;
-		super.setCommandMessageID(cmdID);
+		MessageID cmdmsg = new MessageID(cmdID, ch.getIdLong());
+		super.setCommandMessageID(cmdmsg);
 	}
 	
 	/**
@@ -94,7 +98,8 @@ public class CMD_SOR extends CommandAdapter {
 	{
 		channel = ch;
 		type = t;
-		super.setCommandMessageID(cmdID);
+		MessageID cmdmsg = new MessageID(cmdID, ch.getIdLong());
+		super.setCommandMessageID(cmdmsg);
 	}
 	
 	@Override

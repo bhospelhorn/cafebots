@@ -3,6 +3,7 @@ package waffleoRai_cafebotCommands.Commands;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.MessageChannel;
 import waffleoRai_cafebotCommands.CommandAdapter;
+import waffleoRai_cafebotCommands.MessageID;
 import waffleoRai_cafebotCore.AbstractBot;
 import waffleoRai_schedulebot.Attendance;
 import waffleoRai_schedulebot.CalendarEvent;
@@ -20,7 +21,8 @@ public class CMD_DeclineEvent extends CommandAdapter{
 		channel = c;
 		member = m;
 		eventID = e;
-		super.setCommandMessageID(cmdID);
+		MessageID cmdmsg = new MessageID(cmdID, c.getIdLong());
+		super.setCommandMessageID(cmdmsg);
 		event = null;
 	}
 	

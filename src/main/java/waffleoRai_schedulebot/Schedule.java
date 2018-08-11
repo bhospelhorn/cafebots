@@ -64,6 +64,8 @@ public class Schedule {
 	public static String[] monthnames;
 	private static ReminderMap reminders;
 	
+	private CommandCleanThread commandCleanerThread;
+	
 	/* ----- Construction ----- */
 	
 	public Schedule(UserBank ub, long guild, ParseCore parser)
@@ -881,18 +883,92 @@ public class Schedule {
 	
 	/* ----- Threads ----- */
 	
-	public void startMonitorThreads()
+	public class CommandCleanThread extends Thread
+	{
+		private boolean killMe;
+		private GregorianCalendar lastClean;
+		
+		public CommandCleanThread()
+		{
+			String tname = "AutocleanDaemon_Guild" + Long.toUnsignedString(guildID);
+			super.setDaemon(true);
+			super.setName(tname);
+			killMe = false;
+			lastClean = new GregorianCalendar();
+		}
+		
+		public void run()
+		{
+			while (!isKilled())
+			{
+				//Submit autoclean request
+				GregorianCalendar now = new GregorianCalendar();
+				if (now.get(Calendar.DAY_OF_MONTH) != lastClean.get(Calendar.DAY_OF_MONTH))
+				{
+					cmdCore.command_AutoCommandClean(guildID);
+				}
+				//Sleep for 6 hours
+				try 
+				{
+					Thread.sleep(6 * MILLISECONDS_PER_HOUR);
+				} 
+				catch (InterruptedException e) {
+					Thread.interrupted();
+				}
+			}
+		}
+		
+		public synchronized void interruptMe()
+		{
+			this.interrupt();
+		}
+		
+		private synchronized boolean isKilled()
+		{
+			return killMe;
+		}
+		
+		public synchronized void kill()
+		{
+			killMe = true;
+			this.interrupt();
+		}
+	}
+	
+	public void startMonitorThreads(boolean autocleanOn)
 	{
 		bday_monitor_thread = new WisherThread(SLEEPTIME_MINUTES_BIRTHDAY);
 		bday_monitor_thread.start();
 		event_monitor_thread = new EventTimerThread();
 		event_monitor_thread.start();
+		if (autocleanOn)
+		{
+			commandCleanerThread = new CommandCleanThread();
+			commandCleanerThread.start();
+		}
 	}
 	
 	public void killMonitorThreads()
 	{
 		bday_monitor_thread.kill();
 		event_monitor_thread.terminate();
+		if (commandCleanerThread != null) commandCleanerThread.kill();
+	}
+	
+	public void setCommandAutoclean(boolean on)
+	{
+		if (on)
+		{
+			if (commandCleanerThread != null && commandCleanerThread.isAlive()) return;
+			commandCleanerThread = new CommandCleanThread();
+			commandCleanerThread.start();
+		}
+		else
+		{
+			if (commandCleanerThread == null) return;
+			commandCleanerThread.kill();
+			commandCleanerThread = null;
+		}
 	}
 	
 }

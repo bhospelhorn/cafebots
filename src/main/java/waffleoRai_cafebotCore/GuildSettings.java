@@ -23,7 +23,8 @@ import net.dv8tion.jda.core.entities.Role;
 import waffleoRai_Utils.FileBuffer;
 
 import waffleoRai_Utils.FileBuffer.UnsupportedFileTypeException;
-import waffleoRai_cafebotCommands.LongQueue;
+import waffleoRai_cafebotCommands.MIDQueue;
+import waffleoRai_cafebotCommands.MessageID;
 import waffleoRai_cafebotCommands.ParseCore;
 import waffleoRai_cafebotRoles.ActingManager;
 import waffleoRai_schedulebot.Schedule;
@@ -56,7 +57,8 @@ public class GuildSettings {
 	private boolean farewellsOn;
 	
 	private boolean auto_cmd_clear;
-	private LongQueue recentCommands;
+	//private LongQueue recentCommands;
+	private MIDQueue recentCommands;
 	
 	private UserBank users;
 	private Schedule schedule;
@@ -85,7 +87,8 @@ public class GuildSettings {
 		for (Member m : memlist) users.addUser(new ActorUser(m));
 		dataDir = gdirPath;
 		adminRoles = new LinkedList<Long>();
-		recentCommands = new LongQueue(MAX_SAVED_COMMANDS);
+		//recentCommands = new LongQueue(MAX_SAVED_COMMANDS);
+		recentCommands = new MIDQueue(MAX_SAVED_COMMANDS);
 		auto_cmd_clear = false;
 	}
 	
@@ -132,12 +135,18 @@ public class GuildSettings {
 			}
 			
 			//Comma delimited list of recent command message IDs
-			recentCommands = new LongQueue(MAX_SAVED_COMMANDS);
+			//recentCommands = new LongQueue(MAX_SAVED_COMMANDS);
+			recentCommands = new MIDQueue(MAX_SAVED_COMMANDS);
 			String reccom = br.readLine();
 			if (reccom != null && !reccom.isEmpty())
 			{
 				String[] cmds = reccom.split(",");
-				for (String s : cmds) recentCommands.add(Long.parseUnsignedLong(s));
+				for (String s : cmds){
+					String[] ids = s.split(":");
+					long cid = Long.parseUnsignedLong(ids[0]);
+					long mid = Long.parseUnsignedLong(ids[1]);
+					recentCommands.add(new MessageID(mid, cid));
+				}
 			}
 		}
 		catch (Exception e)
@@ -292,11 +301,6 @@ public class GuildSettings {
 		return auto_cmd_clear;
 	}
 	
-	public LongQueue getRecentCommandList()
-	{
-		return recentCommands;
-	}
-	
 	public ActorUser getUser(long uid)
 	{
 		return users.getUser(uid);
@@ -354,6 +358,7 @@ public class GuildSettings {
 	public synchronized void setAutoCommandClear(boolean on)
 	{
 		auto_cmd_clear = on;
+		schedule.setCommandAutoclean(auto_cmd_clear);
 	}
 
 	/* ----- Admin Permissions ----- */
@@ -441,14 +446,19 @@ public class GuildSettings {
 	
 	/* ----- Command Cleaning ----- */
 	
-	public LongQueue getCommandQueue()
+	public List<MessageID> getRecentCommandList()
+	{
+		return recentCommands.getQueueCopy();
+	}
+	
+	public MIDQueue getCommandQueue()
 	{
 		return recentCommands;
 	}
 	
-	public void queueCommandMessage(long messageID)
+	public void queueCommandMessage(MessageID mid)
 	{
-		recentCommands.add(messageID);
+		recentCommands.add(mid);
 	}
 	
 	/* ----- Data Backup ----- */
@@ -604,7 +614,7 @@ public class GuildSettings {
 	
 	public void startScheduleThreads()
 	{
-		schedule.startMonitorThreads();
+		schedule.startMonitorThreads(auto_cmd_clear);
 	}
 	
 	public void terminateScheduleThreads()
@@ -644,11 +654,11 @@ public class GuildSettings {
 		
 		String cmdlist = "";
 		first = true;
-		List<Long> cmds = recentCommands.getQueueCopy();
-		for (Long l : cmds)
+		List<MessageID> cmds = recentCommands.getQueueCopy();
+		for (MessageID m : cmds)
 		{
 			if (!first) cmdlist += ",";
-			cmdlist += Long.toUnsignedString(l);
+			cmdlist += Long.toUnsignedString(m.getChannelID()) + ":" + Long.toUnsignedString(m.getMessageID());
 			first = false;
 		}
 		bw.write(cmdlist);

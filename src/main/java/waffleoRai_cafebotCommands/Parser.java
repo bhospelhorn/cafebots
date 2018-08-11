@@ -12,6 +12,7 @@ import waffleoRai_cafebotCommands.parsers.PRS_ChangeRoleAdmin;
 import waffleoRai_cafebotCommands.parsers.PRS_CheckAdminRoles;
 import waffleoRai_cafebotCommands.parsers.PRS_CheckGreetingStatus;
 import waffleoRai_cafebotCommands.parsers.PRS_CheckRSVP;
+import waffleoRai_cafebotCommands.parsers.PRS_CleanCommands;
 import waffleoRai_cafebotCommands.parsers.PRS_CleanMessages_1;
 import waffleoRai_cafebotCommands.parsers.PRS_CleanMessages_2;
 import waffleoRai_cafebotCommands.parsers.PRS_CleanMessages_3;
@@ -31,6 +32,7 @@ import waffleoRai_cafebotCommands.parsers.PRS_SOR;
 import waffleoRai_cafebotCommands.parsers.PRS_SaySomething;
 import waffleoRai_cafebotCommands.parsers.PRS_SeeEvents;
 import waffleoRai_cafebotCommands.parsers.PRS_SeeTZ;
+import waffleoRai_cafebotCommands.parsers.PRS_SetAutocleanCommands;
 import waffleoRai_cafebotCommands.parsers.PRS_SetFarewells;
 import waffleoRai_cafebotCommands.parsers.PRS_SetGreetings;
 import waffleoRai_cafebotCommands.parsers.PRS_SetTZ;
@@ -107,8 +109,8 @@ public interface Parser {
 		pmap.put("pingFarewells", new PRS_PingMeFarewells());
 		pmap.put("checkg", new PRS_CheckGreetingStatus());
 		pmap.put("audconf", null);
-		pmap.put("cmdclean", null);
-		pmap.put("autocmdclean", null);
+		pmap.put("cmdclean", new PRS_CleanCommands());
+		pmap.put("autocmdclean", new PRS_SetAutocleanCommands());
 		
 		pmap.put("accept", null);
 		pmap.put("decline", null);

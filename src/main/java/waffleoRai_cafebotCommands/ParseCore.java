@@ -15,6 +15,7 @@ import net.dv8tion.jda.core.events.guild.member.GuildMemberLeaveEvent;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import waffleoRai_Utils.BitStreamer;
 import waffleoRai_cafebotCommands.BotScheduler.Position;
+import waffleoRai_cafebotCommands.Commands.CMD_AutocleanCommands;
 import waffleoRai_cafebotCommands.Commands.CMD_BadCommandMessage;
 import waffleoRai_cafebotCommands.Commands.CMD_IssueReminder;
 import waffleoRai_cafebotCommands.Commands.CMD_MemberFarewell;
@@ -44,6 +45,10 @@ import waffleoRai_schedulebot.EventType;
  * 	Added methods to access information
  * 1.1.1 -> 1.2.0 | July 20, 2018
  * 	Initial update for command ID compatibility
+ * 1.2.0 -> 1.2.1 | August 7, 2018
+ * 	Added command ID passing for responses
+ * 1.2.1 -> 1.2.2 | August 11, 2018
+ * Updated command ID to MessageID object
  */
 
 /**
@@ -57,8 +62,8 @@ import waffleoRai_schedulebot.EventType;
  * <br><br><i>Outstanding Issues:</i>
  * <br>
  * @author Blythe Hospelhorn
- * @version 1.2.0
- * @since July 20, 2018
+ * @version 1.2.2
+ * @since August 11, 2018
  */
 public class ParseCore {
 	
@@ -542,7 +547,8 @@ public class ParseCore {
 					AbstractBot bot = mybots[i];
 					if (bot == null) continue;
 					ResponseQueue rq = bot.getResponseQueue();
-					rq.respond(r, event.getAuthor(), event.getChannel(), event.getMessageIdLong());	
+					MessageID rmsg = new MessageID(event.getMessageIdLong(), event.getChannel().getIdLong());
+					rq.respond(r, event.getAuthor(), event.getChannel(), rmsg);	
 				}
 			}
 		}
@@ -801,6 +807,14 @@ public class ParseCore {
 		int bot = 1;
 		bot = scheduler.sendCommandTo(CMD_ROLEUPDATE);
 		Command cmd = new CMD_ProcessRoleUpdate(member, roles, add);
+		issueDirectCommand(bot, cmd);
+	}
+	
+	public void command_AutoCommandClean(long guildID)
+	{
+		int bot = scheduler.sendCommandTo(CMD_AUTOCLEAN);
+		if (bot < 0 || bot > 9) return;
+		Command cmd = new CMD_AutocleanCommands(guildID);
 		issueDirectCommand(bot, cmd);
 	}
 	

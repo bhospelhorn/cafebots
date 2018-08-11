@@ -3,6 +3,7 @@ package waffleoRai_cafebotCommands.Commands;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.MessageChannel;
 import waffleoRai_cafebotCommands.CommandAdapter;
+import waffleoRai_cafebotCommands.MessageID;
 import waffleoRai_cafebotCore.AbstractBot;
 
 public class CMD_PingMeGreetings extends CommandAdapter{
@@ -17,7 +18,8 @@ public class CMD_PingMeGreetings extends CommandAdapter{
 		req_user = user;
 		setting = dir;
 		channel = ch;
-		super.setCommandMessageID(cmdID);
+		MessageID cmdmsg = new MessageID(cmdID, ch.getIdLong());
+		super.setCommandMessageID(cmdmsg);
 	}
 	
 	public long getUserID()

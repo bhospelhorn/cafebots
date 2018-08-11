@@ -5,6 +5,7 @@ import java.util.List;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.MessageChannel;
 import waffleoRai_cafebotCommands.CommandAdapter;
+import waffleoRai_cafebotCommands.MessageID;
 import waffleoRai_cafebotCore.AbstractBot;
 
 public class CMD_EventMakeWeekly extends CommandAdapter{
@@ -27,7 +28,7 @@ public class CMD_EventMakeWeekly extends CommandAdapter{
 	
 	public CMD_EventMakeWeekly(MessageChannel ch, Member req, int dayOfWeek, List<String> targets, long cmdID)
 	{
-		System.err.println(Thread.currentThread().getName() + " || CMD_EventMakeWeekly.<init> || DEBUG - Called!");
+		//System.err.println(Thread.currentThread().getName() + " || CMD_EventMakeWeekly.<init> || DEBUG - Called!");
 		comChannel = ch;
 		requestingUser = req;
 		DOW = dayOfWeek;
@@ -38,12 +39,13 @@ public class CMD_EventMakeWeekly extends CommandAdapter{
 		hour = 12;
 		minutes = 0;
 		groupEvent = false;
-		super.setCommandMessageID(cmdID);
+		MessageID cmdmsg = new MessageID(cmdID, ch.getIdLong());
+		super.setCommandMessageID(cmdmsg);
 	}
 	
 	public CMD_EventMakeWeekly(MessageChannel ch, Member req, int dayOfWeek, long cmdID)
 	{
-		System.err.println(Thread.currentThread().getName() + " || CMD_EventMakeWeekly.<init> || DEBUG - Called!");
+		//System.err.println(Thread.currentThread().getName() + " || CMD_EventMakeWeekly.<init> || DEBUG - Called!");
 		comChannel = ch;
 		requestingUser = req;
 		DOW = dayOfWeek;
@@ -54,7 +56,8 @@ public class CMD_EventMakeWeekly extends CommandAdapter{
 		hour = 12;
 		minutes = 0;
 		groupEvent = true;
-		super.setCommandMessageID(cmdID);
+		MessageID cmdmsg = new MessageID(cmdID, ch.getIdLong());
+		super.setCommandMessageID(cmdmsg);
 	}
 	
 	public MessageChannel getCommandChannel()
@@ -173,13 +176,13 @@ public class CMD_EventMakeWeekly extends CommandAdapter{
 	/**
 	 * @throws NullPointerException If bot is null.
 	 */
-	public void execute_confirm(AbstractBot bot, long msgid) {
+	public void execute_confirm(AbstractBot bot, MessageID msgid) {
 		bot.makeWeeklyEvent_complete(this, true);
 		bot.queueCommandMessageForCleaning(msgid, getGuildID());
 	}
 
 	@Override
-	public void execute_reject(AbstractBot bot, long msgid) {
+	public void execute_reject(AbstractBot bot, MessageID msgid) {
 		bot.makeWeeklyEvent_complete(this, false);
 		bot.queueCommandMessageForCleaning(msgid, getGuildID());
 	}

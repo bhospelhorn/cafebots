@@ -3,6 +3,7 @@ package waffleoRai_cafebotCommands.Commands;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.MessageChannel;
 import waffleoRai_cafebotCommands.CommandAdapter;
+import waffleoRai_cafebotCommands.MessageID;
 import waffleoRai_cafebotCore.AbstractBot;
 
 /*
@@ -13,9 +14,10 @@ import waffleoRai_cafebotCore.AbstractBot;
  * 
  * 1.0.0 -> 1.1.0 | July 20, 2018
  * 	Added command message ID note
- * 
  * 1.1.0 -> 1.1.1 | August 7, 2018
  *  More command cleaning updating
+ * 1.1.1 -> 1.1.2 | August 11, 2018
+ *  MessageID update
  */
 
 
@@ -24,8 +26,8 @@ import waffleoRai_cafebotCore.AbstractBot;
  * <br><br><b>Standard Command:</b>
  * <br>seealltz
  * @author Blythe Hospelhorn
- * @version 1.1.1
- * @since August 7, 2018
+ * @version 1.1.2
+ * @since August 11, 2018
  */
 public class CMD_SeeTZ extends CommandAdapter{
 
@@ -42,7 +44,8 @@ public class CMD_SeeTZ extends CommandAdapter{
 	{
 		ch = channel;
 		user = u;
-		super.setCommandMessageID(cmdID);
+		MessageID cmdmsg = new MessageID(cmdID, ch.getIdLong());
+		super.setCommandMessageID(cmdmsg);
 	}
 	
 	@Override

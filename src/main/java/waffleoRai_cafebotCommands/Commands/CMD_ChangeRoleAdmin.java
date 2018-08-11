@@ -4,6 +4,7 @@ import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.MessageChannel;
 import net.dv8tion.jda.core.entities.Role;
 import waffleoRai_cafebotCommands.CommandAdapter;
+import waffleoRai_cafebotCommands.MessageID;
 import waffleoRai_cafebotCore.AbstractBot;
 
 public class CMD_ChangeRoleAdmin extends CommandAdapter{
@@ -22,7 +23,8 @@ public class CMD_ChangeRoleAdmin extends CommandAdapter{
 		cmd_channel = channel;
 		user = requester;
 		roleArg = role;
-		super.setCommandMessageID(cmdID);
+		MessageID cmdmsg = new MessageID(cmdID, channel.getIdLong());
+		super.setCommandMessageID(cmdmsg);
 	}
 	
 	public long getChannelID()
@@ -53,14 +55,14 @@ public class CMD_ChangeRoleAdmin extends CommandAdapter{
 	/**
 	 * @throws NullPointerException If bot is null.
 	 */
-	public void execute_confirm(AbstractBot bot, long msgid) {
+	public void execute_confirm(AbstractBot bot, MessageID msgid) {
 		if (add) bot.addAdminPermission(getChannelID(), user.getGuild(), role);
 		else bot.removeAdminPermission(getChannelID(), user.getGuild(), role);
 		bot.queueCommandMessageForCleaning(msgid, getGuildID());
 	}
 
 	@Override
-	public void execute_reject(AbstractBot bot, long msgid) {
+	public void execute_reject(AbstractBot bot, MessageID msgid) {
 		bot.displayGeneralCancel(getChannelID(), user.getUser().getName());
 		bot.queueCommandMessageForCleaning(msgid, getGuildID());
 	}

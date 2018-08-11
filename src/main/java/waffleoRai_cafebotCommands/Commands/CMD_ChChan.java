@@ -3,6 +3,7 @@ package waffleoRai_cafebotCommands.Commands;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.MessageChannel;
 import waffleoRai_cafebotCommands.CommandAdapter;
+import waffleoRai_cafebotCommands.MessageID;
 import waffleoRai_cafebotCore.AbstractBot;
 
 /*
@@ -13,9 +14,10 @@ import waffleoRai_cafebotCore.AbstractBot;
  * 
  * 1.0.0 -> 1.1.0 | July 20, 2018
  * 	Added command message ID note
- * 
  * 1.1.0 -> 1.1.1 | August 7, 2018
  * 	Added more command cleaning stuff
+ * 1.1.1 -> 1.1.2 | August 11, 2018
+ * 	MessageID
  */
 
 /**
@@ -25,8 +27,8 @@ import waffleoRai_cafebotCore.AbstractBot;
  * <br>chchan greeting [channelName]
  * <br><i>These commands are for guild admins only.</i>
  * @author Blythe Hospelhorn
- * @version 1.1.1
- * @since August 7, 2018
+ * @version 1.1.2
+ * @since August 11, 2018
  */
 public class CMD_ChChan extends CommandAdapter{
 
@@ -44,7 +46,7 @@ public class CMD_ChChan extends CommandAdapter{
 	 * @param birthday 
 	 * <br>True - If user wants to change the birthday channel
 	 * <br>False - If user wants to change the greeting channel
-	 * @param cmdID Long UID of the message the command was sent in.
+	 * @param cmdID ID of the message the command was sent in.
 	 */
 	public CMD_ChChan(MessageChannel ch, Member u, String tchan, boolean birthday, long cmdID)
 	{
@@ -52,7 +54,8 @@ public class CMD_ChChan extends CommandAdapter{
 		user = u;
 		trg_channel = tchan;
 		bday = birthday;
-		super.setCommandMessageID(cmdID);
+		MessageID cmdmsg = new MessageID(cmdID, ch.getIdLong());
+		super.setCommandMessageID(cmdmsg);
 	}
 	
 	@Override

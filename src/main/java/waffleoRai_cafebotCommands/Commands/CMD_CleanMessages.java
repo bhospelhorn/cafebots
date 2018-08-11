@@ -3,6 +3,7 @@ package waffleoRai_cafebotCommands.Commands;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.MessageChannel;
 import waffleoRai_cafebotCommands.CommandAdapter;
+import waffleoRai_cafebotCommands.MessageID;
 import waffleoRai_cafebotCore.AbstractBot;
 
 /*
@@ -13,6 +14,8 @@ import waffleoRai_cafebotCore.AbstractBot;
  * 
  * 1.0.0 -> 1.1.0 | July 20, 2018
  * 	Added command message ID note
+ * 1.1.0 -> 1.2.0 | August 11, 2018
+ * 	MessageID update
  */
 
 /**
@@ -23,8 +26,8 @@ import waffleoRai_cafebotCore.AbstractBot;
  * <br><br><i>Admin Only:</i>
  * <br>cleanday
  * @author Blythe Hospelhorn
- * @version 1.1.0
- * @since July 20, 2018
+ * @version 1.2.0
+ * @since August 11, 2018
  */
 public class CMD_CleanMessages extends CommandAdapter{
 
@@ -40,7 +43,7 @@ public class CMD_CleanMessages extends CommandAdapter{
 	 * @param u User sending the command as a JDA Member object.
 	 * @param useronly Whether messages deleted should only include messages sent by the requesting user.
 	 * @param dayonly Whether messages deleted should only include messages sent in the last 24 hours.
-	 * @param cmdID Long UID of the message the command was sent in.
+	 * @param cmdID ID of the message the command was sent in.
 	 */
 	public CMD_CleanMessages(MessageChannel ch, Member u, boolean useronly, boolean dayonly, long cmdID)
 	{
@@ -48,7 +51,8 @@ public class CMD_CleanMessages extends CommandAdapter{
 		user = u;
 		userOnly = useronly;
 		dayOnly = dayonly;
-		super.setCommandMessageID(cmdID);
+		MessageID cmdmsg = new MessageID(cmdID, ch.getIdLong());
+		super.setCommandMessageID(cmdmsg);
 	}
 
 	@Override
@@ -84,7 +88,7 @@ public class CMD_CleanMessages extends CommandAdapter{
 	/**
 	 * @throws NullPointerException If bot is null.
 	 */
-	public void execute_confirm(AbstractBot bot, long msgid) {
+	public void execute_confirm(AbstractBot bot, MessageID msgid) {
 		if (dayOnly)
 		{
 			if (userOnly) bot.cleanChannelMessages_allUserDay(channel.getIdLong(), user);
@@ -101,7 +105,7 @@ public class CMD_CleanMessages extends CommandAdapter{
 	/**
 	 * @throws NullPointerException If bot is null.
 	 */
-	public void execute_reject(AbstractBot bot, long msgid) {
+	public void execute_reject(AbstractBot bot, MessageID msgid) {
 		bot.displayGeneralCancel(getChannelID(), user.getUser().getName());
 		bot.queueCommandMessageForCleaning(msgid, getGuildID());
 	}

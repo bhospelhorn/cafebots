@@ -14,13 +14,16 @@ import waffleoRai_cafebotCore.AbstractBot;
  * 1.0.0 -> 1.1.0 | August 7, 2018
  * 	Added message ID
  * 
+ * 1.1.0 -> 1.1.1 | August 11, 2018
+ * 	MessageID update (long -> MessageID)
+ * 
  */
 
 /**
  * An object containing information on a user response to a bot command prompt.
  * @author Blythe Hospelhorn
- * @version 1.1.0
- * @since August 7, 2018
+ * @version 1.1.1
+ * @since August 11, 2018
  */
 public class Response {
 	
@@ -34,7 +37,7 @@ public class Response {
 	
 	private Command cmd;
 	private int response;
-	private long messageID;
+	private MessageID messageID;
 	
 	private static Map<String, Integer> rMap; //Map of interpretable strings to response enums
 	
@@ -44,7 +47,7 @@ public class Response {
 	 * @param r Response to command (see Response class constants).
 	 * @param messageUID UID of message sent in Discord containing response
 	 */
- 	public Response(Command c, int r, long messageUID)
+ 	public Response(Command c, int r, MessageID messageUID)
 	{
 		cmd = c;
 		response = r;
@@ -110,7 +113,7 @@ public class Response {
 		return i;
 	}
 	
-	public long getMessageID()
+	public MessageID getMessageID()
 	{
 		return messageID;
 	}

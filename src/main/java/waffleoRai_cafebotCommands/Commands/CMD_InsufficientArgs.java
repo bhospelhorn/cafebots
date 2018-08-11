@@ -1,6 +1,7 @@
 package waffleoRai_cafebotCommands.Commands;
 
 import waffleoRai_cafebotCommands.CommandAdapter;
+import waffleoRai_cafebotCommands.MessageID;
 import waffleoRai_cafebotCore.AbstractBot;
 import waffleoRai_schedulebot.EventType;
 
@@ -10,6 +11,11 @@ import waffleoRai_schedulebot.EventType;
  * Creation | June 19, 2018
  * Version 1.0.0 Documentation | July 1, 2018
  * 
+ * 1.0.0 -> 1.1.0 | July 20, 2018
+ * 	Added cmdID param
+ * 1.1.0 -> 1.1.1 | August 11, 2018
+ * 	MessageID update
+ * 
  */
 
 /**
@@ -17,8 +23,8 @@ import waffleoRai_schedulebot.EventType;
  * creation command could not be parsed correctly.
  * <br>This event cannot be induced via command line. It is internal only.
  * @author Blythe Hospelhorn
- * @version 1.0.0
- * @since July 1, 2018
+ * @version 1.1.1
+ * @since August 11, 2018
  */
 public class CMD_InsufficientArgs extends CommandAdapter{
 	
@@ -37,7 +43,8 @@ public class CMD_InsufficientArgs extends CommandAdapter{
 		chid = channelID;
 		type = et;
 		username = uname;
-		super.setCommandMessageID(cmdID);
+		MessageID cmdmsg = new MessageID(cmdID, channelID);
+		super.setCommandMessageID(cmdmsg);
 	}
 
 	/**

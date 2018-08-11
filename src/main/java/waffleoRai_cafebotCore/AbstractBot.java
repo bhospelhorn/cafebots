@@ -4579,7 +4579,7 @@ public abstract class AbstractBot implements Bot{
 		{
 			try
 			{
-				m.delete();
+				m.delete().queue();
 				//AuditableRestAction<Void> a = m.delete();
 			}
 			catch (Exception e)
@@ -4722,10 +4722,10 @@ public abstract class AbstractBot implements Bot{
 		sendMessage(ch, bmsg);
 	}
 	
-	public void queueCommandMessageForCleaning(long messageID, long guildID)
+	public void queueCommandMessageForCleaning(MessageID messageID, long guildID)
 	{
 		if (guildID == -1) return;
-		if (messageID == -1) return;
+		if (messageID == null) return;
 		String methodname = "AbstractBot.queueCommandMessageForCleaning";
 		
 		GuildSettings gs = brain.getGuild(guildID);
@@ -4736,6 +4736,178 @@ public abstract class AbstractBot implements Bot{
 		}
 		
 		gs.queueCommandMessage(messageID);
+	}
+	
+	public void requestCommandClean(long chID, Member mem)
+	{
+		String methodname = "AbstractBot.requestCommandClean";
+		
+		//Get guild
+		Guild g = mem.getGuild();
+		long guildID = g.getIdLong();
+		GuildSettings gs = brain.getGuild(guildID);
+		if (gs == null)
+		{
+			notifyInternalError(chID, methodname, "Data for guild " + guildID + " could not be retrieved!");
+			return;
+		}
+		
+		//Get user profile
+		long uid = mem.getUser().getIdLong();
+		ActorUser user = gs.getUser(uid);
+		if (user == null)
+		{
+			notifyInternalError(chID, methodname, "Data for user " + uid + " could not be retrieved!");
+			return;
+		}
+		
+		//Check if admin
+		if (!user.isAdmin())
+		{
+			insufficientPermissionsMessage(chID, mem);
+			return;
+		}
+		
+		//Issue correct prompt
+		//Update: Doesn't look like this one prompts. Huh.
+		boolean cc = cleanCommands(guildID);
+		
+		//Print bot confirmation
+		String key = BotStrings.KEY_MAINGROUP_BOTSTRINGS + BotStrings.KEY_GROUP_CLEANMSG;
+		if (cc) key += BotStrings.KEY_CMDCLEAN_SUCCESS;
+		else key += BotStrings.KEY_CMDCLEAN_FAIL;
+		String str = botStrings.get(key);
+		BotMessage bmsg = new BotMessage(str);
+		bmsg.substituteString(ReplaceStringType.REQUSER, mem.getUser().getName());
+				
+		sendMessage(chID, bmsg);
+		
+	}
+	
+	public boolean cleanCommands(long guildID)
+	{
+		String methodname = "AbstractBot.cleanCommands";
+		
+		Guild g = botcore.getGuildById(guildID);
+		GuildSettings gs = brain.getGuild(guildID);
+		if (gs == null)
+		{
+			printMessageToSTDERR(methodname, "Data for guild " + guildID + " could not be retrieved!");
+			return false;
+		}
+		
+		MIDQueue msgqueue = gs.getCommandQueue();
+		boolean missed = false;
+		while (!msgqueue.isEmpty())
+		{
+			MessageID mid = msgqueue.pop();
+			long chnid = mid.getChannelID();
+			long msgid = mid.getMessageID();
+			//Get channel
+			TextChannel chan = g.getTextChannelById(chnid);
+			if (chan == null){
+				printMessageToSTDERR(methodname, "Message " + Long.toUnsignedString(msgid) + " on channel " + Long.toUnsignedString(chnid) + " could not be deleted!"
+						+ " Reason: Channel " + Long.toUnsignedString(chnid) + " could not be found on guild " + g.getName());
+				missed = true;
+				continue;
+			}
+			Message msg = null;
+			try
+			{
+				//msg = chan.getMessageById(msgid).complete();
+				//TODO: Does the complete() method work?
+				msg = chan.getMessageById(msgid).complete();
+			}
+			catch (Exception e)
+			{
+				printMessageToSTDERR(methodname, "Message " + Long.toUnsignedString(msgid) + " on channel " + Long.toUnsignedString(chnid) + " could not be deleted!"
+						+ " Reason: Exception caught retrieving message!");
+				missed = true;
+				e.printStackTrace();
+				continue;
+			}
+			if (msg == null){
+				printMessageToSTDERR(methodname, "Message " + Long.toUnsignedString(msgid) + " on channel " + Long.toUnsignedString(chnid) + " could not be deleted!"
+						+ " Reason: Message could not be retrieved!");
+				missed = true;
+				continue;
+			}
+			
+			//Try to delete message
+			try
+			{
+				//TODO: Does this delete.queue work?
+				msg.delete().queue();
+			}
+			catch (Exception e)
+			{
+				printMessageToSTDERR(methodname, "Message " + Long.toUnsignedString(msgid) + " on channel " + Long.toUnsignedString(chnid) + " could not be deleted!"
+						+ " Reason: Permissions or other error deleting message!");
+				missed = true;
+				e.printStackTrace();
+				continue;
+			}
+			
+		}
+		
+		return !missed;
+	}
+
+	public void setAutoCommandClean(long chID, Member mem, boolean on)
+	{
+		final String methodname = "AbstractBot.setAutoCommandClean";
+		
+		//Get guild
+		Guild g = mem.getGuild();
+		long guildID = g.getIdLong();
+		GuildSettings gs = brain.getGuild(guildID);
+		if (gs == null)
+		{
+			notifyInternalError(chID, methodname, "Data for guild " + guildID + " could not be retrieved!");
+			String key = BotStrings.KEY_MAINGROUP_BOTSTRINGS;
+			key += BotStrings.KEY_GROUP_CLEANMSG;
+			if (on) key += BotStrings.KEY_CMDCLEAN_AUTO_ON_FAIL;
+			else key += BotStrings.KEY_CMDCLEAN_AUTO_OFF_FAIL;
+			BotMessage bmsg = new BotMessage(botStrings.get(key));
+			bmsg.substituteString(ReplaceStringType.REQUSER, mem.getUser().getName());
+			sendMessage(chID, bmsg);
+			return;
+		}
+		
+		//Get user profile
+		long uid = mem.getUser().getIdLong();
+		ActorUser user = gs.getUser(uid);
+		if (user == null)
+		{
+			notifyInternalError(chID, methodname, "Data for user " + uid + " could not be retrieved!");
+			String key = BotStrings.KEY_MAINGROUP_BOTSTRINGS;
+			key += BotStrings.KEY_GROUP_CLEANMSG;
+			if (on) key += BotStrings.KEY_CMDCLEAN_AUTO_ON_FAIL;
+			else key += BotStrings.KEY_CMDCLEAN_AUTO_OFF_FAIL;
+			BotMessage bmsg = new BotMessage(botStrings.get(key));
+			bmsg.substituteString(ReplaceStringType.REQUSER, mem.getUser().getName());
+			sendMessage(chID, bmsg);
+			return;
+		}
+		
+		//Check if admin
+		if (!user.isAdmin())
+		{
+			insufficientPermissionsMessage(chID, mem);
+			return;
+		}
+		
+		//Set auto clean in guild settings
+		gs.setAutoCommandClear(on);
+		
+		//Print message
+		String key = BotStrings.KEY_MAINGROUP_BOTSTRINGS;
+		key += BotStrings.KEY_GROUP_CLEANMSG;
+		if (on) key += BotStrings.KEY_CMDCLEAN_AUTO_ON_SUCCESS;
+		else key += BotStrings.KEY_CMDCLEAN_AUTO_OFF_SUCCESS;
+		BotMessage bmsg = new BotMessage(botStrings.get(key));
+		bmsg.substituteString(ReplaceStringType.REQUSER, mem.getUser().getName());
+		sendMessage(chID, bmsg);
 	}
 	
 	/* ----- User Response Handling ----- */

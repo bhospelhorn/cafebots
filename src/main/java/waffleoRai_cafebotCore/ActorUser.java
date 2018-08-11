@@ -16,7 +16,6 @@ import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.User;
 import waffleoRai_Utils.FileBuffer;
 import waffleoRai_Utils.FileBuffer.UnsupportedFileTypeException;
-import waffleoRai_cafebotRoles.ActorRole;
 import waffleoRai_schedulebot.CalendarEvent;
 import waffleoRai_schedulebot.EventType;
 
@@ -39,7 +38,8 @@ public class ActorUser {
 	
 	//private Birthday birthday;
 	
-	private Set<ActorRole> roles;
+	//private Set<ActorRole> dirroles;
+	//private Set<ActorRole> actroles;
 	private boolean audioConfirmed;
 	
 	public ActorUser(Member mem)
@@ -71,7 +71,7 @@ public class ActorUser {
 		target_events = new HashSet<CalendarEvent>();
 		
 		//birthday = null;
-		roles = new HashSet<ActorRole>();
+		//roles = new HashSet<ActorRole>();
 	}
 	
 	public ActorUser(BufferedReader userfile) throws UnsupportedFileTypeException
@@ -120,7 +120,7 @@ public class ActorUser {
 			target_events = new HashSet<CalendarEvent>();
 			
 			//birthday = null;
-			roles = new HashSet<ActorRole>();
+			//roles = new HashSet<ActorRole>();
 			
 		}
 		catch(Exception e)
@@ -193,13 +193,13 @@ public class ActorUser {
 		return elist;
 	}
 	
-	public List<ActorRole> getLinkedRoles()
+	/*public List<ActorRole> getLinkedRoles()
 	{
 		List<ActorRole> rlist = new ArrayList<ActorRole>(roles.size());
 		rlist.addAll(roles);
 		Collections.sort(rlist);
 		return rlist;
-	}
+	}*/
 	
 	public boolean audioConfirmed()
 	{
@@ -264,11 +264,11 @@ public class ActorUser {
 		}
 	}
 	
-	public void linkRole(ActorRole r)
+	/*public void linkRole(ActorRole r)
 	{
 		if (r.getActorUser() != UID) return;
 		roles.add(r);
-	}
+	}*/
 	
 	public void turnOffAllReminders()
 	{

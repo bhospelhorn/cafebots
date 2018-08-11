@@ -2,6 +2,7 @@ package waffleoRai_cafebotCommands.Commands;
 
 import net.dv8tion.jda.core.entities.Member;
 import waffleoRai_cafebotCommands.CommandAdapter;
+import waffleoRai_cafebotCommands.MessageID;
 import waffleoRai_cafebotCore.AbstractBot;
 
 /*
@@ -13,6 +14,9 @@ import waffleoRai_cafebotCore.AbstractBot;
  * 1.0.0 -> 1.1.0 | July 20, 2018
  * 	Added command message ID note
  * 
+ * 1.1.0 -> 1.2.0 | August 11, 2018
+ * 	Command ID now MessageID
+ * 
  */
 
 
@@ -21,8 +25,8 @@ import waffleoRai_cafebotCore.AbstractBot;
  * <br><br><b>Standard Command:</b>
  * <br>birthday mm dd
  * @author Blythe Hospelhorn
- * @version 1.1.0
- * @since July 20, 2018
+ * @version 1.2.0
+ * @since August 11, 2018
  */
 public class CMD_AddBirthday extends CommandAdapter{
 
@@ -37,7 +41,7 @@ public class CMD_AddBirthday extends CommandAdapter{
 	 * @param d Birthday day of month
 	 * @param u User requesting addition as a Discord API Member object
 	 * @param chID UID of channel to send messages to
-	 * @param cmdID Long UID of the message the command was sent in.
+	 * @param cmdID UID of the message the command was sent in.
 	 */
 	public CMD_AddBirthday(int m, int d, Member u, long chID, long cmdID)
 	{
@@ -45,7 +49,8 @@ public class CMD_AddBirthday extends CommandAdapter{
 		day = d;
 		user = u;
 		replyChannel = chID;
-		super.setCommandMessageID(cmdID);
+		MessageID cmdmsg = new MessageID(cmdID, chID);
+		super.setCommandMessageID(cmdmsg);
 	}
 	
 	@Override

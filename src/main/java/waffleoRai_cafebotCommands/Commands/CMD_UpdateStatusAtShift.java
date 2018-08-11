@@ -1,6 +1,7 @@
 package waffleoRai_cafebotCommands.Commands;
 
 import waffleoRai_cafebotCommands.CommandAdapter;
+import waffleoRai_cafebotCommands.MessageID;
 import waffleoRai_cafebotCore.AbstractBot;
 
 /*
@@ -66,7 +67,7 @@ public class CMD_UpdateStatusAtShift extends CommandAdapter{
 	/**
 	 * @throws NullPointerException If bot is null.
 	 */
-	public void execute_rerequest(AbstractBot bot, long msgid) {
+	public void execute_rerequest(AbstractBot bot, MessageID msgid) {
 		bot.changeShiftStatus(m, pos, on);
 	}
 	

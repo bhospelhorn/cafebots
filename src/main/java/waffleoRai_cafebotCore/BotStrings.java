@@ -121,6 +121,12 @@ public class BotStrings {
 	public static final String KEY_ALLDAY_PROMPT = ".cmday_confirm";
 	public static final String KEY_ALLDAY_SUCCESS = ".cmday_success";
 	public static final String KEY_ALLDAY_FAIL = ".cmday_fail";
+	public static final String KEY_CMDCLEAN_SUCCESS = ".cmd_clean_success";
+	public static final String KEY_CMDCLEAN_FAIL = ".cmd_clean_fail";
+	public static final String KEY_CMDCLEAN_AUTO_ON_SUCCESS = ".set_auto_cmd_clean_on_success";
+	public static final String KEY_CMDCLEAN_AUTO_ON_FAIL = ".set_auto_cmd_clean_on_fail";
+	public static final String KEY_CMDCLEAN_AUTO_OFF_SUCCESS = ".set_auto_cmd_clean_off_success";
+	public static final String KEY_CMDCLEAN_AUTO_OFF_FAIL = ".set_auto_cmd_clean_off_fail";
 	
 	public static final int STANDARD_HELP_PARTS = 4;
 	public static final int ADMIN_HELP_PARTS = 2;

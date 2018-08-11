@@ -39,7 +39,7 @@ public interface Command {
 	 * @param msgid Long UID of Discord message containing the user response.
 	 * @throws NullPointerException If bot is null.
 	 */
-	public void execute_confirm(AbstractBot bot, long msgid);
+	public void execute_confirm(AbstractBot bot, MessageID msgid);
 	
 	/**
 	 * Execute the procedure that should be executed upon user cancellation
@@ -48,7 +48,7 @@ public interface Command {
 	 * @param msgid Long UID of Discord message containing the user response.
 	 * @throws NullPointerException If bot is null.
 	 */
-	public void execute_reject(AbstractBot bot, long msgid);
+	public void execute_reject(AbstractBot bot, MessageID msgid);
 	
 	/**
 	 * Execute the procedure that should be executed upon user prompt timeout
@@ -65,14 +65,14 @@ public interface Command {
 	 * @param msgid Long UID of Discord message containing the user response.
 	 * @throws NullPointerException If bot is null.
 	 */
-	public void execute_rerequest(AbstractBot bot, long msgid);
+	public void execute_rerequest(AbstractBot bot, MessageID msgid);
 	
 	/**
-	 * Retrieve the long UID of the original message containing the user-issued
+	 * Retrieve the MessageID (message & channel UIDs) of the original message containing the user-issued
 	 * text command the bot brain received.
-	 * @return Long UID of command message, or -1 if there is none.
+	 * @return MessageID of command message, or null if there is none.
 	 */
-	public long getCommandMessageID();
+	public MessageID getCommandMessageID();
 	
 	/**
 	 * Retrieve the long UID of the guild the command was sent in.

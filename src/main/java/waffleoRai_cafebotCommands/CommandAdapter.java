@@ -11,6 +11,9 @@ import waffleoRai_cafebotCore.AbstractBot;
  * 1.0.0 -> 1.1.0 | July 20, 2018
  * 	Added command message ID note
  * 
+ * 1.1.0 -> 1.2.0 | July 10, 2018
+ *  Command ID (long -> MessageID)
+ * 
  */
 
 /**
@@ -19,12 +22,12 @@ import waffleoRai_cafebotCore.AbstractBot;
  * <br>Command classes that don't prompt for user input would be well suited for CommandAdapter
  * extension.
  * @author Blythe Hospelhorn
- * @version 1.1.0
- * @since July 20, 2018
+ * @version 1.2.0
+ * @since August 10, 2018
  */
 public abstract class CommandAdapter implements Command{
 	
-	private long command_message_ID = -1;
+	private MessageID command_message_ID = null;
 	
 	/**
 	 * Get the raw Long Integer UID of the channel this command is set to send messages to.
@@ -46,12 +49,12 @@ public abstract class CommandAdapter implements Command{
 	/**
 	 * @throws NullPointerException If bot is null.
 	 */
-	public void execute_confirm(AbstractBot bot, long msgid) {
+	public void execute_confirm(AbstractBot bot, MessageID msgid) {
 		bot.queueCommandMessageForCleaning(msgid, getGuildID());
 	}
 
 	@Override
-	public void execute_reject(AbstractBot bot, long msgid) {
+	public void execute_reject(AbstractBot bot, MessageID msgid) {
 		bot.displayGeneralCancel(getChannelID(), "user");
 		bot.queueCommandMessageForCleaning(msgid, getGuildID());
 	}
@@ -69,18 +72,18 @@ public abstract class CommandAdapter implements Command{
 	/**
 	 * @throws NullPointerException If bot is null.
 	 */
-	public void execute_rerequest(AbstractBot bot, long msgid) {
+	public void execute_rerequest(AbstractBot bot, MessageID msgid) {
 		bot.displayRerequestMessage(getChannelID());
 		bot.queueRerequest(this, this.getChannelID(), this.getUserID());
 		bot.queueCommandMessageForCleaning(msgid, getGuildID());
 	}
 	
-	protected void setCommandMessageID(long cmdID)
+	protected void setCommandMessageID(MessageID cmdID)
 	{
 		command_message_ID = cmdID;
 	}
 	
-	public long getCommandMessageID() 
+	public MessageID getCommandMessageID() 
 	{
 		return command_message_ID;
 	}

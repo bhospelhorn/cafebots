@@ -3,6 +3,7 @@ package waffleoRai_cafebotCommands.Commands;
 import java.util.Random;
 
 import waffleoRai_cafebotCommands.CommandAdapter;
+import waffleoRai_cafebotCommands.MessageID;
 import waffleoRai_cafebotCommands.ParseCore;
 import waffleoRai_cafebotCore.AbstractBot;
 import waffleoRai_schedulebot.Birthday;
@@ -13,6 +14,9 @@ import waffleoRai_schedulebot.Birthday;
  * Creation | June 9, 2018
  * Version 1.0.0 Documentation | July 1, 2018
  * 
+ * 1.0.0 -> 1.0.1 | August 11, 2018
+ * 	MessageID update
+ * 
  */
 
 
@@ -21,8 +25,8 @@ import waffleoRai_schedulebot.Birthday;
  * guild's (server's) birthday wishes channel.
  * <br>This event cannot be induced via command line. It is internal only.
  * @author Blythe Hospelhorn
- * @version 1.0.0
- * @since July 1, 2018
+ * @version 1.0.1
+ * @since August 11, 2018
  */
 public class CMD_WishBirthday extends CommandAdapter{
 	
@@ -68,7 +72,7 @@ public class CMD_WishBirthday extends CommandAdapter{
 	/**
 	 * @throws NullPointerException If bot is null.
 	 */
-	public void execute_rerequest(AbstractBot bot, long msgid) {
+	public void execute_rerequest(AbstractBot bot, MessageID msgid) {
 		bot.wishBirthday(bday.getRequestingUser(), guild, cointoss);
 	}
 	

@@ -3,6 +3,7 @@ package waffleoRai_cafebotCommands.Commands;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.MessageChannel;
 import waffleoRai_cafebotCommands.CommandAdapter;
+import waffleoRai_cafebotCommands.MessageID;
 import waffleoRai_cafebotCore.AbstractBot;
 
 /*
@@ -13,6 +14,8 @@ import waffleoRai_cafebotCore.AbstractBot;
  * 
  * 1.0.0 -> 1.1.0 | July 20, 2018
  * 	Added command message ID note
+ * 1.1.0 -> 1.2.0 | August 11, 2018
+ * 	MessageID update
  */
 
 /**
@@ -20,8 +23,8 @@ import waffleoRai_cafebotCore.AbstractBot;
  * <br><br><b>Standard Command:</b>
  * <br>ecancel [eventID]
  * @author Blythe Hospelhorn
- * @version 1.1.0
- * @since July 20, 2018
+ * @version 1.2.0
+ * @since August 11, 2018
  */
 public class CMD_CancelEvent extends CommandAdapter{
 	
@@ -38,7 +41,10 @@ public class CMD_CancelEvent extends CommandAdapter{
 	 * to.
 	 * @param u User that sent the command as a JDA Member object.
 	 * @param eventID UID of the event to cancel.
-	 * @param cmdID Long UID of the message the command was sent in.
+	 * @param cmdID UID of the message the command was sent in.
+	 * @param s Silent - If true, don't request that a message be sent to event participants that the event
+	 * has been cancelled.
+	 * @param all Cancel all instances of the event, not just the next occurrance.
 	 */
 	public CMD_CancelEvent(MessageChannel ch, Member u, long eventID, long cmdID, boolean s, boolean all)
 	{
@@ -47,7 +53,8 @@ public class CMD_CancelEvent extends CommandAdapter{
 		event = eventID;
 		silent = s;
 		cancelAll = all;
-		super.setCommandMessageID(cmdID);
+		MessageID cmdmsg = new MessageID(cmdID, ch.getIdLong());
+		super.setCommandMessageID(cmdmsg);
 	}
 
 	@Override
@@ -74,7 +81,7 @@ public class CMD_CancelEvent extends CommandAdapter{
 	/**
 	 * @throws NullPointerException If bot is null.
 	 */
-	public void execute_confirm(AbstractBot bot, long msgid) {
+	public void execute_confirm(AbstractBot bot, MessageID msgid) {
 		bot.cancelEvent(channel.getIdLong(), user.getGuild().getIdLong(), event, getUserID(), silent, !cancelAll);
 		bot.queueCommandMessageForCleaning(msgid, getGuildID());
 	}
@@ -83,7 +90,7 @@ public class CMD_CancelEvent extends CommandAdapter{
 	/**
 	 * @throws NullPointerException If bot is null.
 	 */
-	public void execute_reject(AbstractBot bot, long msgid) {
+	public void execute_reject(AbstractBot bot, MessageID msgid) {
 		bot.cancelEvent_cancel(channel.getIdLong(), user.getGuild().getIdLong(), event, getUserID());
 		bot.queueCommandMessageForCleaning(msgid, getGuildID());
 	}
