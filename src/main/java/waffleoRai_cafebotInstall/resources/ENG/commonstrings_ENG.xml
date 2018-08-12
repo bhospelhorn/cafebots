@@ -42,8 +42,8 @@
 		<day7>sat</day7>
 	</daysofweekabb>
 	<timestrings>
-		<onetime>%M %d, %y %i %z</onetime>
-		<deadline>%M %d, %y %i %z</deadline>
+		<onetime>%M %d, %Y %i %z</onetime>
+		<deadline>%M %d, %Y %i %z</deadline>
 		<weekly>%D %i %z</weekly>
 		<biweekly>%D %i %z</biweekly>
 		<monthlyday>%I of every month</monthlyday>

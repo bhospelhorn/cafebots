@@ -2772,6 +2772,18 @@ public abstract class AbstractBot implements Bot{
 		bmsg.substituteString(ReplaceStringType.EVENTTYPE, brain.getEventtypeString(e.getType()));
 		bmsg.substituteString(ReplaceStringType.EVENTNAME, e.getEventName());
 		bmsg.substituteString(ReplaceStringType.TIME, brain.getTimeString(e, e.getType(), user.getTimeZone()));
+		if (msg.contains(ReplaceStringType.TARGUSER.getString()))
+		{
+			List<Long> invitees = e.getTargetUsers();
+			List<String> inviteenames = new LinkedList<String>();
+			for (Long iid : invitees)
+			{
+				User u = botcore.getUserById(iid);
+				if (u != null) inviteenames.add(u.getName());
+			}
+			String userlist = brain.formatStringList(inviteenames);
+			bmsg.substituteString(ReplaceStringType.TARGUSER, userlist);
+		}
 		brain.requestResponse(localIndex, m.getUser(), cmd, ch);
 		sendMessage(ch, bmsg);
 	}

@@ -151,6 +151,7 @@ public class ResponseQueue {
 					for (Long l : pkeys)
 					{
 						ResponseCard card = getCard(l);
+						if (card == null) continue;
 						if (card.checkTime() >= TIMEOUT_APPR_SECONDS)
 						{
 							System.err.println(Schedule.getErrorStreamDateMarker() + " ResponseQueue.CleanerThread.run || Timeout detected. Queueing timeout command...");
