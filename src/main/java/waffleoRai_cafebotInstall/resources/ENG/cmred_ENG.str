@@ -245,7 +245,7 @@ At the moment %r, you are set to be notified (by mention via %C) every time a ne
 You are currently NOT set to be notified when a new member joins the server.
 
 #Cancel event - confirm prompt
-You have requested to cancel event %n [%e (%t) at %T]. Are you sure you wish to cancel this event [y/n]?
+You have requested to cancel event %n ["%e" (with %u) at %T]. Are you sure you wish to cancel this event [y/n]?
 
 #Cancel event - success
 Event %n (%e) has been successfully cancelled!
