@@ -334,6 +334,7 @@ public class Schedule {
 		
 		public void run()
 		{
+			System.err.println(Schedule.getErrorStreamDateMarker() + " Schedule.WisherThread.run || Thread " + this.getName() + " (Guild " + Long.toUnsignedString(guildID) + ") started!");
 			while(!isdead())
 			{
 				updateBirthdayWishQueue();
@@ -358,6 +359,7 @@ public class Schedule {
 					Thread.interrupted();
 				}
 			}
+			System.err.println(Schedule.getErrorStreamDateMarker() + " Schedule.WisherThread.run || Thread " + this.getName() + " (Guild " + Long.toUnsignedString(guildID) + ") terminating...");
 		}
 		
 		private synchronized boolean isdead()
@@ -367,6 +369,7 @@ public class Schedule {
 		
 		public synchronized void kill()
 		{
+			System.err.println(Schedule.getErrorStreamDateMarker() + " Schedule.WisherThread.kill || Thread " + this.getName() + " (Guild " + Long.toUnsignedString(guildID) + ") termination requested!");
 			killme = true;
 			this.interrupt();
 		}
@@ -696,6 +699,7 @@ public class Schedule {
 		
 		public void run()
 		{
+			System.err.println(Schedule.getErrorStreamDateMarker() + " Schedule.EventTimerThread.run || Thread " + this.getName() + " (Guild " + Long.toUnsignedString(guildID) + ") started!");
 			while (!killed())
 			{
 				Set<Long> eidset = eventmap.getAllEventIDs();
@@ -735,6 +739,7 @@ public class Schedule {
 					Thread.interrupted();
 				}
 			}
+			System.err.println(Schedule.getErrorStreamDateMarker() + " Schedule.EventTimerThread.run || Thread " + this.getName() + " (Guild " + Long.toUnsignedString(guildID) + ") terminating...");
 		}
 		
 		private synchronized boolean killed()
@@ -749,6 +754,7 @@ public class Schedule {
 		
 		public synchronized void terminate()
 		{
+			System.err.println(Schedule.getErrorStreamDateMarker() + " Schedule.EventTimerThread.terminate || Thread " + this.getName() + " (Guild " + Long.toUnsignedString(guildID) + ") termination requested!");
 			killme = true;
 			this.interrupt();
 		}
@@ -881,6 +887,21 @@ public class Schedule {
 		return i;
 	}
 	
+	public static String getErrorStreamDateMarker()
+	{
+		GregorianCalendar now = new GregorianCalendar();
+		String s = "";
+		s += "[";
+		s += now.get(Calendar.YEAR) + " ";
+		s += String.format("%02d ", (now.get(Calendar.MONTH) + 1));
+		s += String.format("%02d ", now.get(Calendar.DAY_OF_MONTH));
+		s += String.format("%02d:", now.get(Calendar.HOUR_OF_DAY));
+		s += String.format("%02d:", now.get(Calendar.MINUTE));
+		s += String.format("%02d", now.get(Calendar.SECOND));
+		s += "]";
+		return s;
+	}
+	
 	/* ----- Threads ----- */
 	
 	public class CommandCleanThread extends Thread
@@ -899,6 +920,7 @@ public class Schedule {
 		
 		public void run()
 		{
+			System.err.println(Schedule.getErrorStreamDateMarker() + " Schedule.CommandCleanThread.run || Thread " + this.getName() + " (Guild " + Long.toUnsignedString(guildID) + ") started!");
 			while (!isKilled())
 			{
 				//Submit autoclean request
@@ -916,6 +938,7 @@ public class Schedule {
 					Thread.interrupted();
 				}
 			}
+			System.err.println(Schedule.getErrorStreamDateMarker() + " Schedule.CommandCleanThread.run || Thread " + this.getName() + " (Guild " + Long.toUnsignedString(guildID) + ") terminating...");
 		}
 		
 		public synchronized void interruptMe()
@@ -930,6 +953,7 @@ public class Schedule {
 		
 		public synchronized void kill()
 		{
+			System.err.println(Schedule.getErrorStreamDateMarker() + " Schedule.CommandCleanThread.kill || Thread " + this.getName() + " (Guild " + Long.toUnsignedString(guildID) + ") termination requested!");
 			killMe = true;
 			this.interrupt();
 		}

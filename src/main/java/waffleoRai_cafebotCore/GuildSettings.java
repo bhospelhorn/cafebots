@@ -485,6 +485,7 @@ public class GuildSettings {
 		
 		public void run()
 		{
+			System.err.println(Schedule.getErrorStreamDateMarker() + " GuildSettings.BackupThread.run || Thread " + this.getName() + " (guild " + Long.toUnsignedString(guild) + ") started!");
 			//Sleep during delay or until interrupted...
 			try 
 			{
@@ -523,6 +524,7 @@ public class GuildSettings {
 					Thread.interrupted();
 				}
 			}
+			System.err.println(Schedule.getErrorStreamDateMarker() + " GuildSettings.BackupThread.run || Thread " + this.getName() + " (guild " + Long.toUnsignedString(guild) + ") terminating....");
 		}
 		
 		private synchronized boolean killme()
@@ -537,6 +539,7 @@ public class GuildSettings {
 		
 		public synchronized void terminate()
 		{
+			System.err.println(Schedule.getErrorStreamDateMarker() + " GuildSettings.BackupThread.run || Thread " + this.getName() + " (guild " + Long.toUnsignedString(guild) + ") termination requested!");
 			while(backuprunning)
 			{
 				//We have to wait...

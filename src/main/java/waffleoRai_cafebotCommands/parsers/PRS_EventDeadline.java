@@ -22,6 +22,8 @@ public class PRS_EventDeadline implements Parser{
 			return new CMD_InsufficientArgs(event.getChannel().getIdLong(), EventType.DEADLINE, event.getAuthor().getName(), event.getGuild().getIdLong(), event.getMessageIdLong());
 		}
 		
+		System.err.println(Thread.currentThread().getName() + " || PRS_EventDeadline.<init> || DEBUG - Arguments:");
+		for (String s : args) System.err.println("\t" + s);
 		
 		String rawyear = args[1];
 		String rawmonth = args[2];
@@ -34,7 +36,7 @@ public class PRS_EventDeadline implements Parser{
 		
 	
 		int year = 2015;
-		int month = 1;
+		int month = 0;
 		int day = 1;
 		try
 		{

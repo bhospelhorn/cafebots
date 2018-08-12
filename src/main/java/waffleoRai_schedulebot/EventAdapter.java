@@ -359,7 +359,7 @@ public abstract class EventAdapter implements CalendarEvent{
 		instantiateStructures();
 		
 		String[] fields = tsvRecord.split("\t");
-		if (fields.length != 9) throw new FileBuffer.UnsupportedFileTypeException();
+		if (fields.length < 8) throw new FileBuffer.UnsupportedFileTypeException();
 		try
 		{
 			eventID = Long.parseUnsignedLong(fields[0]);
@@ -369,7 +369,7 @@ public abstract class EventAdapter implements CalendarEvent{
 			long eventtime = Long.parseUnsignedLong(fields[5]);
 			rChannel = Long.parseUnsignedLong(fields[6]);
 			tChannel = Long.parseUnsignedLong(fields[7]);
-			if (!fields[8].isEmpty())
+			if (fields.length >= 9 && !fields[8].isEmpty())
 			{
 				String[] tusers = fields[8].split(";");
 				if (tusers != null && tusers.length > 0)

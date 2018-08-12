@@ -9,6 +9,8 @@ import java.util.Set;
 
 import net.dv8tion.jda.core.entities.MessageChannel;
 import net.dv8tion.jda.core.entities.User;
+import waffleoRai_cafebotCore.AbstractBot;
+import waffleoRai_schedulebot.Schedule;
 
 /*
  * UPDATES
@@ -61,6 +63,8 @@ public class ResponseQueue {
 	private TimerThread timer;
 	private CleanerThread sweeper;
 	
+	private AbstractBot bot;
+	
 	/* ----- Inner Classes ----- */
 	
 	private class TimerThread extends Thread
@@ -77,6 +81,7 @@ public class ResponseQueue {
 		
 		public void run()
 		{
+			System.err.println(Schedule.getErrorStreamDateMarker() + " ResponseQueue.TimerThread.run || Thread " + this.getName() + " started!");
 			while(!killMe())
 			{
 				Set<Long> pkeys = getAllUIDs();
@@ -87,13 +92,15 @@ public class ResponseQueue {
 				}
 				try 
 				{
-					Thread.sleep(900);
+					Thread.sleep(1000);
 				} 
 				catch (InterruptedException e) 
 				{
 					e.printStackTrace();
+					Thread.interrupted();
 				}
 			}
+			System.err.println(Schedule.getErrorStreamDateMarker() + " ResponseQueue.TimerThread.run || Thread " + this.getName() + " terminating...");
 		}
 		
 		public synchronized boolean killMe()
@@ -103,7 +110,9 @@ public class ResponseQueue {
 		
 		public synchronized void kill()
 		{
+			System.err.println(Schedule.getErrorStreamDateMarker() + " ResponseQueue.TimerThread.run || Thread " + this.getName() + " termination requested!");
 			killMe = true;
+			this.interrupt();
 		}
 		
 	}
@@ -122,6 +131,7 @@ public class ResponseQueue {
 		
 		public void run()
 		{
+			System.err.println(Schedule.getErrorStreamDateMarker() + " ResponseQueue.CleanerThread.run || Thread " + this.getName() + " started!");
 			while(!killMe())
 			{
 				Set<Long> pkeys = getAllUIDs();
@@ -129,10 +139,11 @@ public class ResponseQueue {
 				{
 					try 
 					{
-						Thread.sleep(900 * TIMEOUT_APPR_SECONDS);
+						Thread.sleep(1000 * TIMEOUT_APPR_SECONDS);
 					} 
 					catch (InterruptedException e) {
 						e.printStackTrace();
+						Thread.interrupted();
 					}
 				}
 				else
@@ -142,6 +153,7 @@ public class ResponseQueue {
 						ResponseCard card = getCard(l);
 						if (card.checkTime() >= TIMEOUT_APPR_SECONDS)
 						{
+							System.err.println(Schedule.getErrorStreamDateMarker() + " ResponseQueue.CleanerThread.run || Timeout detected. Queueing timeout command...");
 							removeCard(l);
 							Response r = new Response(card.getCommand(), Response.RESPONSE_TIMEOUT, null);
 							addToQueue(r);
@@ -149,6 +161,7 @@ public class ResponseQueue {
 					}	
 				}
 			}
+			System.err.println(Schedule.getErrorStreamDateMarker() + " ResponseQueue.CleanerThread.run || Thread " + this.getName() + " terminating...");
 		}
 		
 		public synchronized boolean killMe()
@@ -158,7 +171,9 @@ public class ResponseQueue {
 		
 		public synchronized void kill()
 		{
+			System.err.println(Schedule.getErrorStreamDateMarker() + " ResponseQueue.CleanerThread.run || Thread " + this.getName() + " termination requested!");
 			killMe = true;
+			this.interrupt();
 		}
 		
 	}
@@ -170,10 +185,11 @@ public class ResponseQueue {
 	 * Response queue is implemented as a LinkedList.
 	 * <br>Background threads are neither instantiated nor started by this constructor!
 	 */
-	public ResponseQueue()
+	public ResponseQueue(AbstractBot linkedBot)
 	{
 		pending = new HashMap<Long, ResponseCard>();
 		queue = new LinkedList<Response>();
+		bot = linkedBot;
 	}
 	
 	/* ----- Getters ----- */
@@ -281,6 +297,7 @@ public class ResponseQueue {
 	public synchronized void addToQueue(Response r)
 	{
 		queue.addLast(r);
+		if (bot != null) bot.interruptExecutionThread();
 	}
 	
 	/* ----- Responding ----- */

@@ -208,7 +208,7 @@ public abstract class AbstractBot implements Bot{
 	protected void instantiateQueues()
 	{
 		cmdQueue = new CommandQueue();
-		rspQueue = new ResponseQueue();
+		rspQueue = new ResponseQueue(this);
 	}
 	
 	/* ----- Threads ----- */
@@ -479,11 +479,13 @@ public abstract class AbstractBot implements Bot{
 		//System.err.println(Thread.currentThread().getName() + " || AbstractBot.setBotGameStatus || DEBUG - Target string: " + status);
 		if (!online)
 		{
+			System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.setBotGameStatus || [DEBUG] Set offline: status = " + status);
 			botcore.getPresence().setPresence(OnlineStatus.OFFLINE, Game.playing(status));
 		}
 		else
 		{
 			//botbuilder.setGame(Game.playing(status));	
+			System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.setBotGameStatus || [DEBUG] Set online: status = " + status);
 			botcore.getPresence().setPresence(OnlineStatus.ONLINE, Game.playing(status));
 		}
 	}
@@ -526,6 +528,7 @@ public abstract class AbstractBot implements Bot{
 			@Override
 			public void onDisconnect(DisconnectEvent e)
 			{
+				System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.loginAsync.[anon]ListenerAdapter.onDisconnect || BOT" + getLocalIndex() + " disconnect detected...");
 				closeJDA();
 				botbuilder = null;
 				botcore = null;
@@ -562,6 +565,7 @@ public abstract class AbstractBot implements Bot{
 			@Override
 			public void onDisconnect(DisconnectEvent e)
 			{
+				System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.loginBlock.[anon]ListenerAdapter.onDisconnect || BOT" + getLocalIndex() + " disconnect detected...");
 				closeJDA();
 				botbuilder = null;
 				botcore = null;
@@ -592,6 +596,7 @@ public abstract class AbstractBot implements Bot{
 	 */
 	public void closeJDA()
 	{
+		System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.closeJDA || Bot shutdown requested!");
 		on = false;
 		terminate();
 		botcore.shutdown();
@@ -725,8 +730,10 @@ public abstract class AbstractBot implements Bot{
 		
 		public void run()
 		{
+			System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.ExecutorThread.run || Thread " + this.getName() + " started! (BOT" + bot.getLocalIndex() + ")");
 			while(!killMe())
 			{
+				Thread.interrupted();
 				//Clear responses
 				while (!rspQueue.queueEmpty())
 				{
@@ -749,6 +756,7 @@ public abstract class AbstractBot implements Bot{
 					Thread.interrupted();
 				}
 			}
+			System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.ExecutorThread.run || Thread " + this.getName() + " terminating... (BOT" + bot.getLocalIndex() + ")");
 		}
 		
 		private synchronized boolean killMe()
@@ -761,6 +769,7 @@ public abstract class AbstractBot implements Bot{
 		 */
 		public synchronized void kill()
 		{
+			System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.ExecutorThread.kill || Thread " + this.getName() + " termination requested! (BOT" + bot.getLocalIndex() + ")");
 			killMe = true;
 			this.interrupt();
 		}
@@ -778,6 +787,18 @@ public abstract class AbstractBot implements Bot{
 	}
 	
 	/* ----- Commands : Basic Functions ----- */
+	
+	public void submitCommand(Command cmd)
+	{
+		if (cmd == null) return;
+		cmdQueue.addCommand(cmd);
+		interruptExecutionThread();
+	}
+
+	public void interruptExecutionThread()
+	{
+		if (cmdThread != null && cmdThread.isAlive()) cmdThread.interruptMe();
+	}
 	
 	/**
 	 * Search for a message channel matching the channel ID and attempt to send a message to
@@ -3897,6 +3918,7 @@ public abstract class AbstractBot implements Bot{
 	
 	public void makeDeadlineEvent_complete(CMD_EventMakeDeadline command, boolean r)
 	{
+		String methodname = "";
 		brain.unblacklist(command.getRequestingUser().getUser().getIdLong(), localIndex);
 		if (!r)
 		{
@@ -3977,7 +3999,7 @@ public abstract class AbstractBot implements Bot{
 						User byid = null;	
 						try
 						{
-							byid = botcore.getUserById(u);	
+							byid = botcore.getUserById(u);
 						}
 						catch (Exception ex)
 						{
@@ -3985,6 +4007,7 @@ public abstract class AbstractBot implements Bot{
 						}
 						if (byid != null)
 						{
+							printMessageToSTDERR(methodname, "[DEBUG] TargetArg \"" + u + "\" matched to user " + byid.getName() + " (" + Long.toUnsignedString(byid.getIdLong()) + ")");
 							long uid = byid.getIdLong();
 							e.addTargetUser(uid);
 							ActorUser t = gs.getUserBank().getUser(uid);
@@ -4005,6 +4028,7 @@ public abstract class AbstractBot implements Bot{
 						if (byname != null && !byname.isEmpty())
 						{
 							long uid = byname.get(0).getUser().getIdLong();
+							printMessageToSTDERR(methodname, "[DEBUG] TargetArg \"" + u + "\" matched to user " + byname.get(0).getUser().getName() + " (" + Long.toUnsignedString(uid) + ")");
 							e.addTargetUser(uid);
 							ActorUser t = gs.getUserBank().getUser(uid);
 							if (t == null)
@@ -4024,6 +4048,7 @@ public abstract class AbstractBot implements Bot{
 						if (bynickname != null && !bynickname.isEmpty())
 						{
 							long uid = bynickname.get(0).getUser().getIdLong();
+							printMessageToSTDERR(methodname, "[DEBUG] TargetArg \"" + u + "\" matched to user " + bynickname.get(0).getUser().getName() + " (" + Long.toUnsignedString(uid) + ")");
 							e.addTargetUser(uid);
 							ActorUser t = gs.getUserBank().getUser(uid);
 							if (t == null)

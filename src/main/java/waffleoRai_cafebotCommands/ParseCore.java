@@ -31,6 +31,7 @@ import waffleoRai_schedulebot.Birthday;
 import waffleoRai_schedulebot.CalendarEvent;
 import waffleoRai_schedulebot.EventAdapter;
 import waffleoRai_schedulebot.EventType;
+import waffleoRai_schedulebot.Schedule;
 
 /*
  * UPDATES
@@ -326,6 +327,7 @@ public class ParseCore {
 		@Override
 		public void run()
 		{
+			System.err.println(Schedule.getErrorStreamDateMarker() + " ParseCore.ParserThread.run || Thread " + this.getName() + " started!");
 			while (!isDead())
 			{
 				//Check message queue
@@ -360,6 +362,7 @@ public class ParseCore {
 					}
 				}
 			}
+			System.err.println(Schedule.getErrorStreamDateMarker() + " ParseCore.ParserThread.run || Thread " + this.getName() + " terminating...");
 		}
 		
 		/**
@@ -381,6 +384,7 @@ public class ParseCore {
 		 */
 		public synchronized void terminate()
 		{
+			System.err.println(Schedule.getErrorStreamDateMarker() + " ParseCore.ParserThread.run || Thread " + this.getName() + " termination requested!");
 			killMe = true;
 			this.interrupt();
 		}
@@ -484,7 +488,8 @@ public class ParseCore {
 		if (bot < 0) return;
 		if (bot >= mybots.length) return;
 		if (mybots[bot] == null) return;
-		mybots[bot].getCommandQueue().addCommand(c);
+		//mybots[bot].getCommandQueue().addCommand(c);
+		mybots[bot].submitCommand(c); //This one throws an interrupt!
 	}
 	
 	/**
@@ -516,6 +521,7 @@ public class ParseCore {
 		List<Member> mentioned = event.getMessage().getMentionedMembers();
 		if (b)
 		{
+			System.err.println(Schedule.getErrorStreamDateMarker() + " ParseCore.parseMessage || DEBUG - Message received from blacklisted user " + event.getAuthor().getName());
 			//Response from at least one bot is pending...
 			int pendingVector = blacklist.getBlacklistVector(event.getAuthor());
 			String command = event.getMessage().getContentRaw();
@@ -595,14 +601,16 @@ public class ParseCore {
 						if (i == bot)
 						{
 							//System.err.println(Thread.currentThread().getName() + " || ParseCore.parseMessage || DEBUG - Sending command to bot " + i);
-							mybots[bot].getCommandQueue().addCommand(c);
+							//mybots[bot].getCommandQueue().addCommand(c);
+							mybots[bot].submitCommand(c);
 						}
 						else
 						{
 							if (mybots[i] != null)
 							{
 								//System.err.println(Thread.currentThread().getName() + " || ParseCore.parseMessage || DEBUG - Sending command to bot " + i);
-								mybots[i].getCommandQueue().addCommand(new CMD_OtherBotHandledMessage(event.getChannel()));
+								//mybots[i].getCommandQueue().addCommand(new CMD_OtherBotHandledMessage(event.getChannel()));
+								mybots[bot].submitCommand(new CMD_OtherBotHandledMessage(event.getChannel()));
 							}
 						}
 					}
@@ -618,13 +626,15 @@ public class ParseCore {
 					{
 						if (mybots[i] != null)
 						{
-							mybots[i].getCommandQueue().addCommand(c);
+							//mybots[i].getCommandQueue().addCommand(c);
+							mybots[bot].submitCommand(c);
 							sent = true;
 						}
 					}
 					else
 					{
-						mybots[i].getCommandQueue().addCommand(new CMD_OtherBotHandledMessage(event.getChannel()));
+						//mybots[i].getCommandQueue().addCommand(new CMD_OtherBotHandledMessage(event.getChannel()));
+						mybots[bot].submitCommand(new CMD_OtherBotHandledMessage(event.getChannel()));
 					}
 				}
 			}
@@ -635,7 +645,9 @@ public class ParseCore {
 				if (bot < 0) return;
 				if (bot >= mybots.length) return;
 				if (mybots[bot] == null) return;
-				mybots[bot].getCommandQueue().addCommand(c);
+				System.err.println(Schedule.getErrorStreamDateMarker() + " ParseCore.parseMessage || DEBUG - Command accepted " + Long.toUnsignedString(event.getChannel().getIdLong()) + ":" + Long.toUnsignedString(event.getMessageIdLong()));
+				//mybots[bot].getCommandQueue().addCommand(c);
+				mybots[bot].submitCommand(c);
 			}
 		}
 	}
@@ -655,7 +667,8 @@ public class ParseCore {
 		if (bot < 0) return;
 		if (bot >= mybots.length) return;
 		if (mybots[bot] == null) return;
-		mybots[bot].getCommandQueue().addCommand(c);
+		//mybots[bot].getCommandQueue().addCommand(c);
+		mybots[bot].submitCommand(c);
 	}
 	
 	/**
@@ -670,7 +683,8 @@ public class ParseCore {
 		if (bot < 0) return;
 		if (bot >= mybots.length) return;
 		if (mybots[bot] == null) return;
-		mybots[bot].getCommandQueue().addCommand(c);
+		//mybots[bot].getCommandQueue().addCommand(c);
+		mybots[bot].submitCommand(c);
 	}
 	
 	/**
@@ -685,7 +699,8 @@ public class ParseCore {
 		if (botIndex > mybots.length) return;
 		AbstractBot bot = mybots[botIndex];
 		if (bot == null) return;
-		bot.getCommandQueue().addCommand(cmd);
+		//bot.getCommandQueue().addCommand(cmd);
+		bot.submitCommand(cmd);
 	}
 
 	public void command_EventReminder(EventAdapter e, int level, long guildID)
@@ -725,8 +740,8 @@ public class ParseCore {
 			System.err.println("ParseCore.command_EventReminder || Bot " + bot + " does not exist!");
 			return;
 		}
-		b.getCommandQueue().addCommand(cmd);
-		
+		//b.getCommandQueue().addCommand(cmd);
+		b.submitCommand(cmd);
 	}
 	
 	public void command_EventCancellation(CalendarEvent e, boolean instance, long guild)
@@ -766,7 +781,8 @@ public class ParseCore {
 			System.err.println("ParseCore.command_EventReminder || Bot " + bot + " does not exist!");
 			return;
 		}
-		b.getCommandQueue().addCommand(cmd);
+		//b.getCommandQueue().addCommand(cmd);
+		b.submitCommand(cmd);
 	}
 	
 	public void redirectEventCommand(Command cmd, EventType t)

@@ -26,6 +26,7 @@ import waffleoRai_Utils.FileBuffer;
 import waffleoRai_Utils.FileBuffer.UnsupportedFileTypeException;
 import waffleoRai_cafebotCommands.Commands.CMD_UpdateStatusAtShift;
 import waffleoRai_cafebotCore.AbstractBot;
+import waffleoRai_schedulebot.Schedule;
 
 /*
  * UPDATES
@@ -940,6 +941,7 @@ public class BotScheduler implements ActionListener{
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		setCurrentShift();
+		System.err.println(Schedule.getErrorStreamDateMarker() + " BotScheduler.actionPerformed || Check for shift change...");
 	}
 	
 	/**
@@ -951,8 +953,10 @@ public class BotScheduler implements ActionListener{
 	 */
 	public synchronized void startTimer()
 	{
+		System.err.println(Schedule.getErrorStreamDateMarker() + " BotScheduler.startTimer || Starting bot scheduler thread...");
 		if (timer == null) timer = new Timer(MILLIS_PER_MINUTE * minutesPerShift(shiftsPerDay), this);
 		timer.start();
+		System.err.println(Schedule.getErrorStreamDateMarker() + " BotScheduler.startTimer || Bot scheduler thread started!");
 	}
 	
 	/**
@@ -962,9 +966,11 @@ public class BotScheduler implements ActionListener{
 	 */
 	public synchronized void stopTimer()
 	{
+		System.err.println(Schedule.getErrorStreamDateMarker() + " BotScheduler.startTimer || Stopping bot scheduler thread...");
 		if (timer == null) return;
 		if (!timer.isRunning()) return;
 		timer.stop();
+		System.err.println(Schedule.getErrorStreamDateMarker() + " BotScheduler.startTimer || Bot scheduler thread stopped!");
 	}
 	
 	/**
@@ -1006,7 +1012,11 @@ public class BotScheduler implements ActionListener{
 				currentShift = sh;		
 			}
 		}
-		else currentShift = null;
+		else{
+			currentShift = null;
+			System.err.println(Schedule.getErrorStreamDateMarker() + " BotScheduler.setCurrentShift || ERROR! Shift is null!!");
+			return;
+		}
 		//System.err.println("DEBUG BotScheduler.setCurrentShift || DEBUG: Point 2");
 		if (commander != null){
 			//System.err.println("DEBUG BotScheduler.setCurrentShift || DEBUG: Point 3");
@@ -1019,11 +1029,13 @@ public class BotScheduler implements ActionListener{
 					if (p == null) online = false;
 				}
 				if (p == null){
+					System.err.println(Schedule.getErrorStreamDateMarker() + " BotScheduler.setCurrentShift || BOT" + i + " is off duty!");
 					Command cmd = new CMD_UpdateStatusAtShift(-1, c.get(Calendar.MONTH), online);
 					commander.issueDirectCommand(i, cmd);
 				}
 				else
 				{
+					System.err.println(Schedule.getErrorStreamDateMarker() + " BotScheduler.setCurrentShift || BOT" + i + " is on duty - position " + p.getIndex());
 					Command cmd = new CMD_UpdateStatusAtShift(p.getIndex(), c.get(Calendar.MONTH), online);
 					commander.issueDirectCommand(i, cmd);
 				}

@@ -812,6 +812,7 @@ public class BotBrain {
 		
 		public void run()
 		{
+			System.err.println(Schedule.getErrorStreamDateMarker() + " BotBrain.GuildDataAdder.run || Thread " + this.getName() + " started!");
 			while (!killed())
 			{
 				while (!guilds.isEmpty())
@@ -833,6 +834,7 @@ public class BotBrain {
 					Thread.interrupted();
 				} //Default to an hour
 			}
+			System.err.println(Schedule.getErrorStreamDateMarker() + " BotBrain.GuildDataAdder.run || Thread " + this.getName() + " terminating!");
 		}
 		
 		private synchronized boolean killed()
@@ -842,6 +844,7 @@ public class BotBrain {
 		
 		public synchronized void terminate()
 		{
+			System.err.println(Schedule.getErrorStreamDateMarker() + " BotBrain.GuildDataAdder.run || Thread " + this.getName() + " termination requested!");
 			kill = true;
 			this.interrupt();
 		}
