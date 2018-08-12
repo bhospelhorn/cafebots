@@ -467,4 +467,36 @@ Curious? Well, I'm too lazy to generate a proper link for you, but here's a data
 Uh. Huh. Well... this is embarrassing. Looks like we got some kind of internal error here.
 Dunno what you can do about it, but here's the stderr message if you're interested...
 
+#View Event Info
+Huh? Oh, you want to know more about an event? Sure, I'll go look that up for you...
+----------
+Event [%n]
+"%e"
+%y
+%T
+Host: %r
+Invitee Notification Channel: %C
+Invited:
+%u
+
+#View Event - Event not found
+Whoops. Sorry, but doesn't look like event [%n] exists.
+
+#View Role Info
+Yeah alright, I can get role details for you...
+----------
+Role [%n]
+"%x"
+Class: %P1
+Deadline: %T
+Director: %r
+Actor: %u
+Communication Channel: %C
+Notes: 
+%P2
+
+#View role - role not found
+Nope, sorry. I'm not seeing any role with ID [%n].
+
+
 #ADD HERE...

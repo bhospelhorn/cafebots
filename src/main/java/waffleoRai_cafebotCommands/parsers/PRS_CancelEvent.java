@@ -23,7 +23,7 @@ public class PRS_CancelEvent implements Parser{
 		long eid = -1;
 		try
 		{
-			Long.parseUnsignedLong(args[1]);
+			eid = Long.parseUnsignedLong(args[1]);
 		}
 		catch (NumberFormatException e)
 		{
@@ -50,6 +50,9 @@ public class PRS_CancelEvent implements Parser{
 				}
 			}
 		}
+		//System.err.println("PRS_CancelEvent.<init> || DEBUG: Event ID: " + eid);
+		//System.err.println("PRS_CancelEvent.<init> || DEBUG: Silent: " + silent);
+		//System.err.println("PRS_CancelEvent.<init> || DEBUG: Instance: " + !cancelAll);
 		return new CMD_CancelEvent(event.getChannel(), event.getMember(), eid, event.getMessageIdLong(), silent, cancelAll);
 	}
 

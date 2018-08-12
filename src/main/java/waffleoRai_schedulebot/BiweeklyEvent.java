@@ -20,6 +20,8 @@ public class BiweeklyEvent extends EventAdapter{
 	{
 		super.instantiateStructures();
 		super.setRequestingUser(reqUser);
+		super.setRequestTime();
+		super.setEventID();
 	}
 	
 	private BiweeklyEvent(BiweeklyEvent prequel)

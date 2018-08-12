@@ -48,6 +48,8 @@ public class TimeTest {
 		System.out.println("Day of week: " + now.get(Calendar.DAY_OF_WEEK));
 		System.out.println("Millis: " + nmil);
 		
+		System.out.println("Tuesday: " + Calendar.TUESDAY);
+		
 	}
 
 }

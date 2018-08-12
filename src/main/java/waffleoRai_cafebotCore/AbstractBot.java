@@ -2652,7 +2652,7 @@ public abstract class AbstractBot implements Bot{
 			}
 			user = gs.getUserBank().getUser(uid);
 		}
-		TimeZone tz = user.getTimeZone();
+		//TimeZone tz = user.getTimeZone();
 		List<CalendarEvent> revents = brain.getRequestedEvents(gid, uid);
 		List<CalendarEvent> tevents = brain.getTargetEvents(gid, uid);
 		//Revent list
@@ -2660,7 +2660,7 @@ public abstract class AbstractBot implements Bot{
 		if (revents == null || revents.isEmpty()) reventlist = "[" + brain.getCommonString("commonstrings.misc.empty") + "]";
 		else
 		{
-			for (CalendarEvent e : revents) reventlist += brain.formatEventRecord(e, botcore, tz) + "\n";
+			for (CalendarEvent e : revents) reventlist += brain.formatEventRecord_lite(e) + "\n";
 		}
 		
 		//Tevent list
@@ -2668,7 +2668,7 @@ public abstract class AbstractBot implements Bot{
 		if (tevents == null || tevents.isEmpty()) teventlist = "[" + brain.getCommonString("commonstrings.misc.empty") + "]";
 		else
 		{
-			for (CalendarEvent e : tevents) teventlist += brain.formatEventRecord(e, botcore, tz) + "\n";
+			for (CalendarEvent e : tevents) teventlist += brain.formatEventRecord_lite(e) + "\n";
 		}
 		
 		//Get strings
@@ -2677,9 +2677,12 @@ public abstract class AbstractBot implements Bot{
 		//Substitute (look for %E1 for requested and %E2 for target)
 		BotMessage bmsg1 = new BotMessage(msg1);
 		BotMessage bmsg2 = new BotMessage(msg2);
+		bmsg1.substituteString(ReplaceStringType.REQUSER, m.getUser().getName());
 		bmsg1.substituteString(ReplaceStringType.EVENTENTRY, reventlist);
+		bmsg1.addToEnd("\n");
 		bmsg2.substituteString(ReplaceStringType.EVENTENTRY, teventlist);
 		sendMessage(ch, bmsg1);
+		bmsg2.addToEnd("\n");
 		sendMessage(ch, bmsg2);
 	}
 	
@@ -2688,6 +2691,7 @@ public abstract class AbstractBot implements Bot{
 		//Need member to see if has permission to delete event
 		//Get event...
 		long gid = m.getGuild().getIdLong();
+		//System.err.println("AbstractBot.cancelEvent_prompt || DEBUG: Guild ID: " + gid);
 		GuildSettings gs = brain.getUserData().getGuildSettings(gid);
 		if (gs == null)
 		{
@@ -2707,6 +2711,7 @@ public abstract class AbstractBot implements Bot{
 			System.err.println(Thread.currentThread().getName() + " || AbstractBot.cancelEvent_prompt || ERROR: Guild schedule could not be retrieved! | " + FileBuffer.formatTimeAmerican(stamp));
 			return;	
 		}
+		//System.err.println("AbstractBot.cancelEvent_prompt || DEBUG: Event ID: " + eventID);
 		CalendarEvent e = s.getEvent(eventID);
 		if (e == null)
 		{
@@ -3042,6 +3047,7 @@ public abstract class AbstractBot implements Bot{
 		etime.setTimeZone(rtz);
 		etime.set(command.getYear(), command.getMonth(), command.getDay(), command.getHour(), command.getMinute());
 		String datestring = brain.formatDateString(etime, true);
+		//System.err.println(Thread.currentThread().getName() + " || AbstractBot.makeDeadlineEvent_prompt || DateString: " + datestring);
 		bmsg.substituteString(ReplaceStringType.TIME, datestring);
 		
 		//Target name(s)

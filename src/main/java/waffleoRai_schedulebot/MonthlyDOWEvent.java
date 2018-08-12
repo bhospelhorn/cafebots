@@ -18,8 +18,10 @@ public class MonthlyDOWEvent extends EventAdapter{
 	
 	public MonthlyDOWEvent(long reqUser)
 	{
+		super.setRequestTime();
 		super.instantiateStructures();
 		super.setRequestingUser(reqUser);
+		super.setEventID();
 	}
 	
 	private MonthlyDOWEvent(MonthlyDOWEvent prequel)

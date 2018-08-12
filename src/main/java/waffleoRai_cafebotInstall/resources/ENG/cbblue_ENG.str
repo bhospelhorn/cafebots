@@ -485,6 +485,37 @@ Here are some commands only admins can use:
 
 #Internal Error
 Well. It appears that I... owe you an apology. I seem to have made a misstep - or at least the botcore did.
-Either way, I shall accept responsibility for this malfunction. Below, I will provide you with the error message I received.
+Either way, I shall accept responsibility for this malfunction. Below, you will find the error message I received.
+
+#View Event Info
+Oh? You wish for more information on an event? Very well.
+----------
+Event [%n]
+"%e"
+%y
+%T
+Host: %r
+Invitee Notification Channel: %C
+Invited:
+%u
+
+#View Event - Event not found
+It does not seem that any event by the ID [%n] exists in our records for this server. Perhaps you should double-check before submitting your command next time!
+
+#View Role Info
+You wish for me to retrieve information on a role? Oh, of course I can do that!
+----------
+Role [%n]
+"%x"
+Class: %P1
+Deadline: %T
+Director: %r
+Actor: %u
+Communication Channel: %C
+Notes: 
+%P2
+
+#View role - role not found
+Well, we do not appear to have a record for any role with the ID [%n]. I suppose in that case, there are no details to retrieve!
 
 #ADD HERE...

@@ -31,7 +31,7 @@ public class PRS_EventOnetime implements Parser{
 		String tchan = args[7];
 		
 		int year = 2015;
-		int month = 1;
+		int month = 0;
 		int day = 1;
 		try
 		{
@@ -99,7 +99,7 @@ public class PRS_EventOnetime implements Parser{
 		cmd.setRCHAN_name(rchan);
 		cmd.setTCHAN_name(tchan);
 		cmd.setTime(hr, min);
-		cmd.setDate(year, month, day);
+		cmd.setDate(year, month-1, day);
 		
 		return cmd;
 	}

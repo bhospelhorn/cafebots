@@ -17,9 +17,11 @@ public class PRS_EventDeadline implements Parser{
 	@Override
 	public Command generateCommand(String[] args, MessageReceivedEvent event) 
 	{
+		//System.err.println(Thread.currentThread().getName() + " || PRS_EventDeadline.<init> || DEBUG - Called!");
 		if (args.length < 8){
 			return new CMD_InsufficientArgs(event.getChannel().getIdLong(), EventType.DEADLINE, event.getAuthor().getName(), event.getGuild().getIdLong(), event.getMessageIdLong());
 		}
+		
 		
 		String rawyear = args[1];
 		String rawmonth = args[2];
@@ -30,6 +32,7 @@ public class PRS_EventDeadline implements Parser{
 		String rchan = args[6];
 		String tchan = args[7];
 		
+	
 		int year = 2015;
 		int month = 1;
 		int day = 1;
@@ -99,7 +102,11 @@ public class PRS_EventDeadline implements Parser{
 		cmd.setRCHAN_name(rchan);
 		cmd.setTCHAN_name(tchan);
 		cmd.setTime(hr, min);
-		cmd.setDate(year, month, day);
+		cmd.setDate(year, month-1, day);
+		
+		//System.err.println(Thread.currentThread().getName() + " || PRS_EventDeadline.<init> || Year: " + year);
+		//System.err.println(Thread.currentThread().getName() + " || PRS_EventDeadline.<init> || Month: " + month);
+		//System.err.println(Thread.currentThread().getName() + " || PRS_EventDeadline.<init> || Day: " + day);
 		
 		return cmd;
 	}

@@ -131,18 +131,18 @@ Okay %r, lemme check! ...Nope, your farewell pings are off!
 
 #View user events 1
 Hey, %r! You wanted to see all your events, right?
+
 Events you're the host of:
-EVENTID	TYPE	NAME	TIME	CREATOR	ATTENDEES
 %E
 
 #View user events 2
+
 Events someone invited you to:
-EVENTID	TYPE	NAME	TIME	CREATOR	ATTENDEES
 %E
 
 #View user requested events
 Hi %r! You wanted to see all the events you made, right? Here:
-EVENTID	TYPE	NAME	TIME	CREATOR	ATTENDEES
+
 %E
 
 #Timezone list - success
@@ -529,5 +529,36 @@ Let me see... umm... It doesn't look like you're expected at event %n... I don't
 #Internal Error
 Ahhhhhhh, oh nooooo!! I think I just... I'm sorry... it looks like I messed something up...
 I don't really know what went wrong, but here's the error message I got...
+
+#View Event Info
+Oh! You want me to get more information on an event for you? Sure!
+----------
+Event [%n]
+"%e"
+%y
+%T
+Host: %r
+Invitee Notification Channel: %C
+Invited:
+%u
+
+#View Event - Event not found
+Ummm, so... it looks no event with the ID [%n] exists...
+
+#View Role Info
+You want me to look up more info on a role? Yeah, I can do that!
+----------
+Role [%n]
+"%x"
+Class: %P1
+Deadline: %T
+Director: %r
+Actor: %u
+Communication Channel: %C
+Notes: 
+%P2
+
+#View role - role not found
+I'm sorry... I couldn't find anything for a role with the ID [%n]...
 	
 #ADD HERE...

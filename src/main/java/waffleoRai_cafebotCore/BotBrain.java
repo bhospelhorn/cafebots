@@ -461,7 +461,7 @@ public class BotBrain {
 	
 	public String getDayOfWeekAbbreviation(int dow)
 	{
-		String key = "commonstrings.daysofweekabb.day" + (dow+1);
+		String key = "commonstrings.daysofweekabb.day" + (dow);
 		return commonStrings.get(key);
 	}
 	
@@ -473,11 +473,13 @@ public class BotBrain {
 	
 	public String getTimeString(CalendarEvent event, EventType type, TimeZone tz)
 	{
+		//System.err.println("BotBrain.getTimeString || DEBUG: TimeZone: " + tz);
 		String rawstr = commonStrings.get("commonstrings.timestrings." + event.getType().getCommonKey());
 		rawstr = rawstr.replace(ReplaceStringType.YEAR.getString(), Integer.toString(event.getYear(tz)));
 		rawstr = rawstr.replace(ReplaceStringType.MONTH.getString(), Integer.toString(event.getMonth(tz)));
 		rawstr = rawstr.replace(ReplaceStringType.MONTH_NAME.getString(), capitalize(Schedule.getMonthName(event.getMonth(tz)).substring(0, 3)));
 		rawstr = rawstr.replace(ReplaceStringType.DAYOFMONTH.getString(), Integer.toString(event.getDayOfMonth(tz)));
+		//System.err.println("BotBrain.getTimeString || DEBUG: Day of week: " + event.getDayOfWeek(tz));
 		rawstr = rawstr.replace(ReplaceStringType.DAYOFWEEK.getString(), capitalize(getDayOfWeekAbbreviation(event.getDayOfWeek(tz))));
 		rawstr = rawstr.replace(ReplaceStringType.TIMEONLY.getString(), String.format("%02d:%02d", event.getHour(tz), event.getMinute(tz)));
 		rawstr = rawstr.replace(ReplaceStringType.TIMEZONE.getString(), tz.getDisplayName());
@@ -516,6 +518,11 @@ public class BotBrain {
 		}
 		
 		return s;
+	}
+
+	public String formatEventRecord_lite(CalendarEvent event)
+	{
+		return "[" + Long.toUnsignedString(event.getEventID()) + "]\t" + event.getEventName();
 	}
 	
 	public boolean changeGreetingChannel(long guildID, long channelID)

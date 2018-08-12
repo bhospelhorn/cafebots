@@ -72,7 +72,7 @@ The %o role no longer has cafébot admin permissions.
 Apologies, but you cannot remove cafébot admin permissions from the server owner.
 
 #One-time Make Confirm
-Would you like me to set up a one-time event at %T with users %u [y/n]?
+Would you like me to set up a one-time event at %T with %u [y/n]?
 
 #One-time Make Confirm Positive
 I have added your event to our schedule!
@@ -357,10 +357,10 @@ I heard that is was your birthday today, %U. Allow me to wish you a wonderful da
 Permit me to say... Happy Birthday %U! Had I the opportunity, I would bake you a delightful cake to celebrate! Alas, being merely a small computer program I rather lack the resources! Still, I hope the sentiment brightens your day!
 
 #Confirm deadline event creation
-Would you like me to create a deadline for "%e" at %T for users %u [y/n]?
+Would you like me to create a deadline for "%e" at %T for %u [y/n]?
 
 #Confirm deadline event creation - success
-I have successfully added your deadline for %e to our schedule!
+I have successfully added your deadline for "%e" to our schedule!
 
 #Confirm deadline event creation - cancel
 Very well. I will not add this deadline to the schedule. I await futher commands.
@@ -611,5 +611,36 @@ Ah hello, %r! As you requested, I have reset your reminder ping on/off states to
 #Internal error
 Ah... my deepest apologies! I appear to have encountered some kind of internal error...
 All I can provide you with at this time is the message as it was printed to stderr... Once again, I am very sorry.
+
+#View Event Info
+You wish to see more information about an event? Of course! I shall look that up immediately!
+----------
+Event [%n]
+"%e"
+%y
+%T
+Host: %r
+Invitee Notification Channel: %C
+Invited:
+%u
+
+#View Event - Event not found
+My deepest apologies... It does not seem that an event with ID [%n] exists in this server...
+
+#View Role Info
+Oh? Would you like me to retrieve more information about a role? I don't see why I cannot do that!
+----------
+Role [%n]
+"%x"
+Class: %P1
+Deadline: %T
+Director: %r
+Actor: %u
+Communication Channel: %C
+Notes: 
+%P2
+
+#View role - role not found
+Oh dear... My apologies, but it does not look like any role by ID [%n] exists in this server...
 	
 #ADD HERE...

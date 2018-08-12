@@ -18,8 +18,10 @@ public class MonthlyDOMEvent extends EventAdapter {
 	
 	public MonthlyDOMEvent(long reqUser)
 	{
+		super.setRequestTime();
 		super.instantiateStructures();
 		super.setRequestingUser(reqUser);
+		super.setEventID();
 	}
 	
 	private MonthlyDOMEvent(MonthlyDOMEvent prequel)

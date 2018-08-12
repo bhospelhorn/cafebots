@@ -17,8 +17,10 @@ public class DeadlineEvent extends EventAdapter{
 	
 	public DeadlineEvent(long reqUser)
 	{
+		super.setRequestTime();
 		super.instantiateStructures();
 		super.setRequestingUser(reqUser);
+		super.setEventID();
 	}
 	
 	@Override
@@ -90,11 +92,13 @@ public class DeadlineEvent extends EventAdapter{
 	
 	public void setEventTime(long millis, TimeZone tz)
 	{
+		//System.err.println("DeadlineEvent.setEventType || DEBUG: millis = " + Long.toUnsignedString(millis));
 		GregorianCalendar next = new GregorianCalendar();
 		next.setTimeZone(tz);
 		next.setTimeInMillis(millis);
 
 		super.setEventTime(next);
+		//System.err.println("DeadlineEvent.setEventType || DEBUG: Event time set!");
 		determineNextReminder();
 	}
 	

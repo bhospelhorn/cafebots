@@ -106,22 +106,27 @@ public class GuildSettings {
 			long gid = Long.parseUnsignedLong(br.readLine());
 			//guild = jda.getGuildById(gid);
 			guild = gid;
+			//System.err.println("GuildSettings.<init> || Debug - Line 1 (Guild ID): " + gid);
 			
 			//Bday channel
 			long bdaycid = Long.parseUnsignedLong(br.readLine());
 			//birthdayChannel = guild.getTextChannelById(bdaycid);
 			birthdayChannel = bdaycid;
+			//System.err.println("GuildSettings.<init> || Debug - Line 2 (BDAY Chan ID): " + bdaycid);
 			
 			//Greeting channel
 			long greetcid = Long.parseUnsignedLong(br.readLine());
 			//greetingChannel = guild.getTextChannelById(greetcid);
 			greetingChannel = greetcid;
+			//System.err.println("GuildSettings.<init> || Debug - Line 3 (Greet Chan ID): " + greetcid);
 			
 			String line = br.readLine();
 			if (line.equals("1")) greetingsOn = true;
 			else greetingsOn = false;
+			line = br.readLine();
 			if (line.equals("1")) farewellsOn = true;
 			else farewellsOn = false;
+			line = br.readLine();
 			if (line.equals("1")) auto_cmd_clear = true;
 			else auto_cmd_clear = false;
 			

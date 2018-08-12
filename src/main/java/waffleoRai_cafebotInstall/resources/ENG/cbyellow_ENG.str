@@ -699,4 +699,35 @@ You are not on the list of participants for event %n. As a result, you cannot RS
 INTERNAL ERROR ENCOUNTERED
 STDERR MESSAGE:
 
+#View Event Info
+Retrieving event details...
+----------
+Event [%n]
+"%e"
+%y
+%T
+Host: %r
+Invitee Notification Channel: %C
+Invited:
+%u
+
+#View Event - Event not found
+ERROR: Event [%n] not found in server records.
+
+#View Role Info
+Retrieving role details...
+----------
+Role [%n]
+"%x"
+Class: %P1
+Deadline: %T
+Director: %r
+Actor: %u
+Communication Channel: %C
+Notes: 
+%P2
+
+#View role - role not found
+ERROR: Role [%n] not found in server records.
+
 #ADD HERE...

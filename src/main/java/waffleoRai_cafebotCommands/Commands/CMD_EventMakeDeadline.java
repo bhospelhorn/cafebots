@@ -30,7 +30,7 @@ public class CMD_EventMakeDeadline extends CommandAdapter{
 	
 	public CMD_EventMakeDeadline(MessageChannel ch, Member req, List<String> targets, long cmdID)
 	{
-		//System.err.println(Thread.currentThread().getName() + " || CMD_EventMakeBiweekly.<init> || DEBUG - Called!");
+		System.err.println(Thread.currentThread().getName() + " || CMD_EventMakeDeadline.<init> || DEBUG - Called!");
 		comChannel = ch;
 		requestingUser = req;
 		targetUsers = targets;
@@ -49,7 +49,7 @@ public class CMD_EventMakeDeadline extends CommandAdapter{
 	
 	public CMD_EventMakeDeadline(MessageChannel ch, Member req, long cmdID)
 	{
-		//System.err.println(Thread.currentThread().getName() + " || CMD_EventMakeBiweekly.<init> || DEBUG - Called!");
+		System.err.println(Thread.currentThread().getName() + " || CMD_EventMakeDeadline.<init> || DEBUG - Called!");
 		comChannel = ch;
 		requestingUser = req;
 		targetUsers = null;

@@ -34,7 +34,7 @@ public class PRS_EventWeekly implements Parser{
 		String tchan = args[5];
 		
 		int dow = Schedule.getDayOfWeek(rawdow);
-		if (dow < 0) return new CMD_InsufficientArgs(event.getChannel().getIdLong(), EventType.WEEKLY, event.getAuthor().getName(), event.getGuild().getIdLong(), event.getMessageIdLong());
+		if (dow < 1) return new CMD_InsufficientArgs(event.getChannel().getIdLong(), EventType.WEEKLY, event.getAuthor().getName(), event.getGuild().getIdLong(), event.getMessageIdLong());
 		//System.err.println(Thread.currentThread().getName() + " || PRS_EventWeekly.generateCommand || Day of Week Detected: " + dow);
 		
 		String[] time = rawtime.split(":");

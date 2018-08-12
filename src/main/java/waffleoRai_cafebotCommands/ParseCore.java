@@ -923,6 +923,8 @@ public class ParseCore {
 		userhelper.addCommand("sor");
 		userhelper.addCommand("amiaudconf");
 		userhelper.addCommand(CMD_NOTIFY_AUDCONF);
+		userhelper.addCommand("eventinfo");
+		userhelper.addCommand("roleinfo");
 		
 		Position cleaner = new Position(3);
 		cleaner.addCommand("cleanme");

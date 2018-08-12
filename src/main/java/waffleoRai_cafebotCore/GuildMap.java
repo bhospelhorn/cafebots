@@ -26,20 +26,23 @@ public class GuildMap {
 	
 	/* ----- Instance Variables ----- */
 	
+	private String installDirectory;
+	
 	private Map<Long, GuildSettings> guilds;
 	private Map<Long, String> pathmap;
 	
 	/* ----- Construction/Parsing ----- */
 	
-	public GuildMap()
+	public GuildMap(String installdir)
 	{
 		guilds = new HashMap<Long, GuildSettings>();
 		pathmap = new HashMap<Long, String>();
+		installDirectory = installdir;
 	}
 	
 	public GuildMap(String installdir, ParseCore parser) throws IOException, UnsupportedFileTypeException
 	{
-		this();
+		this(installdir);
 		String gpath = installdir + File.separator + GUILD_DIRNAME;
 		String inipath = gpath + File.separator + GUILD_INIT_FILENAME;
 		if (!FileBuffer.fileExists(inipath))
@@ -63,7 +66,7 @@ public class GuildMap {
 			}
 			try
 			{
-				long uid = Long.parseLong(fields[0]);
+				long uid = Long.parseUnsignedLong(fields[0]);
 				String dirname = fields[1];
 				pathmap.put(uid, dirname);
 			}
@@ -146,11 +149,13 @@ public class GuildMap {
 	
 	public synchronized void forceBackups() throws IOException
 	{
+		/*
 		Set<Long> allgids = guilds.keySet();
 		for (Long l : allgids)
 		{
 			guilds.get(l).forceBackup();
-		}
+		}*/
+		saveAllToDisk(installDirectory);
 	}
 	
 	public synchronized void writeInitFile(String installdir) throws IOException
@@ -162,7 +167,7 @@ public class GuildMap {
 		BufferedWriter bw = new BufferedWriter(fw);
 		
 		Set<Long> gset = pathmap.keySet();
-		boolean first = false;
+		boolean first = true;
 		for (Long l : gset)
 		{
 			String p = pathmap.get(l);
@@ -172,7 +177,8 @@ public class GuildMap {
 				pathmap.put(l, p);
 			}
 			if (!first)bw.write("\n");
-			bw.write(l + "\t" + p);
+			bw.write(Long.toUnsignedString(l) + "\t" + p);
+			first = false;
 		}
 		
 		bw.close();

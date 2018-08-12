@@ -17,8 +17,10 @@ public class OneTimeEvent extends EventAdapter{
 	
 	public OneTimeEvent(long reqUser)
 	{
+		super.setRequestTime();
 		super.instantiateStructures();
 		super.setRequestingUser(reqUser);
+		super.setEventID();
 	}
 	
 	@Override

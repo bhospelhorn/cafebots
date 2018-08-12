@@ -92,6 +92,8 @@ public interface Parser {
 		pmap.put("listroles", null);
 		pmap.put("amiaudconf", null);
 		pmap.put("qchan", new PRS_qChan());
+		pmap.put("eventinfo", null);
+		pmap.put("roleinfo", null);
 		
 		pmap.put("checkperm", new PRS_CheckAdminRoles());
 		pmap.put("addperm", new PRS_ChangeRoleAdmin(true));

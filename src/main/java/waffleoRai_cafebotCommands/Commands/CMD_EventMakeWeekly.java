@@ -29,6 +29,7 @@ public class CMD_EventMakeWeekly extends CommandAdapter{
 	public CMD_EventMakeWeekly(MessageChannel ch, Member req, int dayOfWeek, List<String> targets, long cmdID)
 	{
 		//System.err.println(Thread.currentThread().getName() + " || CMD_EventMakeWeekly.<init> || DEBUG - Called!");
+		//System.err.println(Thread.currentThread().getName() + " || CMD_EventMakeWeekly.<init> || Day of Week: " + dayOfWeek);
 		comChannel = ch;
 		requestingUser = req;
 		DOW = dayOfWeek;
@@ -46,6 +47,7 @@ public class CMD_EventMakeWeekly extends CommandAdapter{
 	public CMD_EventMakeWeekly(MessageChannel ch, Member req, int dayOfWeek, long cmdID)
 	{
 		//System.err.println(Thread.currentThread().getName() + " || CMD_EventMakeWeekly.<init> || DEBUG - Called!");
+		//System.err.println(Thread.currentThread().getName() + " || CMD_EventMakeWeekly.<init> || Day of Week: " + dayOfWeek);
 		comChannel = ch;
 		requestingUser = req;
 		DOW = dayOfWeek;

@@ -86,6 +86,8 @@
 		<canceleventconfirm_success>251,1</canceleventconfirm_success>
 		<canceleventconfirm_cancel>254,1</canceleventconfirm_cancel>
 		<canceleventconfirm_failure>257,1</canceleventconfirm_failure>
+		<vieweventinfo>703,10</vieweventinfo>
+		<vieweventinfo_fail>715,1</vieweventinfo_fail>
 	</eventmanage>
 	<usermanage>
 		<seealltz>260,1</seealltz>
@@ -116,6 +118,8 @@
 		<audconfsetoff>2,1</audconfsetoff>
 		<audconfsetfail>2,1</audconfsetfail>
 		<audconfon_notify>275,1</audconfon_notify>
+		<viewroleinfo>718,11</viewroleinfo>
+		<viewroleinfo_fail>731,1</viewroleinfo_fail>
 	</roles>
 	<role_major>
 		<roleassign>278,10</roleassign>

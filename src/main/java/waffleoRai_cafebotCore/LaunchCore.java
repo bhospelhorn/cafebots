@@ -467,9 +467,6 @@ public class LaunchCore {
 			return null;
 		}
 
-		//TODO: This dummy approach with closing the JDA brings up an interesting problem:
-			// Will the links still be available? Will they be the same for every bot?
-		
 		
 		System.out.println("LaunchCore.loadCore || Adding data to core...");
 		core.setCommonStringMap(commonstrings);
