@@ -791,6 +791,7 @@ public abstract class AbstractBot implements Bot{
 	public void submitCommand(Command cmd)
 	{
 		if (cmd == null) return;
+		System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.submitCommand || Command submitted to BOT" + this.localIndex + " : " + cmd.toString());
 		cmdQueue.addCommand(cmd);
 		interruptExecutionThread();
 	}
