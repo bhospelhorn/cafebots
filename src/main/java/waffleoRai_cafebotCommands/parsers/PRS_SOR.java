@@ -41,7 +41,7 @@ public class PRS_SOR implements Parser{
 		{
 			if (args.length < 3) return new CMD_BadCommandMessage(event.getChannel(), event.getGuild(), event.getMessageIdLong());
 			EventType t = EventType.getEventType(args[2]);
-			return new CMD_SOR(event.getChannel(), t, event.getMessageIdLong());
+			return new CMD_SOR(event.getChannel(), event.getGuild(), t, event.getMessageIdLong());
 		}
 		else
 		{

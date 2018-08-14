@@ -2,6 +2,7 @@ package waffleoRai_cafebotCommands.Commands;
 
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.MessageChannel;
+import net.dv8tion.jda.core.entities.Guild;
 import waffleoRai_cafebotCommands.CommandAdapter;
 import waffleoRai_cafebotCommands.MessageID;
 import waffleoRai_cafebotCore.AbstractBot;
@@ -42,6 +43,8 @@ public class CMD_SOR extends CommandAdapter {
 	private boolean defo;
 	private EventType type;
 	private int level;
+	
+	private Guild guild;
 	
 	/**
 	 * Construct a SOR (Switch on/off Reminders) command that switches all reminders on
@@ -91,13 +94,15 @@ public class CMD_SOR extends CommandAdapter {
 	/**
 	 * Construct a SOR command for viewing reminder times for a particular event type.
 	 * @param ch Channel to send message to.
+	 * @param g Guild message was sent in.
 	 * @param t Type of event to view reminder times for.
 	 * @param cmdID ID of command message.
 	 */
-	public CMD_SOR(MessageChannel ch, EventType t, long cmdID)
+	public CMD_SOR(MessageChannel ch, Guild g, EventType t, long cmdID)
 	{
 		channel = ch;
 		type = t;
+		guild = g;
 		MessageID cmdmsg = new MessageID(cmdID, ch.getIdLong());
 		super.setCommandMessageID(cmdmsg);
 	}
@@ -146,6 +151,7 @@ public class CMD_SOR extends CommandAdapter {
 
 	public long getGuildID()
 	{
+		if (user == null) return guild.getIdLong();
 		return user.getGuild().getIdLong();
 	}
 }

@@ -435,8 +435,8 @@ public class CafebotsFrame extends JFrame {
 			{
 				try 
 				{
-					//core.start(true);
-					core.start(false);
+					core.start(true);
+					//core.start(false);
 					refresher = new RefresherThread();
 					refresher.start();
 				} 

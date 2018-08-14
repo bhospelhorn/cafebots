@@ -479,14 +479,18 @@ public abstract class AbstractBot implements Bot{
 		//System.err.println(Thread.currentThread().getName() + " || AbstractBot.setBotGameStatus || DEBUG - Target string: " + status);
 		if (!online)
 		{
-			System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.setBotGameStatus || [DEBUG] Set offline: status = " + status);
+			System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.setBotGameStatus || [DEBUG] Setting offline: status = " + status);
 			botcore.getPresence().setPresence(OnlineStatus.OFFLINE, Game.playing(status));
+			Presence botpres = botcore.getPresence();
+			System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.setBotGameStatus || [DEBUG] Status set to: " + botpres.getStatus().toString());
 		}
 		else
 		{
 			//botbuilder.setGame(Game.playing(status));	
-			System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.setBotGameStatus || [DEBUG] Set online: status = " + status);
+			System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.setBotGameStatus || [DEBUG] Setting online: status = " + status);
 			botcore.getPresence().setPresence(OnlineStatus.ONLINE, Game.playing(status));
+			Presence botpres = botcore.getPresence();
+			System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.setBotGameStatus || [DEBUG] Status set to: " + botpres.getStatus().toString());
 		}
 	}
 	
@@ -549,7 +553,7 @@ public abstract class AbstractBot implements Bot{
 		addListeners(builder);
 		builder.addEventListener(l);
 		builder.addEventListener(dl);
-		botcore = builder.buildAsync();
+		botcore = builder.buildAsync(); //Deprecated, apparently
 		botbuilder = builder;
 	}
 	
@@ -735,16 +739,28 @@ public abstract class AbstractBot implements Bot{
 			{
 				Thread.interrupted();
 				//Clear responses
-				while (!rspQueue.queueEmpty())
+				try
 				{
-					Response r = rspQueue.popQueue();
-					r.execute(bot);
+					while (!rspQueue.queueEmpty())
+					{
+						Response r = rspQueue.popQueue();
+						System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.ExecutorThread.run || BOT" + localIndex + " executing response: " + r.toString());
+						r.execute(bot);
+						System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.ExecutorThread.run || BOT" + localIndex + " executed response: " + r.toString());
+					}
+					//Clear commands
+					while (!cmdQueue.isEmpty())
+					{
+						Command c = cmdQueue.popCommand();
+						System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.ExecutorThread.run || BOT" + localIndex + " executing command: " + c.toString());
+						c.execute(bot);
+						System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.ExecutorThread.run || BOT" + localIndex + " executed command: " + c.toString());
+					}
 				}
-				//Clear commands
-				while (!cmdQueue.isEmpty())
+				catch (Exception e)
 				{
-					Command c = cmdQueue.popCommand();
-					c.execute(bot);
+					System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.ExecutorThread.run || BOT" + localIndex + " Caught an exception!");
+					e.printStackTrace();
 				}
 				//Sleep
 				try 

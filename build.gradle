@@ -26,6 +26,6 @@ dependencies {
     // Use JUnit test framework
     testImplementation 'junit:junit:4.12'
     
-    compile 'net.dv8tion:JDA:3.5.1_339'
+    compile 'net.dv8tion:JDA:3.7.1_385'
 }
 
