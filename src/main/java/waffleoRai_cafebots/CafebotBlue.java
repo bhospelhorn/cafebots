@@ -17,6 +17,7 @@ public class CafebotBlue extends AbstractBot{
 		super.instantiateQueues();
 		super.brain = core;
 		super.setLocalIndex(localIndex);
+		super.addDisconnectListener();
 	}
 	
 	public int getConstructorType() {

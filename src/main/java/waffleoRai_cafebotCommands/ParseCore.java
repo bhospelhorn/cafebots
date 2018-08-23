@@ -834,6 +834,23 @@ public class ParseCore {
 		issueDirectCommand(bot, cmd);
 	}
 	
+	public void deferToBot(Command cmd, int botConstructor)
+	{
+		for (int i = 1; i < mybots.length; i++)
+		{
+			AbstractBot b = mybots[i];
+			if (b != null)
+			{
+				if (b.getConstructorType() == botConstructor)
+				{
+					b.submitCommand(cmd);
+					return;
+				}
+			}
+		}
+		System.err.println(Thread.currentThread().getName() + " || ParseCore.deferToBot || Compatible bot not found...");
+	}
+	
 	/* ----- Response Handling ----- */
 	
 	/**

@@ -34,6 +34,8 @@ import net.dv8tion.jda.core.entities.TextChannel;
 import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.events.DisconnectEvent;
 import net.dv8tion.jda.core.events.ReadyEvent;
+import net.dv8tion.jda.core.events.ReconnectedEvent;
+import net.dv8tion.jda.core.events.ResumedEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 import net.dv8tion.jda.core.managers.Presence;
 import waffleoRai_Utils.FileBuffer;
@@ -501,6 +503,54 @@ public abstract class AbstractBot implements Bot{
 	
 	/* ----- Connection ----- */
 	
+	public void addDisconnectListener()
+	{
+		ListenerAdapter dl = new ListenerAdapter(){
+			@Override
+			public void onDisconnect(DisconnectEvent e)
+			{
+				System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.loginAsync.[anon]ListenerAdapter.onDisconnect || BOT" + getLocalIndex() + " disconnect detected...");
+				terminate();
+			}
+			
+			public void onReconnect(ReconnectedEvent e)
+			{
+				System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.loginAsync.[anon]ListenerAdapter.onReconnect || BOT" + getLocalIndex() + " reconnect detected...");
+				closeJDA();
+				botbuilder = null;
+				botcore = null;
+				try 
+				{
+					loginAsync();
+				} 
+				catch (LoginException e1) {
+					e1.printStackTrace();
+					return;
+				}
+				start();
+			}
+			
+			public void onResume(ResumedEvent e)
+			{
+				System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.loginAsync.[anon]ListenerAdapter.onResume || BOT" + getLocalIndex() + " resume detected...");
+				closeJDA();
+				botbuilder = null;
+				botcore = null;
+				try 
+				{
+					loginAsync();
+				} 
+				catch (LoginException e1) {
+					e1.printStackTrace();
+					return;
+				}
+				start();
+			}
+			
+		};
+		lListeners.add(dl);
+	}
+	
 	private void addListeners(JDABuilder builder)
 	{
 		if (lListeners == null) return;
@@ -528,23 +578,6 @@ public abstract class AbstractBot implements Bot{
 				start();
 			}
 		};
-		ListenerAdapter dl = new ListenerAdapter(){
-			@Override
-			public void onDisconnect(DisconnectEvent e)
-			{
-				System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.loginAsync.[anon]ListenerAdapter.onDisconnect || BOT" + getLocalIndex() + " disconnect detected...");
-				closeJDA();
-				botbuilder = null;
-				botcore = null;
-				try 
-				{
-					loginAsync();
-				} 
-				catch (LoginException e1) {
-					e1.printStackTrace();
-				}
-			}
-		};
 		
 		//lListeners.add(l);
 		JDABuilder builder = new JDABuilder(AccountType.BOT);
@@ -552,7 +585,7 @@ public abstract class AbstractBot implements Bot{
 		builder.setToken(sToken);
 		addListeners(builder);
 		builder.addEventListener(l);
-		builder.addEventListener(dl);
+		//builder.addEventListener(dl);
 		botcore = builder.buildAsync(); //Deprecated, apparently
 		botbuilder = builder;
 	}
@@ -565,29 +598,12 @@ public abstract class AbstractBot implements Bot{
 	 */
 	public void loginBlock() throws LoginException, InterruptedException
 	{
-		ListenerAdapter dl = new ListenerAdapter(){
-			@Override
-			public void onDisconnect(DisconnectEvent e)
-			{
-				System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.loginBlock.[anon]ListenerAdapter.onDisconnect || BOT" + getLocalIndex() + " disconnect detected...");
-				closeJDA();
-				botbuilder = null;
-				botcore = null;
-				try 
-				{
-					loginAsync();
-				} 
-				catch (LoginException e1) {
-					e1.printStackTrace();
-				}
-			}
-		};
-		
+
 		JDABuilder builder = new JDABuilder(AccountType.BOT);
 		builder.setAutoReconnect(false);
 		builder.setToken(sToken);
 		addListeners(builder);
-		builder.addEventListener(dl);
+		//builder.addEventListener(dl);
 		botcore = builder.buildBlocking();
 		botbuilder = builder;
 		me = botcore.getSelfUser();
@@ -606,6 +622,82 @@ public abstract class AbstractBot implements Bot{
 		botcore.shutdown();
 	}
 
+	public boolean testJDA()
+	{
+		System.err.println(Thread.currentThread().getName() + " || AbstractBot.testJDA || Testing JDA of BOT" + localIndex);
+		if (botcore == null)
+		{
+			System.err.println("JDA TEST BOT" + localIndex + " || JDA builder is non-null: " + (this.botbuilder != null));
+			System.err.println("JDA TEST BOT" + localIndex + " || Botcore is non-null: false");
+			return false;
+		}
+		System.err.println("JDA TEST BOT" + localIndex + " || Botcore is non-null: true");
+		List<Object> llist = botcore.getRegisteredListeners();
+		System.err.println("JDA TEST BOT" + localIndex + " || Testing listeners...");
+		if (llist == null)
+		{
+			System.err.println("JDA TEST BOT" + localIndex + " || Listener list is null!");
+			return false;
+		}
+		int lsz = llist.size();
+		System.err.println("JDA TEST BOT" + localIndex + " || Listener count: " + lsz);
+		if (lsz < 0)
+		{
+			System.err.println("JDA TEST BOT" + localIndex + " || No listeners found!");
+			return false;
+		}
+		for (Object o : llist)
+		{
+			System.err.println("JDA TEST BOT" + localIndex + " || Listener found: " + o.getClass().getName());
+		}
+		
+		System.err.println("JDA TEST BOT" + localIndex + " || Checking botcore presence...");
+		Presence p = botcore.getPresence();
+		System.err.println("JDA TEST BOT" + localIndex + " || Status: " + p.getStatus().toString());
+		Game g = p.getGame();
+		if (g != null) System.err.println("JDA TEST BOT" + localIndex + " || Game: " + g.getName());
+		else System.err.println("JDA TEST BOT" + localIndex + " || Game: [null]");
+		
+		System.err.println("JDA TEST BOT" + localIndex + " || Checking account JDA...");
+		JDA accjda = me.getJDA();
+		if (accjda == null)
+		{
+			System.err.println("JDA TEST BOT" + localIndex + " || Account JDA is non-null: false");
+			return false;
+		}
+		System.err.println("JDA TEST BOT" + localIndex + " || Account JDA is non-null: true");
+		System.err.println("JDA TEST BOT" + localIndex + " || Account JDA is same as botcore: " + (botcore == accjda));
+		System.err.println("JDA TEST BOT" + localIndex + " || Account JDA is equal to botcore: " + (botcore.equals(accjda)));
+		
+		llist = accjda.getRegisteredListeners();
+		System.err.println("JDA TEST BOT" + localIndex + " || Testing listeners...");
+		if (llist == null)
+		{
+			System.err.println("JDA TEST BOT" + localIndex + " || Listener list is null!");
+			return false;
+		}
+		lsz = llist.size();
+		System.err.println("JDA TEST BOT" + localIndex + " || Listener count: " + lsz);
+		if (lsz < 0)
+		{
+			System.err.println("JDA TEST BOT" + localIndex + " || No listeners found!");
+			return false;
+		}
+		for (Object o : llist)
+		{
+			System.err.println("JDA TEST BOT" + localIndex + " || Listener found: " + o.getClass().getName());
+		}
+		
+		System.err.println("JDA TEST BOT" + localIndex + " || Checking account JDA presence...");
+		p = accjda.getPresence();
+		System.err.println("JDA TEST BOT" + localIndex + " || Status: " + p.getStatus().toString());
+		g = p.getGame();
+		if (g != null) System.err.println("JDA TEST BOT" + localIndex + " || Game: " + g.getName());
+		else System.err.println("JDA TEST BOT" + localIndex + " || Game: [null]");
+		
+		return true;
+	}
+	
 	/* ----- Complain ----- */
 	
 	public String printMessageToSTDERR(String funcname, String message)
@@ -2025,6 +2117,8 @@ public abstract class AbstractBot implements Bot{
 			nstat = this.botStrings.get(KEY_MAINGROUP_BOTSTRINGS + KEY_GROUP_STATUS + KEY_STATUSSTEM_ON + pos);
 		}
 		setBotGameStatus(nstat, online);
+		//DEBUG!!!
+		this.testJDA();
 	}
 	
 	/* ----- User Management ----- */
@@ -4140,6 +4234,7 @@ public abstract class AbstractBot implements Bot{
 	
 	public void issueEventReminder(EventAdapter e, int rlevel, long guildID)
 	{
+		String methodname = "AbstractBot.issueEventReminder";
 		long emillis = e.getEventTimeMillis();
 		
 		List<Long> allUsers = e.getTargetUsers();
@@ -4156,6 +4251,7 @@ public abstract class AbstractBot implements Bot{
 			return;
 		}
 		Guild g = botcore.getGuildById(guildID);
+		printMessageToSTDERR(methodname, "BOT " + localIndex + " | Checkpoint 1");
 		
 		//Generate Requser reminder...
 		Member req_user = g.getMemberById(e.getRequestingUser());
@@ -4163,6 +4259,7 @@ public abstract class AbstractBot implements Bot{
 		TimeZone req_tz = req_data.getTimeZone();
 		boolean req_on = req_data.reminderOn(e.getType(), rlevel);
 		BotMessage rmsg = null;
+		printMessageToSTDERR(methodname, "BOT " + localIndex + " | Checkpoint 2");
 		if (req_on)
 		{
 			String msgkey_r = BotStrings.getStringKey_Event(e.getType(), StringKey.EVENT_REMIND, StringKey.OP_REQUSER, rlevel);
@@ -4274,6 +4371,7 @@ public abstract class AbstractBot implements Bot{
 				}
 			}
 		}
+		printMessageToSTDERR(methodname, "BOT " + localIndex + " | Checkpoint 3");
 		
 		String msgkey_t;
 		if (e.isGroupEvent()) msgkey_t = BotStrings.getStringKey_Event(e.getType(), StringKey.EVENT_REMIND, StringKey.OP_GROUPUSER, rlevel);
@@ -4282,6 +4380,7 @@ public abstract class AbstractBot implements Bot{
 		String rawmsg_t = botStrings.get(msgkey_t);
 		BotMessage tmsg = new BotMessage(rawmsg_t);
 		
+		printMessageToSTDERR(methodname, "BOT " + localIndex + " | Checkpoint 4");
 		if (e.isGroupEvent())
 		{
 			Role everyone = g.getPublicRole();
@@ -4343,10 +4442,12 @@ public abstract class AbstractBot implements Bot{
 			}
 			else tmsg = null;
 		}
+		printMessageToSTDERR(methodname, "BOT " + localIndex + " | Checkpoint 5");
 	
 		//Send messages
 		if (rmsg != null) sendMessage(e.getRequesterChannel(), rmsg);
 		if (tmsg != null) sendMessage(e.getTargetChannel(), tmsg);
+		printMessageToSTDERR(methodname, "BOT " + localIndex + " | Checkpoint 6");
 	}
 	
 	public void insufficientArgsMessage_general(long chID, String username, EventType type)

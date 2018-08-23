@@ -171,8 +171,8 @@ Deadline: %T (Event UID: %n)
 Director Notes: %X
 
 My... Congratulations, %u.
-If you wish to accept the role, entering "!accept %n" into the chatbox and sending will suffice.
-However, if you wish to deadline the role, then your command should instead be "!decline %n".
+If you wish to accept the role, entering "!accept %N" into the chatbox and sending will suffice.
+However, if you wish to deadline the role, then your command should instead be "!decline %N".
 
 #Role assign (Extra) - no deadline
 --- Role Assignment ---
@@ -183,8 +183,8 @@ Deadline: [None]
 Director Notes: %X
 
 My... Congratulations, %u.
-If you wish to accept the role, entering "!accept %n" into the chatbox and sending will suffice.
-However, if you wish to deadline the role, then your command should instead be "!decline %n".
+If you wish to accept the role, entering "!accept %N" into the chatbox and sending will suffice.
+However, if you wish to deadline the role, then your command should instead be "!decline %N".
 
 #Role deadline push
 Hello, %U. I am here to inform you that the deadline for your role "%x" (which has ID %n in case you needed to know) has been pushed to %T.

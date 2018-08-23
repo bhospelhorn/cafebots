@@ -715,6 +715,7 @@ public class Schedule {
 					if (nr <= 0 && lv > 0)
 					{
 						cmdCore.command_EventReminder(ea, lv, guildID);
+						ea.determineNextReminder();
 					}
 					//See if the event has already passed (and spawn sequel if need be)
 					long until = ea.getTimeUntil();
