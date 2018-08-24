@@ -4235,6 +4235,7 @@ public abstract class AbstractBot implements Bot{
 	public void issueEventReminder(EventAdapter e, int rlevel, long guildID)
 	{
 		String methodname = "AbstractBot.issueEventReminder";
+		printMessageToSTDERR(methodname, "BOT " + localIndex + " | DEBUG: Issue reminder for event " + Long.toUnsignedString(e.getEventID()) + "(Type: " + e.getType().getStandardKey() + ") level " + rlevel);
 		long emillis = e.getEventTimeMillis();
 		
 		List<Long> allUsers = e.getTargetUsers();
@@ -4251,7 +4252,7 @@ public abstract class AbstractBot implements Bot{
 			return;
 		}
 		Guild g = botcore.getGuildById(guildID);
-		printMessageToSTDERR(methodname, "BOT " + localIndex + " | Checkpoint 1");
+		//printMessageToSTDERR(methodname, "BOT " + localIndex + " | Checkpoint 1");
 		
 		//Generate Requser reminder...
 		Member req_user = g.getMemberById(e.getRequestingUser());
@@ -4259,7 +4260,7 @@ public abstract class AbstractBot implements Bot{
 		TimeZone req_tz = req_data.getTimeZone();
 		boolean req_on = req_data.reminderOn(e.getType(), rlevel);
 		BotMessage rmsg = null;
-		printMessageToSTDERR(methodname, "BOT " + localIndex + " | Checkpoint 2");
+		//printMessageToSTDERR(methodname, "BOT " + localIndex + " | Checkpoint 2");
 		if (req_on)
 		{
 			String msgkey_r = BotStrings.getStringKey_Event(e.getType(), StringKey.EVENT_REMIND, StringKey.OP_REQUSER, rlevel);
@@ -4371,7 +4372,7 @@ public abstract class AbstractBot implements Bot{
 				}
 			}
 		}
-		printMessageToSTDERR(methodname, "BOT " + localIndex + " | Checkpoint 3");
+		//printMessageToSTDERR(methodname, "BOT " + localIndex + " | Checkpoint 3");
 		
 		String msgkey_t;
 		if (e.isGroupEvent()) msgkey_t = BotStrings.getStringKey_Event(e.getType(), StringKey.EVENT_REMIND, StringKey.OP_GROUPUSER, rlevel);
@@ -4380,7 +4381,7 @@ public abstract class AbstractBot implements Bot{
 		String rawmsg_t = botStrings.get(msgkey_t);
 		BotMessage tmsg = new BotMessage(rawmsg_t);
 		
-		printMessageToSTDERR(methodname, "BOT " + localIndex + " | Checkpoint 4");
+		//printMessageToSTDERR(methodname, "BOT " + localIndex + " | Checkpoint 4");
 		if (e.isGroupEvent())
 		{
 			Role everyone = g.getPublicRole();
@@ -4442,12 +4443,12 @@ public abstract class AbstractBot implements Bot{
 			}
 			else tmsg = null;
 		}
-		printMessageToSTDERR(methodname, "BOT " + localIndex + " | Checkpoint 5");
+		//printMessageToSTDERR(methodname, "BOT " + localIndex + " | Checkpoint 5");
 	
 		//Send messages
 		if (rmsg != null) sendMessage(e.getRequesterChannel(), rmsg);
 		if (tmsg != null) sendMessage(e.getTargetChannel(), tmsg);
-		printMessageToSTDERR(methodname, "BOT " + localIndex + " | Checkpoint 6");
+		//printMessageToSTDERR(methodname, "BOT " + localIndex + " | Checkpoint 6");
 	}
 	
 	public void insufficientArgsMessage_general(long chID, String username, EventType type)
