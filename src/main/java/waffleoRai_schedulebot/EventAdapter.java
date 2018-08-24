@@ -35,6 +35,7 @@ public abstract class EventAdapter implements CalendarEvent{
 	{
 		long reqmillis = other.requestTime.getTimeInMillis();
 		long eventmillis = other.eventTime.getTimeInMillis();
+		requestTime = new GregorianCalendar();
 		requestTime.setTimeInMillis(reqmillis);
 		eventTime = new GregorianCalendar();
 		eventTime.setTimeInMillis(eventmillis);

@@ -2117,7 +2117,7 @@ public abstract class AbstractBot implements Bot{
 			nstat = this.botStrings.get(KEY_MAINGROUP_BOTSTRINGS + KEY_GROUP_STATUS + KEY_STATUSSTEM_ON + pos);
 		}
 		setBotGameStatus(nstat, online);
-		//DEBUG!!!
+		//System.err.println(Thread.currentThread().getName() + " || AbstractBot.changeShiftStatus || DEBUG - Status set! Running tests...");
 		this.testJDA();
 	}
 	
