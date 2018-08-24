@@ -325,6 +325,11 @@ public abstract class EventAdapter implements CalendarEvent{
 		return reminderTimes[nextReminder-1] - now.getTimeInMillis();
 	}
 	
+	public long getNextReminderTimeInMillis()
+	{
+		return reminderTimes[nextReminder-1];
+	}
+	
 	public long getRequesterChannel()
 	{
 		return rChannel;

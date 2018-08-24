@@ -14,14 +14,11 @@ import java.util.TimeZone;
 import javax.security.auth.login.LoginException;
 
 import net.dv8tion.jda.core.JDA;
-import net.dv8tion.jda.core.OnlineStatus;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.MessageChannel;
 import net.dv8tion.jda.core.entities.Role;
 import net.dv8tion.jda.core.entities.User;
-import net.dv8tion.jda.core.events.user.update.UserUpdateOnlineStatusEvent;
-import net.dv8tion.jda.core.hooks.ListenerAdapter;
 import waffleoRai_Utils.FileBuffer;
 import waffleoRai_Utils.FileBuffer.UnsupportedFileTypeException;
 import waffleoRai_cafebotCommands.BotScheduler;
@@ -95,26 +92,12 @@ public class BotBrain {
 			throw new IllegalStateException();
 		}
 		//Here, the listeners are generated and given to the master bot.
-		ListenerAdapter debuglistener = new ListenerAdapter(){
-			public void onUserUpdateOnlineStatus(UserUpdateOnlineStatusEvent event)
-			{
-				User u = event.getUser();
-				if (u.isBot())
-				{
-					String errmsg = Schedule.getErrorStreamDateMarker();
-					errmsg += " BotBrain.start. || Bot Online Status Update Detected: " + u.getName();
-					errmsg += " (" + Long.toUnsignedString(u.getIdLong()) + ")";
-					OnlineStatus online = event.getNewOnlineStatus();
-					errmsg += " is now " + online.toString();
-					System.err.println(errmsg);
-				}
-			}
-		};
+		
 		MessageListener ml = new MessageListener(parser, verbose);
 		GreetingListener gl = new GreetingListener(parser, verbose);
 		JoinListener jl = new JoinListener(verbose, this);
 		RoleChangeListener rl = new RoleChangeListener(verbose, this);
-		bots[1].addListener(debuglistener);
+		//bots[1].addListener(debuglistener);
 		bots[1].addListener(ml);
 		bots[1].addListener(gl);
 		bots[1].addListener(jl);
@@ -130,6 +113,7 @@ public class BotBrain {
 			{
 				bcount++;
 				bots[i].addListener(l);
+				bots[i].addStatusChangeDebugListener();
 				bots[i].loginAsync();
 			}
 		}

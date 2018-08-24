@@ -36,6 +36,7 @@ import net.dv8tion.jda.core.events.DisconnectEvent;
 import net.dv8tion.jda.core.events.ReadyEvent;
 import net.dv8tion.jda.core.events.ReconnectedEvent;
 import net.dv8tion.jda.core.events.ResumedEvent;
+import net.dv8tion.jda.core.events.user.update.UserUpdateOnlineStatusEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 import net.dv8tion.jda.core.managers.Presence;
 import waffleoRai_Utils.FileBuffer;
@@ -549,6 +550,27 @@ public abstract class AbstractBot implements Bot{
 			
 		};
 		lListeners.add(dl);
+	}
+	
+	public void addStatusChangeDebugListener()
+	{
+		ListenerAdapter debuglistener = new ListenerAdapter(){
+			public void onUserUpdateOnlineStatus(UserUpdateOnlineStatusEvent event)
+			{
+				User u = event.getUser();
+				if (u.isBot())
+				{
+					String errmsg = Schedule.getErrorStreamDateMarker();
+					errmsg += " BotBrain.start. || Bot Online Status Update Detected: " + u.getName();
+					errmsg += " (" + Long.toUnsignedString(u.getIdLong()) + ")";
+					OnlineStatus online = event.getNewOnlineStatus();
+					errmsg += " is now " + online.toString();
+					System.err.println(errmsg);
+					testJDA();
+				}
+			}
+		};
+		lListeners.add(debuglistener);
 	}
 	
 	private void addListeners(JDABuilder builder)

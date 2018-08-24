@@ -13,7 +13,7 @@ public class CMD_IssueReminder extends CommandAdapter{
 	public CMD_IssueReminder(EventAdapter e, int lv, long gid)
 	{
 		event = e;
-		lv = reminder_level;
+		reminder_level = lv;
 		guildID = gid;
 	}
 
