@@ -715,6 +715,7 @@ public class Schedule {
 					if (nr <= 0 && lv > 0)
 					{
 						cmdCore.command_EventReminder(ea, lv, guildID);
+						System.err.println(Schedule.getErrorStreamDateMarker() + " Schedule.EventTimerThread.run || Issued command reminder command for event " + Long.toUnsignedString(ea.getEventID()));
 						ea.determineNextReminder();
 					}
 					//See if the event has already passed (and spawn sequel if need be)

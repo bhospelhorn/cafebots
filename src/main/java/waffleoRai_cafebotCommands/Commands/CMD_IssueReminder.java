@@ -39,4 +39,9 @@ public class CMD_IssueReminder extends CommandAdapter{
 		return guildID;
 	}
 	
+	public String toString()
+	{
+		return "issueReminder_event" + Long.toUnsignedString(event.getEventID());
+	}
+	
 }
