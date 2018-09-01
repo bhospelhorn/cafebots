@@ -24,6 +24,7 @@ import waffleoRai_cafebotCommands.Commands.CMD_NotifyCancellation;
 import waffleoRai_cafebotCommands.Commands.CMD_OtherBotHandledMessage;
 import waffleoRai_cafebotCommands.Commands.CMD_ParserBlockWarn;
 import waffleoRai_cafebotCommands.Commands.CMD_ProcessRoleUpdate;
+import waffleoRai_cafebotCommands.Commands.CMD_ResetCheck;
 import waffleoRai_cafebotCommands.Commands.CMD_WishBirthday;
 import waffleoRai_cafebotCore.AbstractBot;
 import waffleoRai_cafebotRoles.ActorRole;
@@ -849,6 +850,16 @@ public class ParseCore {
 			}
 		}
 		System.err.println(Thread.currentThread().getName() + " || ParseCore.deferToBot || Compatible bot not found...");
+	}
+	
+	public void command_SessionCheck()
+	{
+		if (mybots == null) return;
+		for (int i = 1; i < mybots.length; i++)
+		{
+			AbstractBot bot = mybots[i];
+			if (bot != null) bot.submitCommand(new CMD_ResetCheck());
+		}
 	}
 	
 	/* ----- Response Handling ----- */

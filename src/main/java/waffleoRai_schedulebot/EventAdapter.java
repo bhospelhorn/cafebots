@@ -144,6 +144,9 @@ public abstract class EventAdapter implements CalendarEvent{
 		if (level < 1 || level > STD_REMINDER_COUNT) return;
 		GregorianCalendar rt = new GregorianCalendar();
 		rt.setTimeInMillis(eventTime.getTimeInMillis());
+		//System.err.println(Schedule.getErrorStreamDateMarker() + " EventAdapter.setReminderTime || Reminder Level: " + level);
+		//System.err.println(Schedule.getErrorStreamDateMarker() + " EventAdapter.setReminderTime || Reminder Time: " + time.toString());
+		//System.err.println(Schedule.getErrorStreamDateMarker() + " EventAdapter.setReminderTime || Event Time: " + FileBuffer.formatTimeAmerican(rt));
 		
 		rt.add(Calendar.YEAR, (time.getYears() * -1));
 		rt.add(Calendar.MONTH, (time.getMonths() * -1));
@@ -151,6 +154,7 @@ public abstract class EventAdapter implements CalendarEvent{
 		rt.add(Calendar.DAY_OF_MONTH, (time.getDays() * -1));
 		rt.add(Calendar.HOUR_OF_DAY, (time.getHours() * -1));
 		rt.add(Calendar.MINUTE, (time.getMinutes() * -1));
+		//System.err.println(Schedule.getErrorStreamDateMarker() + " EventAdapter.setReminderTime || Calculated Reminder Time: " + FileBuffer.formatTimeAmerican(rt));
 		reminderTimes[level-1] = rt.getTimeInMillis();
 	}
 	
@@ -456,15 +460,20 @@ public abstract class EventAdapter implements CalendarEvent{
 		if (reminderTimes == null) loadReminderTimes();
 		GregorianCalendar now = new GregorianCalendar();
 		long nowmillis = now.getTimeInMillis();
+		//System.err.println(Schedule.getErrorStreamDateMarker() + " EventAdapter.determineNextReminder || Now in millis: " + Long.toUnsignedString(nowmillis));
 		int rmax = this.getMaxReminders();
+		//System.err.println(Schedule.getErrorStreamDateMarker() + " EventAdapter.determineNextReminder || Max reminders for event type: " + rmax);
 		for (int i = 0; i < rmax; i++)
 		{
 			long rmillis = reminderTimes[i];
+			//System.err.println(Schedule.getErrorStreamDateMarker() + " EventAdapter.determineNextReminder || Reminder time for level " + (i+1) + ": " + Long.toUnsignedString(rmillis));
 			if (nowmillis >= rmillis)
 			{
 				//The current reminder level is the previous.
 				//Since they are one ahead, can just set as i
 				nextReminder = i;
+				//System.err.println(Schedule.getErrorStreamDateMarker() + " EventAdapter.determineNextReminder || Next reminder set to: " + i);
+				break;
 			}
 		}
 	}

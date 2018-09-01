@@ -61,6 +61,7 @@ public class BotBrain {
 	//private ReminderMap remindertimes;
 	
 	private GuildDataAdder userdataThread;
+	private ResetMonitorThread sessionMonitor;
 	
 	private boolean on;
 	
@@ -102,9 +103,18 @@ public class BotBrain {
 		bots[1].addListener(gl);
 		bots[1].addListener(jl);
 		bots[1].addListener(rl);
+		if (bots[2] != null) bots[2].addListener(new StatusChangeListener(bots[1]));
 		//Logs in all bots and starts all threads
 		parser.block();
 		//Will go ahead and start them all, but this method blocks until everything is ready.
+		for (int i = 2; i < 10; i++)
+		{
+			if (bots[i] != null)
+			{
+				bots[1].addListener(new StatusChangeListener(bots[i]));
+			}
+		}
+		
 		LoginListener l = new LoginListener();
 		int bcount = 0;
 		for (int i = 1; i < 10; i++)
@@ -113,7 +123,7 @@ public class BotBrain {
 			{
 				bcount++;
 				bots[i].addListener(l);
-				bots[i].addStatusChangeDebugListener();
+				//bots[i].addStatusChangeDebugListener();
 				bots[i].loginAsync();
 			}
 		}
@@ -130,6 +140,10 @@ public class BotBrain {
 		
 		//Start guild schedule and backup threads
 		userdata.startAllBackgroundThreads();
+		
+		//Start session monitor
+		sessionMonitor = new ResetMonitorThread();
+		sessionMonitor.start();
 		
 		//Block until bots have logged in.
 		while (l.getLoginCount() < bcount)
@@ -165,6 +179,9 @@ public class BotBrain {
 				bots[i].removeAllListeners();
 			}
 		}
+		//Kill session manager
+		sessionMonitor.kill();
+		
 		//Stop shift scheduling thread
 		shiftManager.stopTimer();
 				
@@ -175,7 +192,7 @@ public class BotBrain {
 		parser.killParserThread();
 		
 		//Kill user data manager
-		this.userdataThread.terminate();
+		userdataThread.terminate();
 		
 		on = false;
 		parser.unblock();
@@ -656,59 +673,59 @@ public class BotBrain {
 		if (y > 0)
 		{
 			String timestring = "";
-			if (y > 1 || !includePlurals) timestring = this.getCommonString(keystem + ".year");
-			else timestring = this.getCommonString(keystem + ".year_pl");
-			s += y + timestring;
+			if (y > 1 || !includePlurals) timestring = this.getCommonString(keystem + ".year_pl");
+			else timestring = this.getCommonString(keystem + ".year");
+			s += y + " " + timestring;
 			first = false;
 		}
 		int m = rt.getMonths();
 		if (m > 0)
 		{
 			String timestring = "";
-			if (m > 1 || !includePlurals) timestring = this.getCommonString(keystem + ".month");
-			else timestring = this.getCommonString(keystem + ".month_pl");
+			if (m > 1 || !includePlurals) timestring = this.getCommonString(keystem + ".month_pl");
+			else timestring = this.getCommonString(keystem + ".month");
 			if (!first) s += " ";
-			s += m + timestring;
+			s += m + " " + timestring;
 			first = false;
 		}
 		int w = rt.getWeeks();
 		if (w > 0)
 		{
 			String timestring = "";
-			if (w > 1 || !includePlurals) timestring = this.getCommonString(keystem + ".week");
-			else timestring = this.getCommonString(keystem + ".week_pl");
+			if (w > 1 || !includePlurals) timestring = this.getCommonString(keystem + ".week_pl");
+			else timestring = this.getCommonString(keystem + ".week");
 			if (!first) s += " ";
-			s += w + timestring;
+			s += w + " " + timestring;
 			first = false;
 		}
 		int d = rt.getDays();
 		if (d > 0)
 		{
 			String timestring = "";
-			if (d > 1 || !includePlurals) timestring = this.getCommonString(keystem + ".day");
-			else timestring = this.getCommonString(keystem + ".day_pl");
+			if (d > 1 || !includePlurals) timestring = this.getCommonString(keystem + ".day_pl");
+			else timestring = this.getCommonString(keystem + ".day");
 			if (!first) s += " ";
-			s += d + timestring;
+			s += d + " " + timestring;
 			first = false;
 		}
 		int h = rt.getHours();
 		if (h > 0)
 		{
 			String timestring = "";
-			if (h > 1 || !includePlurals) timestring = this.getCommonString(keystem + ".hour");
-			else timestring = this.getCommonString(keystem + ".hour_pl");
+			if (h > 1 || !includePlurals) timestring = this.getCommonString(keystem + ".hour_pl");
+			else timestring = this.getCommonString(keystem + ".hour");
 			if (!first) s += " ";
-			s += h + timestring;
+			s += h + " " + timestring;
 			first = false;
 		}
 		int n = rt.getMinutes();
 		if (n > 0)
 		{
 			String timestring = "";
-			if (n > 1 || !includePlurals) timestring = this.getCommonString(keystem + ".minute");
-			else timestring = this.getCommonString(keystem + ".minute_pl");
+			if (n > 1 || !includePlurals) timestring = this.getCommonString(keystem + ".minute_pl");
+			else timestring = this.getCommonString(keystem + ".minute");
 			if (!first) s += " ";
-			s += n + timestring;
+			s += n + " " + timestring;
 			first = false;
 		}
 		return s;
@@ -893,6 +910,60 @@ public class BotBrain {
 		if (gs == null) return false;
 		ActorUser u = gs.getUserBank().getUser(uid);
 		return (u != null);
+	}
+	
+	/* ----- Session Expiration Monitor ----- */
+	
+	public class ResetMonitorThread extends Thread
+	{
+		private boolean killme;
+		
+		public ResetMonitorThread()
+		{
+			super.setName("SessionMonitorDaemon");
+			super.setDaemon(true);
+		}
+		
+		public void run()
+		{
+			try 
+			{
+				Thread.sleep(1000*60*30);
+			} 
+			catch (InterruptedException e) 
+			{
+				Thread.interrupted();
+			}
+			while(!killRequested())
+			{
+				parser.command_SessionCheck();
+				try 
+				{
+					Thread.sleep(1000*60*30);
+				} 
+				catch (InterruptedException e) 
+				{
+					Thread.interrupted();
+				}
+			}
+		}
+		
+		private synchronized boolean killRequested()
+		{
+			return killme;
+		}
+		
+		public synchronized void kill()
+		{
+			killme = true;
+			this.interrupt();
+		}
+		
+		public synchronized void interruptMe()
+		{
+			this.interrupt();
+		}
+		
 	}
 	
 	/* ----- Role Updates ----- */

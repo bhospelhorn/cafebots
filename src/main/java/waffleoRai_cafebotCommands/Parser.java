@@ -20,6 +20,7 @@ import waffleoRai_cafebotCommands.parsers.PRS_DeclineEvent;
 import waffleoRai_cafebotCommands.parsers.PRS_EventBiweekly;
 import waffleoRai_cafebotCommands.parsers.PRS_EventDeadline;
 import waffleoRai_cafebotCommands.parsers.PRS_EventHelp;
+import waffleoRai_cafebotCommands.parsers.PRS_EventInfo;
 import waffleoRai_cafebotCommands.parsers.PRS_EventMonthlyDOM;
 import waffleoRai_cafebotCommands.parsers.PRS_EventMonthlyDOW;
 import waffleoRai_cafebotCommands.parsers.PRS_EventOnetime;
@@ -92,7 +93,7 @@ public interface Parser {
 		pmap.put("listroles", null);
 		pmap.put("amiaudconf", null);
 		pmap.put("qchan", new PRS_qChan());
-		pmap.put("eventinfo", null);
+		pmap.put("eventinfo", new PRS_EventInfo());
 		pmap.put("roleinfo", null);
 		
 		pmap.put("checkperm", new PRS_CheckAdminRoles());

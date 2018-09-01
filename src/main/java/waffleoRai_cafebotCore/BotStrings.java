@@ -82,6 +82,8 @@ public class BotStrings {
 	public static final String KEY_CANCELEVENTS_SUCCESS = ".canceleventconfirm_success";
 	public static final String KEY_CANCELEVENTS_CANCEL = ".canceleventconfirm_cancel";
 	public static final String KEY_CANCELEVENTS_FAILURE = ".canceleventconfirm_failure";
+	public static final String KEY_EVENTINFO_FAILURE = ".vieweventinfo_fail";
+	public static final String KEY_EVENTINFO = ".vieweventinfo";
 	
 	//Group: Game playing status
 	public static final String KEY_STATUSSTEM_OFF = ".off";

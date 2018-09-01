@@ -409,8 +409,8 @@ public class CafebotsFrame extends JFrame {
 			protected Void doInBackground() throws Exception {
 				try
 				{
-					core = LaunchCore.loadCore(true);
-					//core = LaunchCore.loadCore(false);
+					//core = LaunchCore.loadCore(true);
+					core = LaunchCore.loadCore(false);
 					AbstractBot[] barr = core.getBots();
 					for (int i = 1; i < 10; i++)
 					{
@@ -435,8 +435,8 @@ public class CafebotsFrame extends JFrame {
 			{
 				try 
 				{
-					core.start(true);
-					//core.start(false);
+					//core.start(true);
+					core.start(false);
 					refresher = new RefresherThread();
 					refresher.start();
 				} 

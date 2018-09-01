@@ -263,7 +263,9 @@ public class Schedule {
 	
 		public synchronized Set<Long> getAllEventIDs()
 		{
-			return map.keySet();
+			Set<Long> copy = new HashSet<Long>();
+			copy.addAll(map.keySet());
+			return copy;
 		}
 	
 		public synchronized Collection<EventAdapter> getAllEvents()
@@ -710,19 +712,18 @@ public class Schedule {
 					if (!(e instanceof EventAdapter)) continue;
 					EventAdapter ea = (EventAdapter)e;
 					//See if it's passed the last reminder time
-					System.err.println(Schedule.getErrorStreamDateMarker() + " Schedule.EventTimerThread.run || Checking next reminder time for event " + Long.toUnsignedString(ea.getEventID()));
+					//System.err.println(Schedule.getErrorStreamDateMarker() + " Schedule.EventTimerThread.run || Checking next reminder time for event " + Long.toUnsignedString(ea.getEventID()));
 					int lv = ea.nextReminderLevel();
 					long nr = ea.untilNextReminder();
-					System.err.println(Schedule.getErrorStreamDateMarker() + " Schedule.EventTimerThread.run || Next Reminder level: " + lv);
-					System.err.println(Schedule.getErrorStreamDateMarker() + " Schedule.EventTimerThread.run || Milliseconds until next reminder: " + nr);
-					GregorianCalendar rtime = new GregorianCalendar();
-					rtime.setTimeInMillis(ea.getNextReminderTimeInMillis());
-					System.err.println(Schedule.getErrorStreamDateMarker() + " Schedule.EventTimerThread.run || Reminder time: " + FileBuffer.formatTimeAmerican(rtime));
 					if (nr <= 0 && lv > 0)
 					{
+						//System.err.println(Schedule.getErrorStreamDateMarker() + " Schedule.EventTimerThread.run || Next Reminder level: " + lv);
+						//System.err.println(Schedule.getErrorStreamDateMarker() + " Schedule.EventTimerThread.run || Milliseconds until next reminder: " + nr);
+						GregorianCalendar rtime = new GregorianCalendar();
+						rtime.setTimeInMillis(ea.getNextReminderTimeInMillis());
+						//System.err.println(Schedule.getErrorStreamDateMarker() + " Schedule.EventTimerThread.run || Reminder time: " + FileBuffer.formatTimeAmerican(rtime));
 						//cmdCore.command_EventReminder(ea, lv, guildID);
-						System.err.println(Schedule.getErrorStreamDateMarker() + " Schedule.EventTimerThread.run || Issued command reminder command for event " + Long.toUnsignedString(ea.getEventID()));
-						//ea.determineNextReminder();
+						//System.err.println(Schedule.getErrorStreamDateMarker() + " Schedule.EventTimerThread.run || Issued command reminder command for event " + Long.toUnsignedString(ea.getEventID()));
 					}
 					//See if the event has already passed (and spawn sequel if need be)
 					long until = ea.getTimeUntil();

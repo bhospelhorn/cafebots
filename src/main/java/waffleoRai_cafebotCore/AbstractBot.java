@@ -36,7 +36,6 @@ import net.dv8tion.jda.core.events.DisconnectEvent;
 import net.dv8tion.jda.core.events.ReadyEvent;
 import net.dv8tion.jda.core.events.ReconnectedEvent;
 import net.dv8tion.jda.core.events.ResumedEvent;
-import net.dv8tion.jda.core.events.user.update.UserUpdateOnlineStatusEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 import net.dv8tion.jda.core.managers.Presence;
 import waffleoRai_Utils.FileBuffer;
@@ -226,6 +225,7 @@ public abstract class AbstractBot implements Bot{
 		cmdThread = new ExecutorThread(this);
 		cmdThread.start();
 		rspQueue.startThreads();
+		on = true;
 	}
 	
 	/**
@@ -236,6 +236,16 @@ public abstract class AbstractBot implements Bot{
 	{
 		cmdThread.kill();
 		rspQueue.killThreads();
+	}
+	
+	public void softReset() throws LoginException, InterruptedException
+	{
+		//terminate();
+		closeJDA();
+		botbuilder = null;
+		botcore = null;
+		loginBlock();
+		//start();
 	}
 	
 	/* ----- Getters ----- */
@@ -522,13 +532,13 @@ public abstract class AbstractBot implements Bot{
 				botcore = null;
 				try 
 				{
-					loginAsync();
+					loginBlock();
 				} 
-				catch (LoginException e1) {
+				catch (LoginException | InterruptedException e1) {
 					e1.printStackTrace();
 					return;
 				}
-				start();
+				//start();
 			}
 			
 			public void onResume(ResumedEvent e)
@@ -539,9 +549,9 @@ public abstract class AbstractBot implements Bot{
 				botcore = null;
 				try 
 				{
-					loginAsync();
+					loginBlock();
 				} 
-				catch (LoginException e1) {
+				catch (LoginException | InterruptedException e1) {
 					e1.printStackTrace();
 					return;
 				}
@@ -550,27 +560,6 @@ public abstract class AbstractBot implements Bot{
 			
 		};
 		lListeners.add(dl);
-	}
-	
-	public void addStatusChangeDebugListener()
-	{
-		ListenerAdapter debuglistener = new ListenerAdapter(){
-			public void onUserUpdateOnlineStatus(UserUpdateOnlineStatusEvent event)
-			{
-				User u = event.getUser();
-				if (u.isBot())
-				{
-					String errmsg = Schedule.getErrorStreamDateMarker();
-					errmsg += " BotBrain.start. || Bot Online Status Update Detected: " + u.getName();
-					errmsg += " (" + Long.toUnsignedString(u.getIdLong()) + ")";
-					OnlineStatus online = event.getNewOnlineStatus();
-					errmsg += " is now " + online.toString();
-					System.err.println(errmsg);
-					testJDA();
-				}
-			}
-		};
-		lListeners.add(debuglistener);
 	}
 	
 	private void addListeners(JDABuilder builder)
@@ -596,7 +585,7 @@ public abstract class AbstractBot implements Bot{
 			public void onReady(ReadyEvent e)
 			{
 				me = botcore.getSelfUser();
-				on = true;
+				//on = true;
 				start();
 			}
 		};
@@ -629,7 +618,7 @@ public abstract class AbstractBot implements Bot{
 		botcore = builder.buildBlocking();
 		botbuilder = builder;
 		me = botcore.getSelfUser();
-		on = true;
+		//on = true;
 		start();
 	}
 	
@@ -718,6 +707,41 @@ public abstract class AbstractBot implements Bot{
 		else System.err.println("JDA TEST BOT" + localIndex + " || Game: [null]");
 		
 		return true;
+	}
+	
+	public boolean isOn()
+	{
+		return on;
+	}
+	
+	public void testForReset()
+	{
+		//Test the current JDA to see if it matches the referenced JDA
+		//If not, the session has expired (for some reason) and the bot needs to be logged back in.
+		
+		if (me.getJDA() != this.botcore)
+		{
+			System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.testForReset || Session Expiration Detected! BOT" + localIndex);
+			//Stop bot threads
+			on = false;
+			cmdThread.kill();
+			rspQueue.killThreads();
+			//Log out
+			botcore.shutdownNow();
+			me.getJDA().shutdownNow();
+			//Log back in (auto restarts threads when ready)
+			try 
+			{
+				loginAsync();
+				System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.testForReset || Rebooting BOT" + localIndex);
+			} 
+			catch (LoginException e) 
+			{
+				System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.testForReset || Login refresh failed... BOT" + localIndex);
+				e.printStackTrace();
+			}
+			
+		}
 	}
 	
 	/* ----- Complain ----- */
@@ -860,7 +884,7 @@ public abstract class AbstractBot implements Bot{
 						Response r = rspQueue.popQueue();
 						System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.ExecutorThread.run || BOT" + localIndex + " executing response: " + r.toString());
 						r.execute(bot);
-						System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.ExecutorThread.run || BOT" + localIndex + " executed response: " + r.toString());
+						//System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.ExecutorThread.run || BOT" + localIndex + " executed response: " + r.toString());
 					}
 					//Clear commands
 					while (!cmdQueue.isEmpty())
@@ -868,7 +892,7 @@ public abstract class AbstractBot implements Bot{
 						Command c = cmdQueue.popCommand();
 						System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.ExecutorThread.run || BOT" + localIndex + " executing command: " + c.toString());
 						c.execute(bot);
-						System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.ExecutorThread.run || BOT" + localIndex + " executed command: " + c.toString());
+						//System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.ExecutorThread.run || BOT" + localIndex + " executed command: " + c.toString());
 					}
 				}
 				catch (Exception e)
@@ -921,7 +945,7 @@ public abstract class AbstractBot implements Bot{
 	public void submitCommand(Command cmd)
 	{
 		if (cmd == null) return;
-		System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.submitCommand || Command submitted to BOT" + this.localIndex + " : " + cmd.toString());
+		//System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.submitCommand || Command submitted to BOT" + this.localIndex + " : " + cmd.toString());
 		cmdQueue.addCommand(cmd);
 		interruptExecutionThread();
 	}
@@ -2140,7 +2164,7 @@ public abstract class AbstractBot implements Bot{
 		}
 		setBotGameStatus(nstat, online);
 		//System.err.println(Thread.currentThread().getName() + " || AbstractBot.changeShiftStatus || DEBUG - Status set! Running tests...");
-		this.testJDA();
+		//this.testJDA();
 	}
 	
 	/* ----- User Management ----- */
@@ -2474,7 +2498,7 @@ public abstract class AbstractBot implements Bot{
 		String s = "";
 		for (int i = 1; i <= nrem; i++)
 		{
-			s += "l" + i + ":" + brain.getReminderLevelString(type, i, true);
+			s += "l" + i + ": " + brain.getReminderLevelString(type, i, true);
 			s += "\n";
 		}
 		BotMessage bmsg = new BotMessage(s);
@@ -3026,6 +3050,99 @@ public abstract class AbstractBot implements Bot{
 		bmsg.substituteString(ReplaceStringType.FORMATTED_TIME_RELATIVE, ftime);
 		
 		sendMessage(tchan, bmsg);
+	}
+	
+	public void displayEventInfo(long chID, long guildID, long eventID, long uid)
+	{
+		//Retrieve event
+		CalendarEvent e = brain.getEvent(guildID, eventID);
+		if (e == null)
+		{
+			String key = BotStrings.KEY_MAINGROUP_BOTSTRINGS + BotStrings.KEY_GROUP_EVENTMANAGE + BotStrings.KEY_EVENTINFO_FAILURE;
+			String msg = botStrings.get(key);
+			BotMessage bmsg = new BotMessage(msg);
+			bmsg.substituteString(ReplaceStringType.GENERALNUM, Long.toUnsignedString(eventID));
+			sendMessage(chID, bmsg);
+			return;
+		}
+		
+		//Get requesting user (for timezone)
+		ActorUser u = brain.getUser(guildID, uid);
+		TimeZone tz = TimeZone.getDefault();
+		if (u != null) tz = u.getTimeZone();
+		
+		//Get guild
+		Guild g = botcore.getGuildById(guildID);
+		
+		String key = BotStrings.KEY_MAINGROUP_BOTSTRINGS + BotStrings.KEY_GROUP_EVENTMANAGE + BotStrings.KEY_EVENTINFO;
+		String msg = botStrings.get(key);
+		BotMessage bmsg = new BotMessage(msg);
+		//EventID
+		bmsg.substituteString(ReplaceStringType.GENERALNUM, Long.toUnsignedString(eventID));
+		//Name
+		bmsg.substituteString(ReplaceStringType.EVENTNAME, e.getEventName());
+		//Type
+		bmsg.substituteString(ReplaceStringType.EVENTTYPE, e.getType().toString());
+		//Time
+		String tstr = brain.getTimeString(e, e.getType(), tz);
+		bmsg.substituteString(ReplaceStringType.TIME, tstr);
+		//Host
+		long ruid = e.getRequestingUser();
+		Member req = g.getMemberById(ruid);
+		if (req != null)
+		{
+			String mstr = req.getEffectiveName();
+			String uname = req.getUser().getName();
+			if (!uname.equals(mstr)) mstr += " (" + uname + ")";
+			bmsg.substituteString(ReplaceStringType.REQUSER, mstr);	
+		}
+		else bmsg.substituteString(ReplaceStringType.REQUSER, "[USER NOT FOUND]");	
+		//Notification channel
+		if (e instanceof EventAdapter)
+		{
+			EventAdapter ea = (EventAdapter)e;
+			long nchid = ea.getTargetChannel();
+			TextChannel nchan = g.getTextChannelById(nchid);
+			bmsg.substituteMention(ReplaceStringType.CHANNEL_MENTION, nchan);
+		}
+		else
+		{
+			GuildSettings gs = brain.getGuild(guildID);
+			if (gs == null)
+			{
+				bmsg.substituteString(ReplaceStringType.CHANNEL_MENTION, "[None]");
+			}
+			else
+			{
+				TextChannel bchan = g.getTextChannelById(gs.getBirthdayChannelID());
+				bmsg.substituteMention(ReplaceStringType.CHANNEL_MENTION, bchan);
+			}
+		}
+		//Guests
+		if (e.isGroupEvent())
+		{
+			String everyonestring = brain.getEveryoneString();
+			bmsg.substituteString(ReplaceStringType.TARGUSER, everyonestring);
+		}
+		else
+		{
+			List<Long> invitees = e.getTargetUsers();
+			String istr = "";
+			for (Long l : invitees)
+			{
+				Member m = g.getMemberById(l);
+				if (m == null) continue;
+				String effname = m.getEffectiveName();
+				String uname = m.getUser().getName();
+				istr += effname;
+				if (!uname.equals(effname)) istr += " (" + uname + ")";
+				istr += "\n";
+			}	
+			bmsg.substituteString(ReplaceStringType.TARGUSER, istr);
+		}
+		
+		sendMessage(chID, bmsg);
+		
 	}
 	
 		// ---- Other events
