@@ -1,6 +1,7 @@
 package waffleoRai_cafebotCore;
 
 
+import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.OnlineStatus;
 import net.dv8tion.jda.core.entities.SelfUser;
 import net.dv8tion.jda.core.entities.User;
@@ -36,7 +37,20 @@ public class StatusChangeListener extends ListenerAdapter{
 			//if (bot != null) bot.testJDA();
 			
 			//Tell bot to check itself
-			if (bot != null) bot.submitCommand(new CMD_ResetCheck());
+			if (online == OnlineStatus.OFFLINE && bot.isOn())
+			{
+				System.err.println("BOT " + u.getName() + " has silently disconnected.");
+				if (bot != null){
+					JDA otherJDA = u.getJDA();
+					JDA botJDA = bot.getJDA();
+					if (botJDA != otherJDA)
+					{
+						System.err.println("BOT " + u.getName() + " JDA discordance detected!");
+					}
+					bot.submitCommand(new CMD_ResetCheck());
+				}
+			}
+			
 		}
 	}
 

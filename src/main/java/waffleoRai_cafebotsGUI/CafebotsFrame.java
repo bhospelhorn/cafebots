@@ -48,6 +48,7 @@ public class CafebotsFrame extends JFrame {
 	
 	private BotBrain core;
 	private JButton btnLogin;
+	private JButton btnZap;
 	
 	private RefresherThread refresher;
 	
@@ -233,6 +234,19 @@ public class CafebotsFrame extends JFrame {
 		lblThread_parser.setFont(new Font("Tahoma", Font.PLAIN, 11));
 		lblThread_parser.setBounds(200, 25, 97, 14);
 		ctrlpnl.add(lblThread_parser);
+		
+		btnZap = new JButton("ZAP!");
+		btnZap.setBounds(1004, 3, 89, 23);
+		ctrlpnl.add(btnZap);
+		btnZap.addActionListener(new ActionListener(){
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				forceJDACheck();
+			}
+			
+		});
+		
 		btnLogin.addActionListener(new ActionListener(){
 
 			@Override
@@ -273,6 +287,7 @@ public class CafebotsFrame extends JFrame {
 			p.setWait();
 		}
 		btnLogin.setEnabled(false);
+		btnZap.setEnabled(false);
 	}
 	
 	public void unsetWait()
@@ -282,6 +297,7 @@ public class CafebotsFrame extends JFrame {
 			p.unsetWait();
 		}
 		btnLogin.setEnabled(true);
+		btnZap.setEnabled(true);
 	}
 	
 	public class RefresherThread extends Thread
@@ -482,5 +498,10 @@ public class CafebotsFrame extends JFrame {
 	public BotBrain getBrain()
 	{
 		return core;
+	}
+
+	public void forceJDACheck()
+	{
+		if (core != null) core.forceJDACheck();
 	}
 }

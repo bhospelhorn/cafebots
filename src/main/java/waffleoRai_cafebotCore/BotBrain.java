@@ -200,6 +200,11 @@ public class BotBrain {
 		saveUserData();
 	}
 	
+	public void forceJDACheck()
+	{
+		parser.command_SessionCheck();
+	}
+	
 	/* ----- Inner Classes ----- */
 	
 	public static class StringMap

@@ -670,7 +670,9 @@ public abstract class AbstractBot implements Bot{
 		else System.err.println("JDA TEST BOT" + localIndex + " || Game: [null]");
 		
 		System.err.println("JDA TEST BOT" + localIndex + " || Checking account JDA...");
-		JDA accjda = me.getJDA();
+		long myid = me.getIdLong();
+		User otherme = botcore.getUserById(myid);
+		JDA accjda = otherme.getJDA();
 		if (accjda == null)
 		{
 			System.err.println("JDA TEST BOT" + localIndex + " || Account JDA is non-null: false");
@@ -719,7 +721,12 @@ public abstract class AbstractBot implements Bot{
 		//Test the current JDA to see if it matches the referenced JDA
 		//If not, the session has expired (for some reason) and the bot needs to be logged back in.
 		
-		if (me.getJDA() != this.botcore)
+		//DEBUG
+		//testJDA();
+		long myid = me.getIdLong();
+		User otherme = botcore.getUserById(myid);
+		
+		if (otherme.getJDA() != this.botcore)
 		{
 			System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.testForReset || Session Expiration Detected! BOT" + localIndex);
 			//Stop bot threads
@@ -727,8 +734,8 @@ public abstract class AbstractBot implements Bot{
 			cmdThread.kill();
 			rspQueue.killThreads();
 			//Log out
-			botcore.shutdownNow();
-			me.getJDA().shutdownNow();
+			botcore.shutdown();
+			otherme.getJDA().shutdownNow();
 			//Log back in (auto restarts threads when ready)
 			try 
 			{
@@ -740,7 +747,6 @@ public abstract class AbstractBot implements Bot{
 				System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.testForReset || Login refresh failed... BOT" + localIndex);
 				e.printStackTrace();
 			}
-			
 		}
 	}
 	

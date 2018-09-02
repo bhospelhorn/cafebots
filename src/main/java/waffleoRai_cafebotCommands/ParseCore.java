@@ -859,6 +859,14 @@ public class ParseCore {
 		{
 			AbstractBot bot = mybots[i];
 			if (bot != null) bot.submitCommand(new CMD_ResetCheck());
+			try 
+			{
+				Thread.sleep(500);
+			} 
+			catch (InterruptedException e) 
+			{
+				e.printStackTrace();
+			}
 		}
 	}
 	
