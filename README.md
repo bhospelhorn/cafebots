@@ -87,6 +87,8 @@ ecancel [eventID] (instance) (silent)
     Cancel an event you created. Instance and silent arguments are optional, and should be bools if included.
 checkrsvp [eventID]
     Check your rsvp status for an event.
+eventinfo [eventID]
+    Get details on a specific event.
 ```
 
 Role Management
@@ -96,6 +98,8 @@ listroles
     Get a list of your assigned roles and deadlines.
 amiaudconf
     See whether you have been marked as having confirmed audio quality.
+roleinfo [roleID]
+    Get details on a specific role.
 ```
 
 Message Cleaning
