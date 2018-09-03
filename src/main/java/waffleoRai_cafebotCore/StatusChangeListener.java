@@ -1,7 +1,5 @@
 package waffleoRai_cafebotCore;
 
-
-import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.OnlineStatus;
 import net.dv8tion.jda.core.entities.SelfUser;
 import net.dv8tion.jda.core.entities.User;
@@ -12,16 +10,25 @@ import waffleoRai_schedulebot.Schedule;
 
 public class StatusChangeListener extends ListenerAdapter{
 	
+	private AbstractBot monitor;
 	private AbstractBot bot;
 	
-	public StatusChangeListener(AbstractBot target)
+	public StatusChangeListener(AbstractBot source, AbstractBot target)
 	{
+		monitor = source;
 		bot = target;
 	}
 	
 	public void onUserUpdateOnlineStatus(UserUpdateOnlineStatusEvent event)
 	{
 		if (bot == null) return;
+		
+		//See if this monitor bot is even set to be monitoring...
+		if (bot.getLocalIndex() != 1)
+		{
+			if (!bot.isBeta()) return;
+		}
+		
 		User u = event.getUser();
 		if (u.isBot())
 		{
@@ -37,16 +44,11 @@ public class StatusChangeListener extends ListenerAdapter{
 			//if (bot != null) bot.testJDA();
 			
 			//Tell bot to check itself
-			if (online == OnlineStatus.OFFLINE && bot.isOn())
+			if (online == OnlineStatus.OFFLINE && bot.isOn() && !bot.expectedOnline())
 			{
-				System.err.println("BOT " + u.getName() + " has silently disconnected.");
-				if (bot != null){
-					JDA otherJDA = u.getJDA();
-					JDA botJDA = bot.getJDA();
-					if (botJDA != otherJDA)
-					{
-						System.err.println("BOT " + u.getName() + " JDA discordance detected!");
-					}
+				System.err.println("Monitor Bot " + monitor.getBotName() + ": BOT " + u.getName() + " has silently disconnected.");
+				if (bot != null)
+				{
 					bot.submitCommand(new CMD_ResetCheck());
 				}
 			}

@@ -869,6 +869,31 @@ public class ParseCore {
 			}
 		}
 	}
+
+	public void setBetaBot()
+	{
+		//Find the first bot online that isn't the masterbot (1) and set as beta
+		//Set others non-beta
+		boolean bset = false;
+		for (int i = 2; i < mybots.length; i++)
+		{
+			AbstractBot b = mybots[i];
+			if (b == null) continue;
+			if (!bset)
+			{
+				if (b.visiblyOnline()){
+					b.setBeta(true);
+					bset = true;
+					System.err.println(Schedule.getErrorStreamDateMarker() + " ParseCore.setBetaBot || BOT" + i + " set to beta bot!");
+				}
+				else b.setBeta(false);
+			}
+			else
+			{
+				b.setBeta(false);
+			}
+		}
+	}
 	
 	/* ----- Response Handling ----- */
 	

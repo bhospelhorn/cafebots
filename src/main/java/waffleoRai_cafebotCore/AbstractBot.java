@@ -191,6 +191,7 @@ public abstract class AbstractBot implements Bot{
 	private JDA botcore;
 	private SelfUser me;
 	private boolean on;
+	private boolean beta;
 	
 	protected BotBrain brain;
 	
@@ -238,14 +239,32 @@ public abstract class AbstractBot implements Bot{
 		rspQueue.killThreads();
 	}
 	
-	public void softReset() throws LoginException, InterruptedException
+	public void softReset()
 	{
-		//terminate();
-		closeJDA();
-		botbuilder = null;
-		botcore = null;
-		loginBlock();
-		//start();
+		System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.softReset || Reset requested for BOT" + localIndex);
+		//Stop bot threads
+		on = false;
+		cmdThread.kill();
+		rspQueue.killThreads();
+		//Get current status
+		OnlineStatus ostat = botcore.getPresence().getStatus();
+		Game gamestat = botcore.getPresence().getGame();
+		//Log out
+		botcore.shutdown();
+		//otherme.getJDA().shutdownNow();
+		//Log back in (auto restarts threads when ready)
+		try 
+		{
+			loginAsync();
+			System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.softReset || Rebooting BOT" + localIndex);
+		} 
+		catch (LoginException e) 
+		{
+			System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.softReset || Login refresh failed... BOT" + localIndex);
+			e.printStackTrace();
+		}
+		//Reinstate status
+		this.setBotGameStatus(gamestat.getName(), (ostat == OnlineStatus.ONLINE));
 	}
 	
 	/* ----- Getters ----- */
@@ -505,6 +524,8 @@ public abstract class AbstractBot implements Bot{
 			Presence botpres = botcore.getPresence();
 			System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.setBotGameStatus || [DEBUG] Status set to: " + botpres.getStatus().toString());
 		}
+		//Check
+		testForReset();
 	}
 	
 	public static void setOffdutyBotsOffline(boolean b)
@@ -716,38 +737,37 @@ public abstract class AbstractBot implements Bot{
 		return on;
 	}
 	
+	public boolean expectedOnline()
+	{
+		return (botcore.getPresence().getStatus() == OnlineStatus.ONLINE);
+	}
+	
+	public boolean visiblyOnline()
+	{
+		return brain.amIOnline(this);
+	}
+	
+	public boolean isBeta()
+	{
+		return beta;
+	}
+	
+	public void setBeta(boolean b)
+	{
+		beta = b;
+	}
+	
 	public void testForReset()
 	{
-		//Test the current JDA to see if it matches the referenced JDA
-		//If not, the session has expired (for some reason) and the bot needs to be logged back in.
-		
 		//DEBUG
 		//testJDA();
-		long myid = me.getIdLong();
-		User otherme = botcore.getUserById(myid);
 		
-		if (otherme.getJDA() != this.botcore)
-		{
-			System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.testForReset || Session Expiration Detected! BOT" + localIndex);
-			//Stop bot threads
-			on = false;
-			cmdThread.kill();
-			rspQueue.killThreads();
-			//Log out
-			botcore.shutdown();
-			otherme.getJDA().shutdownNow();
-			//Log back in (auto restarts threads when ready)
-			try 
-			{
-				loginAsync();
-				System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.testForReset || Rebooting BOT" + localIndex);
-			} 
-			catch (LoginException e) 
-			{
-				System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.testForReset || Login refresh failed... BOT" + localIndex);
-				e.printStackTrace();
-			}
-		}
+		//Check if supposed to be online
+		if (!expectedOnline()) return;
+		//If so, check if not online
+		if (brain.amIOnline(this)) return;
+		//If supposed to be online but not, then soft reset
+		softReset();
 	}
 	
 	/* ----- Complain ----- */

@@ -14,6 +14,7 @@ import java.util.TimeZone;
 import javax.security.auth.login.LoginException;
 
 import net.dv8tion.jda.core.JDA;
+import net.dv8tion.jda.core.OnlineStatus;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.MessageChannel;
@@ -103,7 +104,7 @@ public class BotBrain {
 		bots[1].addListener(gl);
 		bots[1].addListener(jl);
 		bots[1].addListener(rl);
-		if (bots[2] != null) bots[2].addListener(new StatusChangeListener(bots[1]));
+		if (bots[2] != null) bots[2].addListener(new StatusChangeListener(bots[2], bots[1]));
 		//Logs in all bots and starts all threads
 		parser.block();
 		//Will go ahead and start them all, but this method blocks until everything is ready.
@@ -111,7 +112,8 @@ public class BotBrain {
 		{
 			if (bots[i] != null)
 			{
-				bots[1].addListener(new StatusChangeListener(bots[i]));
+				bots[1].addListener(new StatusChangeListener(bots[1], bots[i]));
+				bots[i].addListener(new StatusChangeListener(bots[i], bots[1]));
 			}
 		}
 		
@@ -203,6 +205,31 @@ public class BotBrain {
 	public void forceJDACheck()
 	{
 		parser.command_SessionCheck();
+	}
+	
+	/* ----- Bot Status ----- */
+	
+	protected boolean amIOnline(AbstractBot bot)
+	{
+		if (bot == null) return false;
+		//Get bot index
+		int boti = bot.getLocalIndex();
+		//Pick a bot that isn't that bot
+		AbstractBot checker = null;
+		for (int i = 1; i < bots.length; i++)
+		{
+			if (i == boti) continue;
+			if (bots[i] == null) continue;
+			checker = bots[i];
+			break;
+		}
+		//Check the JDA for checker
+		JDA cjda = checker.getJDA();
+		//Get UID of bot to check
+		long meid = bot.getBotUser().getIdLong();
+		//Get status of bot to check from other JDA
+		JDA visSesh = cjda.getUserById(meid).getJDA();
+		return (visSesh.getPresence().getStatus() == OnlineStatus.OFFLINE);
 	}
 	
 	/* ----- Inner Classes ----- */
