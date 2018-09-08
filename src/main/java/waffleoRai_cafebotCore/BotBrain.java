@@ -223,8 +223,34 @@ public class BotBrain {
 			checker = bots[i];
 			break;
 		}
+		
+		//Wait for check bot to be on
+		while (!checker.isOn())
+		{
+			try 
+			{
+				Thread.sleep(10);
+			} 
+			catch (InterruptedException e) 
+			{
+				e.printStackTrace();
+			}
+		}
 		//Check the JDA for checker
 		JDA cjda = checker.getJDA();
+		
+		//Wait for target bot to be on
+		while (!bot.isOn())
+		{
+			try 
+			{
+				Thread.sleep(10);
+			} 
+			catch (InterruptedException e) 
+			{
+				e.printStackTrace();
+			}
+		}
 		//Get UID of bot to check
 		long meid = bot.getBotUser().getIdLong();
 		//Get status of bot to check from other JDA
