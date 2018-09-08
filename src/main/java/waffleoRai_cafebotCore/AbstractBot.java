@@ -511,18 +511,18 @@ public abstract class AbstractBot implements Bot{
 		//System.err.println(Thread.currentThread().getName() + " || AbstractBot.setBotGameStatus || DEBUG - Target string: " + status);
 		if (!online)
 		{
-			System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.setBotGameStatus || [DEBUG] Setting offline: status = " + status);
+			System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.setBotGameStatus || [DEBUG] BOT " + localIndex + " Setting offline: status = " + status);
 			botcore.getPresence().setPresence(OnlineStatus.OFFLINE, Game.playing(status));
 			Presence botpres = botcore.getPresence();
-			System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.setBotGameStatus || [DEBUG] Status set to: " + botpres.getStatus().toString());
+			System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.setBotGameStatus || [DEBUG] BOT " + localIndex + " Status set to: " + botpres.getStatus().toString());
 		}
 		else
 		{
 			//botbuilder.setGame(Game.playing(status));	
-			System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.setBotGameStatus || [DEBUG] Setting online: status = " + status);
+			System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.setBotGameStatus || [DEBUG] BOT " + localIndex + " Setting online: status = " + status);
 			botcore.getPresence().setPresence(OnlineStatus.ONLINE, Game.playing(status));
 			Presence botpres = botcore.getPresence();
-			System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.setBotGameStatus || [DEBUG] Status set to: " + botpres.getStatus().toString());
+			System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.setBotGameStatus || [DEBUG] BOT " + localIndex + " Status set to: " + botpres.getStatus().toString());
 		}
 		//Check
 		testForReset();
@@ -605,6 +605,7 @@ public abstract class AbstractBot implements Bot{
 			@Override
 			public void onReady(ReadyEvent e)
 			{
+				System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.loginAsync || BOT" + localIndex + " has logged in!");
 				me = botcore.getSelfUser();
 				//on = true;
 				start();
@@ -763,7 +764,10 @@ public abstract class AbstractBot implements Bot{
 		//testJDA();
 		
 		//Check if supposed to be online
-		if (!expectedOnline()) return;
+		if (!expectedOnline()){
+			System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.testForReset || [DEBUG] BOT " + localIndex + " is not expected online. No reset required!");
+			return;
+		}
 		//If so, check if not online
 		if (brain.amIOnline(this)) return;
 		//If supposed to be online but not, then soft reset

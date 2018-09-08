@@ -874,6 +874,7 @@ public class ParseCore {
 	{
 		//Find the first bot online that isn't the masterbot (1) and set as beta
 		//Set others non-beta
+		System.err.println(Schedule.getErrorStreamDateMarker() + " ParseCore.setBetaBot || CALLED!");
 		boolean bset = false;
 		for (int i = 2; i < mybots.length; i++)
 		{
@@ -893,6 +894,7 @@ public class ParseCore {
 				b.setBeta(false);
 			}
 		}
+		System.err.println(Schedule.getErrorStreamDateMarker() + " ParseCore.setBetaBot || RETURNING");
 	}
 	
 	/* ----- Response Handling ----- */

@@ -165,7 +165,18 @@ public class BotBrain {
 		System.out.println("BotBrain.start || All bots have logged in!");
 		
 		on = true;
+		//Wait a second to choose beta bot
+		try 
+		{
+			Thread.sleep(1000);
+		} 
+		catch (InterruptedException e) 
+		{
+			e.printStackTrace();
+		}
+		parser.setBetaBot();
 		parser.unblock();
+		System.out.println("BotBrain.start || Parser has been unblocked!");
 	}
 	
 	public void terminate() throws IOException
@@ -223,6 +234,7 @@ public class BotBrain {
 			checker = bots[i];
 			break;
 		}
+		System.err.println(Schedule.getErrorStreamDateMarker() + " BotBrain.amIOnline || Checking online status for BOT" + bot.getLocalIndex() + " using BOT" + checker.getLocalIndex());
 		
 		//Wait for check bot to be on
 		while (!checker.isOn())
@@ -236,6 +248,7 @@ public class BotBrain {
 				e.printStackTrace();
 			}
 		}
+		//System.err.println(Schedule.getErrorStreamDateMarker() + " BotBrain.amIOnline || BOT" + checker.getLocalIndex() + " is online!");
 		//Check the JDA for checker
 		JDA cjda = checker.getJDA();
 		
@@ -251,11 +264,29 @@ public class BotBrain {
 				e.printStackTrace();
 			}
 		}
+		//System.err.println(Schedule.getErrorStreamDateMarker() + " BotBrain.amIOnline || BOT" + bot.getLocalIndex() + " is online!");
 		//Get UID of bot to check
 		long meid = bot.getBotUser().getIdLong();
+		
+		//Grab a random mutual guild
+		User target = cjda.getUserById(meid);
+		List<Guild> mutualg = target.getMutualGuilds();
+		if (mutualg.isEmpty())
+		{
+			System.err.println(Schedule.getErrorStreamDateMarker() + " ERROR: BOT" + checker.getLocalIndex() + " & BOT" + bot.getLocalIndex() + " share no mutual guilds. Online status cannot be checked?");
+			return true;
+		}
+		Guild g = mutualg.get(0);
+		Member tmem = g.getMemberById(meid);
+		
 		//Get status of bot to check from other JDA
-		JDA visSesh = cjda.getUserById(meid).getJDA();
-		return (visSesh.getPresence().getStatus() == OnlineStatus.OFFLINE);
+		//JDA visSesh = cjda.getUserById(meid).getJDA();
+		OnlineStatus tonline = tmem.getOnlineStatus();
+		//boolean amionline = (visSesh.getPresence().getStatus() != OnlineStatus.OFFLINE);
+		//System.err.println(Schedule.getErrorStreamDateMarker() + " BotBrain.amIOnline || BOT" + bot.getLocalIndex() + " visible status: " + visSesh.getPresence().getStatus().toString());
+		boolean amionline = (tonline != OnlineStatus.OFFLINE);
+		System.err.println(Schedule.getErrorStreamDateMarker() + " BotBrain.amIOnline || BOT" + bot.getLocalIndex() + " visible status: " + tonline.toString());
+		return amionline;
 	}
 	
 	/* ----- Inner Classes ----- */
