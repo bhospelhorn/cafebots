@@ -114,6 +114,8 @@ public class ParseCore {
 	
 	private boolean block;
 	
+	private boolean[] statusLocks;
+	
 	/* ----- Construction ----- */
 	
 	/**
@@ -130,6 +132,7 @@ public class ParseCore {
 		scheduler = s;
 		std_prefix = "!";
 		mybots = new AbstractBot[10];
+		statusLocks = new boolean[10];
 		if (parserMap == null) populateParserMap_Standard();
 		block = false;
 		mqueue = new MessageQueue();
@@ -895,6 +898,29 @@ public class ParseCore {
 			}
 		}
 		System.err.println(Schedule.getErrorStreamDateMarker() + " ParseCore.setBetaBot || RETURNING");
+	}
+
+	public synchronized boolean statusLock()
+	{
+		for (int i = 1; i < 10; i++)
+		{
+			if (mybots[i] != null && !statusLocks[i]) return true;
+		}
+		return false;
+	}
+	
+	public synchronized void clearStatusLock()
+	{
+		for (int i = 1; i < 10; i++)
+		{
+			statusLocks[i] = false;
+		}
+	}
+	
+	public synchronized void signalStatusChange(int botIndex)
+	{
+		if (botIndex < 0 || botIndex >= 10) return;
+		statusLocks[botIndex] = true;
 	}
 	
 	/* ----- Response Handling ----- */

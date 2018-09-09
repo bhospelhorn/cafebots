@@ -288,6 +288,11 @@ public class BotBrain {
 		System.err.println(Schedule.getErrorStreamDateMarker() + " BotBrain.amIOnline || BOT" + bot.getLocalIndex() + " visible status: " + tonline.toString());
 		return amionline;
 	}
+
+	protected void signalStatusChange(AbstractBot bot)
+	{
+		parser.signalStatusChange(bot.getLocalIndex());
+	}
 	
 	/* ----- Inner Classes ----- */
 	

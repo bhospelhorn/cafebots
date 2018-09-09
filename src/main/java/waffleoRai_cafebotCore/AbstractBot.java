@@ -1,5 +1,7 @@
 package waffleoRai_cafebotCore;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -17,9 +19,11 @@ import java.util.TimeZone;
 
 import javax.imageio.ImageIO;
 import javax.security.auth.login.LoginException;
+import javax.swing.Timer;
 
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
+import net.dv8tion.jda.core.JDA.Status;
 import net.dv8tion.jda.core.JDABuilder;
 import net.dv8tion.jda.core.OnlineStatus;
 import net.dv8tion.jda.core.entities.Game;
@@ -47,6 +51,7 @@ import waffleoRai_cafebotCommands.Commands.CMD_EventMakeMonthlyDOM;
 import waffleoRai_cafebotCommands.Commands.CMD_EventMakeMonthlyDOW;
 import waffleoRai_cafebotCommands.Commands.CMD_EventMakeOnetime;
 import waffleoRai_cafebotCommands.Commands.CMD_EventMakeWeekly;
+import waffleoRai_cafebotCommands.Commands.CMD_UpdateStatusAtReboot;
 import waffleoRai_schedulebot.Attendance;
 import waffleoRai_schedulebot.Birthday;
 import waffleoRai_schedulebot.BiweeklyEvent;
@@ -241,30 +246,65 @@ public abstract class AbstractBot implements Bot{
 	
 	public void softReset()
 	{
+		//Run in a local anonymous thread so that the execution thread doesn't try to send
+		// more commands while the bot is trying to log back in...
 		System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.softReset || Reset requested for BOT" + localIndex);
-		//Stop bot threads
-		on = false;
-		cmdThread.kill();
-		rspQueue.killThreads();
-		//Get current status
-		OnlineStatus ostat = botcore.getPresence().getStatus();
-		Game gamestat = botcore.getPresence().getGame();
-		//Log out
-		botcore.shutdown();
-		//otherme.getJDA().shutdownNow();
-		//Log back in (auto restarts threads when ready)
-		try 
-		{
-			loginAsync();
-			System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.softReset || Rebooting BOT" + localIndex);
-		} 
-		catch (LoginException e) 
-		{
-			System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.softReset || Login refresh failed... BOT" + localIndex);
-			e.printStackTrace();
-		}
-		//Reinstate status
-		this.setBotGameStatus(gamestat.getName(), (ostat == OnlineStatus.ONLINE));
+		Thread t = new Thread(){
+			
+			public void run()
+			{
+				//Stop bot threads
+				on = false;
+				cmdThread.kill();
+				rspQueue.killThreads();
+				//Get current status
+				OnlineStatus ostat = botcore.getPresence().getStatus();
+				Game gamestat = botcore.getPresence().getGame();
+				//Log out
+				botcore.shutdown();
+				//otherme.getJDA().shutdownNow();
+				//Wait for shutdown...
+				Status corestat = botcore.getStatus();
+				while (corestat != Status.SHUTDOWN)
+				{
+					//Wait.
+					try 
+					{
+						Thread.sleep(100);
+					} 
+					catch (InterruptedException e) 
+					{
+						Thread.interrupted();
+						System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.softReset || Shutdown wait sleep interrupted for BOT" + localIndex);
+						e.printStackTrace();
+					}
+					corestat = botcore.getStatus();
+				}
+				System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.softReset || Shutdown complete for BOT" + localIndex);
+				//Log back in (auto restarts threads when ready)
+				botcore = null;
+				botbuilder = null;
+				me = null;
+				try 
+				{
+					loginAsync();
+					System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.softReset || Rebooting BOT" + localIndex);
+				} 
+				catch (LoginException e) 
+				{
+					System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.softReset || Login refresh failed... BOT" + localIndex);
+					e.printStackTrace();
+				}
+				//Reinstate status
+				Command setstat = new CMD_UpdateStatusAtReboot(gamestat.getName(), (ostat == OnlineStatus.ONLINE));
+				cmdQueue.addCommand(setstat); //Shouldn't execute until command thread reboots
+				System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.softReset || Soft reset procedure complete for BOT" + localIndex);
+			}
+			
+		};
+		
+		t.start();
+		
 	}
 	
 	/* ----- Getters ----- */
@@ -524,8 +564,52 @@ public abstract class AbstractBot implements Bot{
 			Presence botpres = botcore.getPresence();
 			System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.setBotGameStatus || [DEBUG] BOT " + localIndex + " Status set to: " + botpres.getStatus().toString());
 		}
+		//Wait one second before checking...
+	
+		boolean[] ready = new boolean[1];
+		ready[0] = false;
+		Timer t = new Timer(1000, new ActionListener(){
+
+			public void actionPerformed(ActionEvent e) 
+			{
+				ready[0] = true;
+			}
+			
+		});
+		
+		t.setInitialDelay(1000);
+		t.start();
+		/*try 
+		{
+			Thread.sleep(1000);
+		} 
+		catch (InterruptedException e) 
+		{
+			//Very likely to get interrupted if another command comes in. For now, just deal with that.
+			Thread.interrupted();
+			System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.setBotGameStatus || Status update wait sleep interrupted!");
+			e.printStackTrace();
+		}*/
+		while (!ready[0])
+		{
+			//Wait
+			try 
+			{
+				Thread.sleep(500);
+			} 
+			catch (InterruptedException e) 
+			{
+				//Very likely to get interrupted if another command comes in. For now, just deal with that.
+				Thread.interrupted();
+				System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.setBotGameStatus || Status update wait sleep interrupted!");
+				e.printStackTrace();
+			}
+		}
+		t.stop();
+		
 		//Check
 		testForReset();
+		brain.signalStatusChange(this); //NOTE: Move before reset check? Do if this becomes a problem!
 	}
 	
 	public static void setOffdutyBotsOffline(boolean b)

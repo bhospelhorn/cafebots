@@ -1040,10 +1040,26 @@ public class BotScheduler implements ActionListener{
 					commander.issueDirectCommand(i, cmd);
 				}
 			}
-			if(this.timerRunning()) commander.setBetaBot();
+			if(this.timerRunning()){
+				while(commander.statusLock())
+				{
+					try 
+					{
+						Thread.sleep(100);
+					} 
+					catch (InterruptedException e) 
+					{
+						Thread.interrupted();
+						System.err.println(Schedule.getErrorStreamDateMarker() + " BotScheduler.setCurrentShift || Scheduler thread status lock wait sleep interrupted!");
+						e.printStackTrace();
+					}
+				}
+				commander.setBetaBot();
+			}
 			//System.err.println("DEBUG BotScheduler.setCurrentShift || DEBUG: Point 4");
 		}
 		//System.err.println("DEBUG BotScheduler.setCurrentShift || DEBUG: Method Returning!");
+		commander.clearStatusLock();
 	}
 	
 	/* ----- Command Management ----- */
