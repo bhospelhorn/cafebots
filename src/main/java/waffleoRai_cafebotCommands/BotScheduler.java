@@ -1056,10 +1056,10 @@ public class BotScheduler implements ActionListener{
 				}
 				commander.setBetaBot();
 			}
+			commander.clearStatusLock();
 			//System.err.println("DEBUG BotScheduler.setCurrentShift || DEBUG: Point 4");
 		}
 		//System.err.println("DEBUG BotScheduler.setCurrentShift || DEBUG: Method Returning!");
-		commander.clearStatusLock();
 	}
 	
 	/* ----- Command Management ----- */
