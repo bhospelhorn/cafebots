@@ -1020,6 +1020,7 @@ public class BotScheduler implements ActionListener{
 		//System.err.println("DEBUG BotScheduler.setCurrentShift || DEBUG: Point 2");
 		if (commander != null){
 			//System.err.println("DEBUG BotScheduler.setCurrentShift || DEBUG: Point 3");
+			commander.clearStatusLock();
 			for (int i = 1; i < 10; i++)
 			{
 				Position p = currentShift.getBotPosition(i);
@@ -1056,7 +1057,7 @@ public class BotScheduler implements ActionListener{
 				}
 				commander.setBetaBot();
 			}
-			commander.clearStatusLock();
+			//commander.clearStatusLock();
 			//System.err.println("DEBUG BotScheduler.setCurrentShift || DEBUG: Point 4");
 		}
 		//System.err.println("DEBUG BotScheduler.setCurrentShift || DEBUG: Method Returning!");

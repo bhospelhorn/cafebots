@@ -25,6 +25,8 @@ import javax.swing.border.BevelBorder;
 import waffleoRai_cafebotCore.AbstractBot;
 import waffleoRai_cafebotCore.BotBrain;
 import waffleoRai_cafebotCore.LaunchCore;
+import waffleoRai_schedulebot.Schedule;
+
 import javax.swing.JButton;
 import java.awt.Font;
 import javax.swing.JLabel;
@@ -313,17 +315,19 @@ public class CafebotsFrame extends JFrame {
 		
 		public void run()
 		{
+			System.err.println(Schedule.getErrorStreamDateMarker() + " CafebotsFrame.RefresherThread.run || GUI refresher thread started!");
 			while (!killed())
 			{
 				updatePanels();
 				try 
 				{
-					Thread.sleep(1000 * 600);
+					Thread.sleep(1000 * 60 * 10);
 				} catch (InterruptedException e) {
 					Thread.interrupted();
 					//e.printStackTrace();
 				}
 			}
+			System.err.println(Schedule.getErrorStreamDateMarker() + " CafebotsFrame.RefresherThread.run || GUI refresher thread terminating...");
 		}
 		
 		private synchronized boolean killed()
@@ -333,6 +337,7 @@ public class CafebotsFrame extends JFrame {
 		
 		public synchronized void killMe()
 		{
+			System.err.println(Schedule.getErrorStreamDateMarker() + " CafebotsFrame.RefresherThread.run || GUI refresher thread termination requested!");
 			kill = true;
 			this.interrupt();
 		}

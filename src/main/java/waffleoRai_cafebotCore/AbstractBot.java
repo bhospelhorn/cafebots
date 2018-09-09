@@ -1,7 +1,5 @@
 package waffleoRai_cafebotCore;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -19,7 +17,6 @@ import java.util.TimeZone;
 
 import javax.imageio.ImageIO;
 import javax.security.auth.login.LoginException;
-import javax.swing.Timer;
 
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
@@ -566,31 +563,31 @@ public abstract class AbstractBot implements Bot{
 		}
 		//Wait one second before checking...
 	
-		boolean[] ready = new boolean[1];
-		ready[0] = false;
-		Timer t = new Timer(1000, new ActionListener(){
-
-			public void actionPerformed(ActionEvent e) 
+		//System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.setBotGameStatus || [DEBUG] BOT " + localIndex + " Starting status change check wait...");
+		SyncSwitch ready = new SyncSwitch();
+		ready.set(false);
+		Thread th = new Thread(){
+			
+			public void run()
 			{
-				ready[0] = true;
+				//Wait 1 second
+				//Set ready
+				try 
+				{
+					Thread.sleep(1000);
+				} 
+				catch (InterruptedException e) 
+				{
+					Thread.interrupted();
+				}
+				ready.set(true);
 			}
 			
-		});
+		};
 		
-		t.setInitialDelay(1000);
-		t.start();
-		/*try 
-		{
-			Thread.sleep(1000);
-		} 
-		catch (InterruptedException e) 
-		{
-			//Very likely to get interrupted if another command comes in. For now, just deal with that.
-			Thread.interrupted();
-			System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.setBotGameStatus || Status update wait sleep interrupted!");
-			e.printStackTrace();
-		}*/
-		while (!ready[0])
+		th.start();
+
+		while (!ready.get())
 		{
 			//Wait
 			try 
@@ -605,7 +602,7 @@ public abstract class AbstractBot implements Bot{
 				e.printStackTrace();
 			}
 		}
-		t.stop();
+		//System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.setBotGameStatus || [DEBUG] BOT " + localIndex + " ready for check.");
 		
 		//Check
 		testForReset();
@@ -696,6 +693,7 @@ public abstract class AbstractBot implements Bot{
 			}
 		};
 		
+		System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.loginAsync || Login async called for BOT" + localIndex);
 		//lListeners.add(l);
 		JDABuilder builder = new JDABuilder(AccountType.BOT);
 		builder.setAutoReconnect(false);
@@ -705,6 +703,7 @@ public abstract class AbstractBot implements Bot{
 		//builder.addEventListener(dl);
 		botcore = builder.buildAsync(); //Deprecated, apparently
 		botbuilder = builder;
+		System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.loginAsync || Login async request complete for BOT" + localIndex);
 	}
 	
 	/**

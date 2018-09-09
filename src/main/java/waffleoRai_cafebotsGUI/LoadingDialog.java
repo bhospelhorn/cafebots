@@ -6,7 +6,9 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JDialog;
 import javax.swing.JLabel;
-import javax.swing.Timer;
+
+import waffleoRai_Utils.Athread;
+import waffleoRai_schedulebot.Schedule;
 
 import java.awt.Font;
 import java.awt.Dimension;
@@ -18,7 +20,7 @@ public class LoadingDialog extends JDialog implements ActionListener{
 	
 	//private Frame parent;
 	private JLabel lblDots;
-	private Timer timer;
+	private Athread timer;
 	
 	private int dotCount;
 	
@@ -32,6 +34,27 @@ public class LoadingDialog extends JDialog implements ActionListener{
 		setResizable(false);
 		setTitle("Loading");
 		getContentPane().setLayout(null);
+		
+		timer = new Athread(){
+
+			@Override
+			public void doSomething() {
+				if (dotCount >= MAXDOTS)
+				{
+					dotCount = 0;
+					lblDots.setText("");
+				}
+				else
+				{
+					lblDots.setText(lblDots.getText() + ".");
+					dotCount++;
+				}
+				
+				lblDots.repaint();
+			}
+			
+		};
+		timer.setSleeptime_millis(500);
 		
 		JLabel lblPleaseWait = new JLabel("Please Wait");
 		lblPleaseWait.setFont(new Font("Tahoma", Font.PLAIN, 16));
@@ -71,13 +94,16 @@ public class LoadingDialog extends JDialog implements ActionListener{
 	
 	public void startTimer()
 	{
-		timer = new Timer(500, this);
+		//timer = new Timer(500, this);
+		System.err.println(Schedule.getErrorStreamDateMarker() + " LoadingDialog.startTimer || GUI loading dialog - starting timer!");
 		timer.start();
 	}
 
 	public void stopTimer()
 	{
-		timer.stop();
+		System.err.println(Schedule.getErrorStreamDateMarker() + " LoadingDialog.stopTimer || GUI loading dialog - stopping timer!");
+		timer.kill();
+		//timer.stop();
 	}
 	
 	public void setLoadedMessage()

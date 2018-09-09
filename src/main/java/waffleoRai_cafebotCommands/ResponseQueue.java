@@ -96,7 +96,7 @@ public class ResponseQueue {
 				} 
 				catch (InterruptedException e) 
 				{
-					e.printStackTrace();
+					//e.printStackTrace();
 					Thread.interrupted();
 				}
 			}
@@ -142,7 +142,7 @@ public class ResponseQueue {
 						Thread.sleep(1000 * TIMEOUT_APPR_SECONDS);
 					} 
 					catch (InterruptedException e) {
-						e.printStackTrace();
+						//e.printStackTrace();
 						Thread.interrupted();
 					}
 				}

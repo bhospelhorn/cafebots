@@ -127,6 +127,15 @@ public class BotBrain {
 				bots[i].addListener(l);
 				//bots[i].addStatusChangeDebugListener();
 				bots[i].loginAsync();
+				/*try 
+				{
+					Thread.sleep(1000);
+				} 
+				catch (InterruptedException e) 
+				{
+					Thread.interrupted();
+					e.printStackTrace();
+				}*/
 			}
 		}
 		
@@ -148,6 +157,7 @@ public class BotBrain {
 		sessionMonitor.start();
 		
 		//Block until bots have logged in.
+		int secondCounter = 0;
 		while (l.getLoginCount() < bcount)
 		{
 			//Wait
@@ -160,20 +170,42 @@ public class BotBrain {
 				System.err.println("BotBrain.start || Thread start wait sleep interrupted... Rechecking bot status...");
 				e.printStackTrace();
 			}
+			secondCounter++;
+			if (secondCounter % 10 == 0)
+			{
+				System.out.println("BotBrain.start || There appears to be one or more hanging logins... (" + secondCounter + " seconds since login check started.)");
+				for (int i = 1; i < 10; i++)
+				{
+					if (bots[i] != null)
+					{
+						if (!bots[i].isOn())
+						{
+							System.err.println(Schedule.getErrorStreamDateMarker() + " BotBrain.start || BOT" + i + " is not online. Attempting to restart login...");
+							JDA botcore = bots[i].getJDA();
+							if (botcore != null) botcore.shutdownNow();
+							bots[i].loginAsync();
+						}
+					}
+				}
+			}
 		}
 		l.resetLoginCounter();
 		System.out.println("BotBrain.start || All bots have logged in!");
 		
 		on = true;
 		//Wait a second to choose beta bot
-		try 
+		while(parser.statusLock())
 		{
-			Thread.sleep(1000);
-		} 
-		catch (InterruptedException e) 
-		{
-			e.printStackTrace();
+			try 
+			{
+				Thread.sleep(1000);
+			} 
+			catch (InterruptedException e) 
+			{
+				e.printStackTrace();
+			}	
 		}
+		System.out.println("BotBrain.start || All bots have updated their status!");
 		parser.setBetaBot();
 		parser.unblock();
 		System.out.println("BotBrain.start || Parser has been unblocked!");
@@ -291,6 +323,7 @@ public class BotBrain {
 
 	protected void signalStatusChange(AbstractBot bot)
 	{
+		//System.err.println(Schedule.getErrorStreamDateMarker() + " BotBrain.signalStatusChange || BOT" + bot.getLocalIndex() + " signaled status change!");
 		parser.signalStatusChange(bot.getLocalIndex());
 	}
 	
