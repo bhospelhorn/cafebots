@@ -703,6 +703,37 @@ public abstract class AbstractBot implements Bot{
 		//builder.addEventListener(dl);
 		botcore = builder.buildAsync(); //Deprecated, apparently
 		botbuilder = builder;
+		//Spawn anonymous thread to resubmit request after 10 seconds if the bot hasn't switched on
+		Thread retrythread = new Thread(){
+			public void run()
+			{
+				int maxSeconds = 10;
+				for (int i = 0; i < maxSeconds; i++)
+				{
+					try 
+					{
+						Thread.sleep(1000);
+					} 
+					catch (InterruptedException e) 
+					{
+						e.printStackTrace();
+					}
+					if (isOn())return;
+				}
+				//If it doesn't return before this part is reached, it has been too long.
+				System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.loginAsync || Login is hanging for BOT" + localIndex + "... Resubmitting login request...");
+				try 
+				{
+					loginAsync();
+				} 
+				catch (LoginException e) 
+				{
+					System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.loginAsync || ERROR: BOT" + localIndex + " login retry failed!!!");
+					e.printStackTrace();
+				}
+			}
+		};
+		retrythread.start();
 		System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.loginAsync || Login async request complete for BOT" + localIndex);
 	}
 	

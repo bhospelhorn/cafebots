@@ -24,9 +24,9 @@ public class StatusChangeListener extends ListenerAdapter{
 		if (bot == null) return;
 		
 		//See if this monitor bot is even set to be monitoring...
-		if (bot.getLocalIndex() != 1)
+		if (monitor.getLocalIndex() != 1)
 		{
-			if (!bot.isBeta()) return;
+			if (!monitor.isBeta()) return;
 		}
 		
 		User u = event.getUser();
@@ -44,7 +44,7 @@ public class StatusChangeListener extends ListenerAdapter{
 			//if (bot != null) bot.testJDA();
 			
 			//Tell bot to check itself
-			if (online == OnlineStatus.OFFLINE && bot.isOn() && !bot.expectedOnline())
+			if (online == OnlineStatus.OFFLINE && bot.isOn() && bot.expectedOnline())
 			{
 				System.err.println("Monitor Bot " + monitor.getBotName() + ": BOT " + u.getName() + " has silently disconnected.");
 				if (bot != null)
