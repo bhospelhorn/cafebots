@@ -171,7 +171,7 @@ public class BotBrain {
 				e.printStackTrace();
 			}
 			secondCounter++;
-			if (secondCounter % 15 == 0)
+			if (secondCounter % 60 == 0)
 			{
 				System.out.println("BotBrain.start || There appears to be one or more hanging logins... (" + secondCounter + " seconds since login check started.)");
 				for (int i = 1; i < 10; i++)

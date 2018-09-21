@@ -172,6 +172,8 @@ public abstract class AbstractBot implements Bot{
 	public static final int STANDARD_HELP_PARTS = 4;
 	public static final int ADMIN_HELP_PARTS = 2;
 	
+	public static final int LOGIN_ASYNC_TIMEOUT_SECS = 15;
+	
 	/* ----- Instance Variables ----- */
 	
 	private static boolean offdutyBots_offline;
@@ -189,13 +191,17 @@ public abstract class AbstractBot implements Bot{
 	
 	private ExecutorThread cmdThread;
 	
-	private JDABuilder botbuilder;
-	private JDA botcore;
-	private SelfUser me;
-	private boolean on;
-	private boolean beta;
+	private SyncObject<JDABuilder> botbuilder;
+	private SyncObject<JDA> botcore;
+	private SyncObject<SelfUser> me;
+	private SyncSwitch on;
+	private SyncSwitch beta;
 	
 	protected BotBrain brain;
+	
+	//Login
+	private SyncSet<Long> loginAttempts;
+	private SyncSwitch loginBlock;
 	
 	/* ----- Instantiation ----- */
 	
@@ -228,7 +234,7 @@ public abstract class AbstractBot implements Bot{
 		cmdThread = new ExecutorThread(this);
 		cmdThread.start();
 		rspQueue.startThreads();
-		on = true;
+		on.set(true);
 	}
 	
 	/**
@@ -251,17 +257,17 @@ public abstract class AbstractBot implements Bot{
 			public void run()
 			{
 				//Stop bot threads
-				on = false;
+				on.set(false);
 				cmdThread.kill();
 				rspQueue.killThreads();
 				//Get current status
-				OnlineStatus ostat = botcore.getPresence().getStatus();
-				Game gamestat = botcore.getPresence().getGame();
+				OnlineStatus ostat = botcore.get().getPresence().getStatus();
+				Game gamestat = botcore.get().getPresence().getGame();
 				//Log out
-				botcore.shutdown();
+				botcore.get().shutdown();
 				//otherme.getJDA().shutdownNow();
 				//Wait for shutdown...
-				Status corestat = botcore.getStatus();
+				Status corestat = botcore.get().getStatus();
 				while (corestat != Status.SHUTDOWN)
 				{
 					//Wait.
@@ -275,7 +281,7 @@ public abstract class AbstractBot implements Bot{
 						System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.softReset || Shutdown wait sleep interrupted for BOT" + localIndex);
 						e.printStackTrace();
 					}
-					corestat = botcore.getStatus();
+					corestat = botcore.get().getStatus();
 				}
 				System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.softReset || Shutdown complete for BOT" + localIndex);
 				//Log back in (auto restarts threads when ready)
@@ -345,7 +351,8 @@ public abstract class AbstractBot implements Bot{
 	 */
 	public SelfUser getBotUser()
 	{
-		return me;
+		if (me == null) return null;
+		return me.get();
 	}
 	
 	/**
@@ -355,8 +362,8 @@ public abstract class AbstractBot implements Bot{
 	 */
 	public String getBotName()
 	{
-		if (me == null) return null;
-		return me.getName();
+		if (me == null || me.get() == null) return null;
+		return me.get().getName();
 	}
 	
 	/**
@@ -367,8 +374,8 @@ public abstract class AbstractBot implements Bot{
 	 */
 	public String getBotDiscriminator()
 	{
-		if (me == null) return null;
-		return me.getDiscriminator();
+		if (me == null || me.get() == null) return null;
+		return me.get().getDiscriminator();
 	}
 	
 	/**
@@ -380,9 +387,9 @@ public abstract class AbstractBot implements Bot{
 	 */
 	public String getBotNickname(Guild g)
 	{
-		if (me == null) return null;
+		if (me == null || me.get() == null) return null;
 		if (g == null) return null;
-		Member mme = g.getMember(me);
+		Member mme = g.getMember(me.get());
 		if (mme == null) return null;
 		return mme.getEffectiveName();
 	}
@@ -394,8 +401,8 @@ public abstract class AbstractBot implements Bot{
 	 */
 	public String getBotStatus()
 	{
-		if (botcore == null) return null;
-		Presence p = botcore.getPresence();
+		if (botcore == null || botcore.get() == null) return null;
+		Presence p = botcore.get().getPresence();
 		if (p == null) return null;
 		Game g = p.getGame();
 		if (g == null) return null;
@@ -410,9 +417,9 @@ public abstract class AbstractBot implements Bot{
 	 */
 	public BufferedImage getBotAvatar() throws IOException
 	{
-		if (me == null) return null;
-		String imgurl = me.getAvatarUrl();
-		if (imgurl == null) imgurl = me.getDefaultAvatarUrl();
+		if (me == null || me.get() == null) return null;
+		String imgurl = me.get().getAvatarUrl();
+		if (imgurl == null) imgurl = me.get().getDefaultAvatarUrl();
 		//System.err.println("AbstractBot.getBotAvatar || Image URL String: " + imgurl);
 		URL myimg = new URL(imgurl);
 		//System.err.println("AbstractBot.getBotAvatar || Image URL: " + myimg.toString());
@@ -452,7 +459,8 @@ public abstract class AbstractBot implements Bot{
 	 */
 	public JDA getJDA()
 	{
-		return botcore;
+		if (botcore == null) return null;
+		return botcore.get();
 	}
 	
 	/**
@@ -511,7 +519,7 @@ public abstract class AbstractBot implements Bot{
 	public void addListener(Object l)
 	{
 		lListeners.add(l);
-		if (on) botbuilder.addEventListener(l);
+		if (on.get()) botbuilder.get().addEventListener(l);
 	}
 	
 	/**
@@ -521,10 +529,10 @@ public abstract class AbstractBot implements Bot{
 	{
 		if (lListeners == null) return;
 		if (lListeners.isEmpty()) return;
-		if (botbuilder == null) return;
+		if (botbuilder == null || botbuilder.get()== null) return;
 		for (Object l : lListeners)
 		{
-			botbuilder.removeEventListener(l);
+			botbuilder.get().removeEventListener(l);
 		}
 	}
 	
@@ -549,16 +557,16 @@ public abstract class AbstractBot implements Bot{
 		if (!online)
 		{
 			System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.setBotGameStatus || [DEBUG] BOT " + localIndex + " Setting offline: status = " + status);
-			botcore.getPresence().setPresence(OnlineStatus.OFFLINE, Game.playing(status));
-			Presence botpres = botcore.getPresence();
+			botcore.get().getPresence().setPresence(OnlineStatus.OFFLINE, Game.playing(status));
+			Presence botpres = botcore.get().getPresence();
 			System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.setBotGameStatus || [DEBUG] BOT " + localIndex + " Status set to: " + botpres.getStatus().toString());
 		}
 		else
 		{
 			//botbuilder.setGame(Game.playing(status));	
 			System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.setBotGameStatus || [DEBUG] BOT " + localIndex + " Setting online: status = " + status);
-			botcore.getPresence().setPresence(OnlineStatus.ONLINE, Game.playing(status));
-			Presence botpres = botcore.getPresence();
+			botcore.get().getPresence().setPresence(OnlineStatus.ONLINE, Game.playing(status));
+			Presence botpres = botcore.get().getPresence();
 			System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.setBotGameStatus || [DEBUG] BOT " + localIndex + " Status set to: " + botpres.getStatus().toString());
 		}
 		//Wait one second before checking...
@@ -615,6 +623,53 @@ public abstract class AbstractBot implements Bot{
 	}
 	
 	/* ----- Connection ----- */
+	
+	public class LoginListener extends ListenerAdapter
+	{
+		private long attemptID;
+		
+		private JDABuilder builder;
+		
+		public LoginListener(long aID)
+		{
+			attemptID = aID;
+			builder = null;
+		}
+		
+		public void linkBuilder(JDABuilder b)
+		{
+			builder = b;
+		}
+		
+		public boolean isViable()
+		{
+			return loginAttempts.contains(attemptID);
+		}
+		
+		public void onReady(ReadyEvent e)
+		{
+			if (isViable())
+			{
+				System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.LoginListener.onReady || BOT" + localIndex + " has logged in! [Login attempt 0x" + Long.toHexString(attemptID) + " successful!]");
+				if (botbuilder == null) botbuilder = new SyncObject<JDABuilder>();
+				botbuilder.set(builder);
+				if (botcore == null) botcore = new SyncObject<JDA>();
+				botcore.set(e.getJDA());
+				if (me == null) me = new SyncObject<SelfUser>();
+				me.set(botcore.get().getSelfUser());
+				start();
+				loginAttempts.remove(attemptID);
+				loginBlock.set(false);
+			}
+			else
+			{
+				System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.LoginListener.onReady || BOT" + localIndex + " login attempt has timed out... [Login attempt 0x" + Long.toHexString(attemptID) + " failed!]");
+				//Toss the JDA
+				if (e.getJDA() != null) e.getJDA().shutdownNow();
+			}
+		}
+		
+	}
 	
 	public void addDisconnectListener()
 	{
@@ -682,33 +737,48 @@ public abstract class AbstractBot implements Bot{
 	 */
 	public void loginAsync() throws LoginException
 	{
-		ListenerAdapter l = new ListenerAdapter(){
-			@Override
-			public void onReady(ReadyEvent e)
-			{
-				System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.loginAsync || BOT" + localIndex + " has logged in!");
-				me = botcore.getSelfUser();
-				//on = true;
-				start();
-			}
-		};
+		long attemptID = new GregorianCalendar().getTimeInMillis();
+		System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.loginAsync || Login async called for BOT" + localIndex + "! Attempt ID: 0x" + Long.toUnsignedString(attemptID));
+		LoginListener l = new LoginListener(attemptID);
+		loginAttempts.add(attemptID);
 		
-		System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.loginAsync || Login async called for BOT" + localIndex);
-		//lListeners.add(l);
+		//Block until loginBlock is removed...
+		while(loginBlock.get())
+		{
+			System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.loginAsync || Login async BOT" + localIndex + " - Another login attempt is already in progress. Waiting...");
+			try 
+			{
+				Thread.sleep(1000);
+			} 
+			catch (InterruptedException e) 
+			{
+				Thread.interrupted();
+			}
+		}
+		
+		System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.loginAsync || Login async BOT" + localIndex + " login block passed. Now attempting login...");
+		if (isOn())
+		{
+			System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.loginAsync || Login async BOT" + localIndex + " a past login attempt appears to have succeeded. New login will not be attempted...");
+			return;
+		}
+		loginBlock.set(true);
+		
 		JDABuilder builder = new JDABuilder(AccountType.BOT);
-		builder.setAutoReconnect(false);
+		builder.setAutoReconnect(true);
 		builder.setToken(sToken);
 		addListeners(builder);
 		builder.addEventListener(l);
-		//builder.addEventListener(dl);
-		botcore = builder.buildAsync(); //Deprecated, apparently
-		botbuilder = builder;
-		//Spawn anonymous thread to resubmit request after 10 seconds if the bot hasn't switched on
+
+		l.linkBuilder(builder);
+		
+		builder.buildAsync(); //Deprecated, apparently????
+		
+		//Spawn anonymous thread to resubmit request after some seconds if the bot hasn't switched on
 		Thread retrythread = new Thread(){
 			public void run()
 			{
-				int maxSeconds = 10;
-				for (int i = 0; i < maxSeconds; i++)
+				for (int i = 0; i < LOGIN_ASYNC_TIMEOUT_SECS; i++)
 				{
 					try 
 					{
@@ -716,12 +786,18 @@ public abstract class AbstractBot implements Bot{
 					} 
 					catch (InterruptedException e) 
 					{
+						Thread.interrupted();
 						e.printStackTrace();
 					}
 					if (isOn())return;
 				}
+				
 				//If it doesn't return before this part is reached, it has been too long.
-				System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.loginAsync || Login is hanging for BOT" + localIndex + "... Resubmitting login request...");
+				loginAttempts.remove(attemptID);
+				if (isOn()) return; //For extra safety
+				System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.loginAsync || Login is hanging for BOT" + localIndex + " (Attempt 0x" + Long.toHexString(attemptID) + ") ... Timing out previous request and resubmitting new request...");
+				loginBlock.set(false);
+				
 				try 
 				{
 					loginAsync();
@@ -734,7 +810,7 @@ public abstract class AbstractBot implements Bot{
 			}
 		};
 		retrythread.start();
-		System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.loginAsync || Login async request complete for BOT" + localIndex);
+		System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.loginAsync || Login async request complete for BOT" + localIndex + " (Attempt ID: 0x" + Long.toHexString(attemptID) + ")");
 	}
 	
 	/**
@@ -745,17 +821,38 @@ public abstract class AbstractBot implements Bot{
 	 */
 	public void loginBlock() throws LoginException, InterruptedException
 	{
-
+		long attemptID = new GregorianCalendar().getTimeInMillis();
+		loginAttempts.add(attemptID);
+		
+		while(loginBlock.get())
+		{
+			try 
+			{
+				Thread.sleep(1000);
+			} 
+			catch (InterruptedException e) 
+			{
+				Thread.interrupted();
+			}
+		}
+		
+		if (isOn()) return;
+		loginBlock.set(true);
+		
 		JDABuilder builder = new JDABuilder(AccountType.BOT);
 		builder.setAutoReconnect(false);
 		builder.setToken(sToken);
 		addListeners(builder);
-		//builder.addEventListener(dl);
-		botcore = builder.buildBlocking();
-		botbuilder = builder;
-		me = botcore.getSelfUser();
-		//on = true;
+		
+		JDA sesh = builder.buildBlocking();
+		botcore.set(sesh);
+		botbuilder.set(builder);
+		me.set(botcore.get().getSelfUser());
+		
 		start();
+		
+		loginAttempts.remove(attemptID);
+		loginBlock.set(false);
 	}
 	
 	/**
@@ -764,9 +861,9 @@ public abstract class AbstractBot implements Bot{
 	public void closeJDA()
 	{
 		System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.closeJDA || Bot shutdown requested!");
-		on = false;
+		on.set(false);
 		terminate();
-		botcore.shutdown();
+		botcore.get().shutdown();
 	}
 
 	public boolean testJDA()
@@ -779,7 +876,7 @@ public abstract class AbstractBot implements Bot{
 			return false;
 		}
 		System.err.println("JDA TEST BOT" + localIndex + " || Botcore is non-null: true");
-		List<Object> llist = botcore.getRegisteredListeners();
+		List<Object> llist = botcore.get().getRegisteredListeners();
 		System.err.println("JDA TEST BOT" + localIndex + " || Testing listeners...");
 		if (llist == null)
 		{
@@ -799,15 +896,15 @@ public abstract class AbstractBot implements Bot{
 		}
 		
 		System.err.println("JDA TEST BOT" + localIndex + " || Checking botcore presence...");
-		Presence p = botcore.getPresence();
+		Presence p = botcore.get().getPresence();
 		System.err.println("JDA TEST BOT" + localIndex + " || Status: " + p.getStatus().toString());
 		Game g = p.getGame();
 		if (g != null) System.err.println("JDA TEST BOT" + localIndex + " || Game: " + g.getName());
 		else System.err.println("JDA TEST BOT" + localIndex + " || Game: [null]");
 		
 		System.err.println("JDA TEST BOT" + localIndex + " || Checking account JDA...");
-		long myid = me.getIdLong();
-		User otherme = botcore.getUserById(myid);
+		long myid = me.get().getIdLong();
+		User otherme = botcore.get().getUserById(myid);
 		JDA accjda = otherme.getJDA();
 		if (accjda == null)
 		{
@@ -849,12 +946,12 @@ public abstract class AbstractBot implements Bot{
 	
 	public boolean isOn()
 	{
-		return on;
+		return on.get();
 	}
 	
 	public boolean expectedOnline()
 	{
-		return (botcore.getPresence().getStatus() == OnlineStatus.ONLINE);
+		return (botcore.get().getPresence().getStatus() == OnlineStatus.ONLINE);
 	}
 	
 	public boolean visiblyOnline()
@@ -864,12 +961,12 @@ public abstract class AbstractBot implements Bot{
 	
 	public boolean isBeta()
 	{
-		return beta;
+		return beta.get();
 	}
 	
 	public void setBeta(boolean b)
 	{
-		beta = b;
+		beta.set(b);
 	}
 	
 	public void testForReset()
@@ -1110,7 +1207,7 @@ public abstract class AbstractBot implements Bot{
 		if (channelID == -1){
 			return;
 		}
-		MessageChannel channel = botcore.getTextChannelById(channelID);
+		MessageChannel channel = botcore.get().getTextChannelById(channelID);
 		if (channel == null)
 		{
 			GregorianCalendar stamp = new GregorianCalendar();
@@ -1125,7 +1222,7 @@ public abstract class AbstractBot implements Bot{
 		{
 			GregorianCalendar stamp = new GregorianCalendar();
 			System.err.println(Thread.currentThread().getName() + " || AbstractBot.sendMessage || ERROR: Message could not be sent!  " + FileBuffer.formatTimeAmerican(stamp));
-			System.out.println("Bot " + me.getName() + " tried to say: " + message);
+			System.out.println("Bot " + me.get().getName() + " tried to say: " + message);
 			e.printStackTrace();
 		}
 	}
@@ -1145,7 +1242,7 @@ public abstract class AbstractBot implements Bot{
 		{
 			GregorianCalendar stamp = new GregorianCalendar();
 			System.err.println(Thread.currentThread().getName() + " || AbstractBot.sendMessage || ERROR: Message could not be sent!  " + FileBuffer.formatTimeAmerican(stamp));
-			System.out.println("Bot " + me.getName() + " tried to say: " + message);
+			System.out.println("Bot " + me.get().getName() + " tried to say: " + message);
 			e.printStackTrace();
 		}
 	}
@@ -1159,7 +1256,7 @@ public abstract class AbstractBot implements Bot{
 	public void sendFile(long channelID, BotMessage message, File file)
 	{
 		if (channelID == -1) return;
-		MessageChannel channel = botcore.getTextChannelById(channelID);
+		MessageChannel channel = botcore.get().getTextChannelById(channelID);
 		if (channel == null)
 		{
 			GregorianCalendar stamp = new GregorianCalendar();
@@ -1173,7 +1270,7 @@ public abstract class AbstractBot implements Bot{
 		{
 			GregorianCalendar stamp = new GregorianCalendar();
 			System.err.println(Thread.currentThread().getName() + " || AbstractBot.sendFile || ERROR: Message could not be sent!  " + FileBuffer.formatTimeAmerican(stamp));
-			System.out.println("Bot " + me.getName() + " tried to upload " + file.getName() + " with note: " + message);
+			System.out.println("Bot " + me.get().getName() + " tried to upload " + file.getName() + " with note: " + message);
 			e.printStackTrace();
 			throw e;
 		}
@@ -1213,7 +1310,7 @@ public abstract class AbstractBot implements Bot{
 	private TextChannel getChannel(long channelID)
 	{
 		if (channelID == -1) return null;
-		TextChannel channel = botcore.getTextChannelById(channelID);
+		TextChannel channel = botcore.get().getTextChannelById(channelID);
 		if (channel == null)
 		{
 			GregorianCalendar stamp = new GregorianCalendar();
@@ -1277,7 +1374,7 @@ public abstract class AbstractBot implements Bot{
 	public void displayHelp(long channelID, boolean isAdmin)
 	{
 		if (channelID == -1) return;
-		MessageChannel channel = botcore.getTextChannelById(channelID);
+		MessageChannel channel = botcore.get().getTextChannelById(channelID);
 		if (channel == null)
 		{
 			GregorianCalendar stamp = new GregorianCalendar();
@@ -1290,7 +1387,7 @@ public abstract class AbstractBot implements Bot{
 			{
 				String mstr = botStrings.get(helpkey + "1" + KEY_HELPSTEM_ADMIN);
 				BotMessage msg = new BotMessage(mstr);
-				msg.substituteString(ReplaceStringType.BOTNAME, me.getName());
+				msg.substituteString(ReplaceStringType.BOTNAME, me.get().getName());
 				sendMessage(channel, msg);
 				mstr = botStrings.get(helpkey + "2");
 				sendMessage(channel, new BotMessage(mstr));
@@ -1303,7 +1400,7 @@ public abstract class AbstractBot implements Bot{
 			{
 				String mstr = botStrings.get(helpkey + "1");
 				BotMessage msg = new BotMessage(mstr);
-				msg.substituteString(ReplaceStringType.BOTNAME, me.getName());
+				msg.substituteString(ReplaceStringType.BOTNAME, me.get().getName());
 				sendMessage(channel, msg);
 				mstr = botStrings.get(helpkey + "2");
 				sendMessage(channel, new BotMessage(mstr));
@@ -1492,7 +1589,7 @@ public abstract class AbstractBot implements Bot{
 		}
 		//Parse greeting channel name...
 		boolean success = true;
-		List<TextChannel> clist = botcore.getTextChannelsByName(gChan, true);
+		List<TextChannel> clist = botcore.get().getTextChannelsByName(gChan, true);
 		if (clist == null || clist.isEmpty()) success = false;
 		else
 		{
@@ -1544,7 +1641,7 @@ public abstract class AbstractBot implements Bot{
 		}
 		else
 		{
-			TextChannel gchan = botcore.getTextChannelById(gch);
+			TextChannel gchan = botcore.get().getTextChannelById(gch);
 			if (gchan == null)
 			{
 				sendMessage(cmdChanID, new BotMessage(failmsg));
@@ -1579,7 +1676,7 @@ public abstract class AbstractBot implements Bot{
 		}
 		if (!gs.greetingsOn()) return;
 		long ch = gs.getGreetingChannelID();
-		MessageChannel c = botcore.getTextChannelById(ch);
+		MessageChannel c = botcore.get().getTextChannelById(ch);
 		if (c == null)
 		{
 			System.err.println(Thread.currentThread().getName() + " || AbstractBot.greetNewUser || Action failed: Could not retrieve greeting channel.");
@@ -1592,7 +1689,7 @@ public abstract class AbstractBot implements Bot{
 		bmsg.substituteMention(ReplaceStringType.TARGUSER_MENTION, m);
 		bmsg.substituteString(ReplaceStringType.TARGUSER, m.getUser().getName());
 		bmsg.substituteString(ReplaceStringType.GUILDNAME, g.getName());
-		bmsg.substituteString(ReplaceStringType.BOTNAME, me.getName());
+		bmsg.substituteString(ReplaceStringType.BOTNAME, me.get().getName());
 		sendMessage(c, bmsg);
 	}
 	
@@ -1616,7 +1713,7 @@ public abstract class AbstractBot implements Bot{
 		{
 			long ch = admin.getPingGreetingsChannel();
 			if (ch < 0) continue;
-			MessageChannel c = botcore.getTextChannelById(ch);
+			MessageChannel c = botcore.get().getTextChannelById(ch);
 			if (c == null)
 			{
 				System.err.println(Thread.currentThread().getName() + " || AbstractBot.greetNewUser || Action failed: Could not retrieve greeting ping channel for user " + admin.getUID());
@@ -1720,7 +1817,7 @@ public abstract class AbstractBot implements Bot{
 			return;
 		}
 		
-		List<TextChannel> tchan = botcore.getTextChannelsByName(targetChan, true);
+		List<TextChannel> tchan = botcore.get().getTextChannelsByName(targetChan, true);
 		
 		if (tchan == null || tchan.isEmpty())
 		{
@@ -1782,7 +1879,7 @@ public abstract class AbstractBot implements Bot{
 		}
 		
 		//TextChannel pchan = botcore.getTextChannelById(u.getPingGreetingsChannel());
-		TextChannel pchan = botcore.getTextChannelById(channelID);
+		TextChannel pchan = botcore.get().getTextChannelById(channelID);
 		if (pchan == null)
 		{
 			GregorianCalendar stamp = new GregorianCalendar();
@@ -1823,7 +1920,7 @@ public abstract class AbstractBot implements Bot{
 		}
 		if (!gs.farewellsOn()) return;
 		long ch = gs.getGreetingChannelID();
-		MessageChannel c = botcore.getTextChannelById(ch);
+		MessageChannel c = botcore.get().getTextChannelById(ch);
 		if (c == null)
 		{
 			System.err.println(Thread.currentThread().getName() + " || AbstractBot.farewellUser || Action failed: Could not retrieve greeting channel.");
@@ -1859,7 +1956,7 @@ public abstract class AbstractBot implements Bot{
 		{
 			long ch = admin.getPingGreetingsChannel();
 			if (ch < 0) continue;
-			MessageChannel c = botcore.getTextChannelById(ch);
+			MessageChannel c = botcore.get().getTextChannelById(ch);
 			if (c == null)
 			{
 				System.err.println(Thread.currentThread().getName() + " || AbstractBot.pingUserDeparture || Action failed: Could not retrieve greeting ping channel for user " + admin.getUID());
@@ -1961,7 +2058,7 @@ public abstract class AbstractBot implements Bot{
 			return;
 		}
 		
-		TextChannel pchan = botcore.getTextChannelById(u.getPingGreetingsChannel());
+		TextChannel pchan = botcore.get().getTextChannelById(u.getPingGreetingsChannel());
 		if (pchan == null)
 		{
 			GregorianCalendar stamp = new GregorianCalendar();
@@ -2667,7 +2764,7 @@ public abstract class AbstractBot implements Bot{
 			System.err.println("\tTimestamp: " + FileBuffer.formatTimeAmerican(stamp));
 			return;
 		}
-		Guild g = botcore.getGuildById(gid);
+		Guild g = botcore.get().getGuildById(gid);
 		if (g == null)
 		{
 			System.err.println(Thread.currentThread().getName() + " || AbstractBot.wishBirthday || ERROR: Guild \"" + gid + "\" could not be found!");
@@ -2724,7 +2821,7 @@ public abstract class AbstractBot implements Bot{
 	public void setBirthdayChannel(long cmdChanID, String bdayChan, Member m)
 	{
 		if (cmdChanID == -1) return;
-		MessageChannel cmdChan = botcore.getTextChannelById(cmdChanID);
+		MessageChannel cmdChan = botcore.get().getTextChannelById(cmdChanID);
 		if (cmdChan == null)
 		{
 			GregorianCalendar stamp = new GregorianCalendar();
@@ -2738,7 +2835,7 @@ public abstract class AbstractBot implements Bot{
 		long guildID = m.getGuild().getIdLong();
 		GuildMap guildmap = brain.getUserData();
 		GuildSettings gs = guildmap.getGuildSettings(guildID);
-		Guild g = botcore.getGuildById(guildID);
+		Guild g = botcore.get().getGuildById(guildID);
 		if (gs == null)
 		{
 			boolean b = newGuild(g);
@@ -2807,7 +2904,7 @@ public abstract class AbstractBot implements Bot{
 		}
 		else
 		{
-			TextChannel bchan = botcore.getTextChannelById(bch);
+			TextChannel bchan = botcore.get().getTextChannelById(bch);
 			if (bchan == null)
 			{
 				sendMessage(cmdChanID, new BotMessage(failmsg));
@@ -2852,7 +2949,7 @@ public abstract class AbstractBot implements Bot{
 		}
 		if (chID == -1) return;
 		
-		MessageChannel cmdChan = botcore.getTextChannelById(chID);
+		MessageChannel cmdChan = botcore.get().getTextChannelById(chID);
 		if (cmdChan == null) 
 		{
 			System.err.println(Thread.currentThread().getName() + " || AbstractBot.setBirthday || command failed: channel " + chID + " could not be retrieved...");
@@ -2894,7 +2991,7 @@ public abstract class AbstractBot implements Bot{
 
 	public void insufficientArgsMessage_birthday(long chID, String username)
 	{
-		MessageChannel cmdChan = botcore.getTextChannelById(chID);
+		MessageChannel cmdChan = botcore.get().getTextChannelById(chID);
 		if (cmdChan == null) 
 		{
 			System.err.println(Thread.currentThread().getName() + " || AbstractBot.setBirthday || command failed: channel " + chID + " could not be retrieved...");
@@ -3079,7 +3176,7 @@ public abstract class AbstractBot implements Bot{
 			List<String> inviteenames = new LinkedList<String>();
 			for (Long iid : invitees)
 			{
-				User u = botcore.getUserById(iid);
+				User u = botcore.get().getUserById(iid);
 				if (u != null) inviteenames.add(u.getName());
 			}
 			String userlist = brain.formatStringList(inviteenames);
@@ -3167,11 +3264,11 @@ public abstract class AbstractBot implements Bot{
 		else key = BotStrings.getStringKey_Event(e.getType(), StringKey.EVENT_NOTIFYCANCEL, null, 0);
 		String rawmsg = botStrings.get(key);
 		BotMessage bmsg = new BotMessage(rawmsg);
-		User requser = botcore.getUserById(event.getRequestingUser());
+		User requser = botcore.get().getUserById(event.getRequestingUser());
 		
 		//%U %r %e %F %n
 		bmsg.substituteString(ReplaceStringType.REQUSER, requser.getName());
-		Guild guild = botcore.getGuildById(guildID);
+		Guild guild = botcore.get().getGuildById(guildID);
 		if (!e.isGroupEvent())
 		{
 			List<IMentionable> targUsers = new LinkedList<IMentionable>();
@@ -3216,7 +3313,7 @@ public abstract class AbstractBot implements Bot{
 		if (u != null) tz = u.getTimeZone();
 		
 		//Get guild
-		Guild g = botcore.getGuildById(guildID);
+		Guild g = botcore.get().getGuildById(guildID);
 		
 		String key = BotStrings.KEY_MAINGROUP_BOTSTRINGS + BotStrings.KEY_GROUP_EVENTMANAGE + BotStrings.KEY_EVENTINFO;
 		String msg = botStrings.get(key);
@@ -3294,8 +3391,8 @@ public abstract class AbstractBot implements Bot{
 	public void makeWeeklyEvent_prompt(CMD_EventMakeWeekly command)
 	{
 		//First, check channels...
-		List<TextChannel> possible_rchan = botcore.getTextChannelsByName(command.getRequesterChannelName(), true);
-		List<TextChannel> possible_tchan = botcore.getTextChannelsByName(command.getTargetChannelName(), true);
+		List<TextChannel> possible_rchan = botcore.get().getTextChannelsByName(command.getRequesterChannelName(), true);
+		List<TextChannel> possible_tchan = botcore.get().getTextChannelsByName(command.getTargetChannelName(), true);
 		if (possible_rchan == null || possible_rchan.isEmpty() || possible_tchan == null || possible_tchan.isEmpty())
 		{
 			String badchan_key = BotStrings.getStringKey_Event(EventType.WEEKLY, StringKey.EVENT_BADCHAN, null, 0);
@@ -3320,8 +3417,8 @@ public abstract class AbstractBot implements Bot{
 	
 	public void makeBiweeklyEvent_prompt(CMD_EventMakeBiweekly command)
 	{
-		List<TextChannel> possible_rchan = botcore.getTextChannelsByName(command.getRequesterChannelName(), true);
-		List<TextChannel> possible_tchan = botcore.getTextChannelsByName(command.getTargetChannelName(), true);
+		List<TextChannel> possible_rchan = botcore.get().getTextChannelsByName(command.getRequesterChannelName(), true);
+		List<TextChannel> possible_tchan = botcore.get().getTextChannelsByName(command.getTargetChannelName(), true);
 		if (possible_rchan == null || possible_rchan.isEmpty() || possible_tchan == null || possible_tchan.isEmpty())
 		{
 			String badchan_key = BotStrings.getStringKey_Event(EventType.BIWEEKLY, StringKey.EVENT_BADCHAN, null, 0);
@@ -3346,8 +3443,8 @@ public abstract class AbstractBot implements Bot{
 	
 	public void makeMonthlyAEvent_prompt(CMD_EventMakeMonthlyDOM command)
 	{
-		List<TextChannel> possible_rchan = botcore.getTextChannelsByName(command.getRequesterChannelName(), true);
-		List<TextChannel> possible_tchan = botcore.getTextChannelsByName(command.getTargetChannelName(), true);
+		List<TextChannel> possible_rchan = botcore.get().getTextChannelsByName(command.getRequesterChannelName(), true);
+		List<TextChannel> possible_tchan = botcore.get().getTextChannelsByName(command.getTargetChannelName(), true);
 		if (possible_rchan == null || possible_rchan.isEmpty() || possible_tchan == null || possible_tchan.isEmpty())
 		{
 			String badchan_key = BotStrings.getStringKey_Event(EventType.MONTHLYA, StringKey.EVENT_BADCHAN, null, 0);
@@ -3371,8 +3468,8 @@ public abstract class AbstractBot implements Bot{
 	
 	public void makeMonthlyBEvent_prompt(CMD_EventMakeMonthlyDOW command)
 	{
-		List<TextChannel> possible_rchan = botcore.getTextChannelsByName(command.getRequesterChannelName(), true);
-		List<TextChannel> possible_tchan = botcore.getTextChannelsByName(command.getTargetChannelName(), true);
+		List<TextChannel> possible_rchan = botcore.get().getTextChannelsByName(command.getRequesterChannelName(), true);
+		List<TextChannel> possible_tchan = botcore.get().getTextChannelsByName(command.getTargetChannelName(), true);
 		if (possible_rchan == null || possible_rchan.isEmpty() || possible_tchan == null || possible_tchan.isEmpty())
 		{
 			String badchan_key = BotStrings.getStringKey_Event(EventType.MONTHLYB, StringKey.EVENT_BADCHAN, null, 0);
@@ -3398,8 +3495,8 @@ public abstract class AbstractBot implements Bot{
 	
 	public void makeOnetimeEvent_prompt(CMD_EventMakeOnetime command)
 	{
-		List<TextChannel> possible_rchan = botcore.getTextChannelsByName(command.getRequesterChannelName(), true);
-		List<TextChannel> possible_tchan = botcore.getTextChannelsByName(command.getTargetChannelName(), true);
+		List<TextChannel> possible_rchan = botcore.get().getTextChannelsByName(command.getRequesterChannelName(), true);
+		List<TextChannel> possible_tchan = botcore.get().getTextChannelsByName(command.getTargetChannelName(), true);
 		if (possible_rchan == null || possible_rchan.isEmpty() || possible_tchan == null || possible_tchan.isEmpty())
 		{
 			String badchan_key = BotStrings.getStringKey_Event(EventType.ONETIME, StringKey.EVENT_BADCHAN, null, 0);
@@ -3442,8 +3539,8 @@ public abstract class AbstractBot implements Bot{
 	
 	public void makeDeadlineEvent_prompt(CMD_EventMakeDeadline command)
 	{
-		List<TextChannel> possible_rchan = botcore.getTextChannelsByName(command.getRequesterChannelName(), true);
-		List<TextChannel> possible_tchan = botcore.getTextChannelsByName(command.getTargetChannelName(), true);
+		List<TextChannel> possible_rchan = botcore.get().getTextChannelsByName(command.getRequesterChannelName(), true);
+		List<TextChannel> possible_tchan = botcore.get().getTextChannelsByName(command.getTargetChannelName(), true);
 		if (possible_rchan == null || possible_rchan.isEmpty() || possible_tchan == null || possible_tchan.isEmpty())
 		{
 			String badchan_key = BotStrings.getStringKey_Event(EventType.DEADLINE, StringKey.EVENT_BADCHAN, null, 0);
@@ -3564,7 +3661,7 @@ public abstract class AbstractBot implements Bot{
 						User byid = null;	
 						try
 						{
-							byid = botcore.getUserById(u);	
+							byid = botcore.get().getUserById(u);	
 						}
 						catch (Exception ex)
 						{
@@ -3726,7 +3823,7 @@ public abstract class AbstractBot implements Bot{
 						User byid = null;	
 						try
 						{
-							byid = botcore.getUserById(u);	
+							byid = botcore.get().getUserById(u);	
 						}
 						catch (Exception ex)
 						{
@@ -3888,7 +3985,7 @@ public abstract class AbstractBot implements Bot{
 						User byid = null;	
 						try
 						{
-							byid = botcore.getUserById(u);	
+							byid = botcore.get().getUserById(u);	
 						}
 						catch (Exception ex)
 						{
@@ -4049,7 +4146,7 @@ public abstract class AbstractBot implements Bot{
 						User byid = null;	
 						try
 						{
-							byid = botcore.getUserById(u);	
+							byid = botcore.get().getUserById(u);	
 						}
 						catch (Exception ex)
 						{
@@ -4215,7 +4312,7 @@ public abstract class AbstractBot implements Bot{
 						User byid = null;	
 						try
 						{
-							byid = botcore.getUserById(u);	
+							byid = botcore.get().getUserById(u);	
 						}
 						catch (Exception ex)
 						{
@@ -4405,7 +4502,7 @@ public abstract class AbstractBot implements Bot{
 						User byid = null;	
 						try
 						{
-							byid = botcore.getUserById(u);
+							byid = botcore.get().getUserById(u);
 						}
 						catch (Exception ex)
 						{
@@ -4534,7 +4631,7 @@ public abstract class AbstractBot implements Bot{
 			System.err.println(Thread.currentThread().getName() + " || AbstractBot.issueEventReminder || ERROR: Data for guild " + Long.toHexString(guildID) + " could not be retrieved! | " + FileBuffer.formatTimeAmerican(stamp));
 			return;
 		}
-		Guild g = botcore.getGuildById(guildID);
+		Guild g = botcore.get().getGuildById(guildID);
 		//printMessageToSTDERR(methodname, "BOT " + localIndex + " | Checkpoint 1");
 		
 		//Generate Requser reminder...
@@ -5233,7 +5330,7 @@ public abstract class AbstractBot implements Bot{
 	{
 		String methodname = "AbstractBot.cleanCommands";
 		
-		Guild g = botcore.getGuildById(guildID);
+		Guild g = botcore.get().getGuildById(guildID);
 		GuildSettings gs = brain.getGuild(guildID);
 		if (gs == null)
 		{
@@ -5381,7 +5478,7 @@ public abstract class AbstractBot implements Bot{
 	
 	public void queueRerequest(Command cmd, long channelID, long userID)
 	{
-		brain.requestResponse(localIndex, botcore.getUserById(userID), cmd, botcore.getTextChannelById(channelID));
+		brain.requestResponse(localIndex, botcore.get().getUserById(userID), cmd, botcore.get().getTextChannelById(channelID));
 	}
 	
 }

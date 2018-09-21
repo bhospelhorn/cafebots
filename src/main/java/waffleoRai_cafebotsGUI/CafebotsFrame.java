@@ -18,10 +18,12 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 import javax.swing.border.BevelBorder;
 
+import waffleoRai_Utils.FileBuffer;
 import waffleoRai_cafebotCore.AbstractBot;
 import waffleoRai_cafebotCore.BotBrain;
 import waffleoRai_cafebotCore.LaunchCore;
@@ -61,6 +63,8 @@ public class CafebotsFrame extends JFrame {
 	
 	private JLabel lblThread_scheduler;
 	private JLabel lblThread_parser;
+	
+	private JLabel lblRefreshTime;
 	
 	public CafebotsFrame()
 	{
@@ -240,6 +244,16 @@ public class CafebotsFrame extends JFrame {
 		btnZap = new JButton("ZAP!");
 		btnZap.setBounds(1004, 3, 89, 23);
 		ctrlpnl.add(btnZap);
+		
+		JLabel lblGuiLastRefresh = new JLabel("GUI Last Refresh:");
+		lblGuiLastRefresh.setFont(new Font("Tahoma", Font.PLAIN, 11));
+		lblGuiLastRefresh.setBounds(786, 72, 89, 14);
+		ctrlpnl.add(lblGuiLastRefresh);
+		
+		lblRefreshTime = new JLabel("(Bootup)");
+		lblRefreshTime.setFont(new Font("Tahoma", Font.PLAIN, 11));
+		lblRefreshTime.setBounds(877, 72, 216, 14);
+		ctrlpnl.add(lblRefreshTime);
 		btnZap.addActionListener(new ActionListener(){
 
 			@Override
@@ -387,6 +401,9 @@ public class CafebotsFrame extends JFrame {
 			p.updatePanel();
 		}
 		updateControlPanel();
+		GregorianCalendar now = new GregorianCalendar();
+		lblRefreshTime.setText(FileBuffer.formatTimeAmerican(now));
+		lblRefreshTime.repaint();
 	}
 	
 	public void loadBots()
