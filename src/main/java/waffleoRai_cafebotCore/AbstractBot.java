@@ -204,22 +204,19 @@ public abstract class AbstractBot implements Bot{
 	private SyncSwitch loginBlock;
 	
 	/* ----- Instantiation ----- */
-	
-	/**
-	 * If listeners will be added to this bot when the JDA is built (at login),
-	 * the list must be instantiated at construction!! Otherwise, you will get
-	 * a NullPointerException when you attempt to add listeners. Also note that
-	 * listeners should be added BEFORE login.
-	 */
-	protected void instantiateListenerList()
+		
+	protected void instantiateInternals()
 	{
 		lListeners = new LinkedList<Object>();
-	}
-	
-	protected void instantiateQueues()
-	{
 		cmdQueue = new CommandQueue();
 		rspQueue = new ResponseQueue(this);
+		botbuilder = new SyncObject<JDABuilder>();
+		botcore = new SyncObject<JDA>();
+		me = new SyncObject<SelfUser>();
+		on = new SyncSwitch();
+		beta = new SyncSwitch();
+		loginAttempts = new SyncSet<Long>();
+		loginBlock = new SyncSwitch();
 	}
 	
 	/* ----- Threads ----- */

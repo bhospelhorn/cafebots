@@ -246,13 +246,13 @@ public class CafebotsFrame extends JFrame {
 		ctrlpnl.add(btnZap);
 		
 		JLabel lblGuiLastRefresh = new JLabel("GUI Last Refresh:");
-		lblGuiLastRefresh.setFont(new Font("Tahoma", Font.PLAIN, 11));
-		lblGuiLastRefresh.setBounds(786, 72, 89, 14);
+		lblGuiLastRefresh.setFont(new Font("Tahoma", Font.BOLD, 11));
+		lblGuiLastRefresh.setBounds(325, 7, 105, 14);
 		ctrlpnl.add(lblGuiLastRefresh);
 		
 		lblRefreshTime = new JLabel("(Bootup)");
 		lblRefreshTime.setFont(new Font("Tahoma", Font.PLAIN, 11));
-		lblRefreshTime.setBounds(877, 72, 216, 14);
+		lblRefreshTime.setBounds(429, 7, 565, 14);
 		ctrlpnl.add(lblRefreshTime);
 		btnZap.addActionListener(new ActionListener(){
 

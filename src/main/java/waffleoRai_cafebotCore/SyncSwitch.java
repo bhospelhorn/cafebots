@@ -4,6 +4,11 @@ public class SyncSwitch {
 	
 	private boolean value;
 	
+	public SyncSwitch()
+	{
+		value = false;
+	}
+	
 	public synchronized boolean get()
 	{
 		return value;

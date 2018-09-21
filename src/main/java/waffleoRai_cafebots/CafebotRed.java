@@ -13,8 +13,7 @@ public class CafebotRed extends AbstractBot{
 		super.setToken(Token);
 		super.setVersionString(VERSION);
 		super.setXMLInitKey(InitKey);
-		super.instantiateListenerList();
-		super.instantiateQueues();
+		super.instantiateInternals();
 		super.brain = core;
 		super.setLocalIndex(localIndex);
 		super.addDisconnectListener();
