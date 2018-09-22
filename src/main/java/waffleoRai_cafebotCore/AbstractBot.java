@@ -675,6 +675,7 @@ public abstract class AbstractBot implements Bot{
 			public void onDisconnect(DisconnectEvent e)
 			{
 				System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.loginAsync.[anon]ListenerAdapter.onDisconnect || BOT" + getLocalIndex() + " disconnect detected...");
+				on.set(false);
 				terminate();
 			}
 			
@@ -682,34 +683,32 @@ public abstract class AbstractBot implements Bot{
 			{
 				System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.loginAsync.[anon]ListenerAdapter.onReconnect || BOT" + getLocalIndex() + " reconnect detected...");
 				closeJDA();
-				botbuilder = null;
-				botcore = null;
+				botcore.set(null);
+				botbuilder.set(null);
 				try 
 				{
-					loginBlock();
+					loginAsync();
 				} 
-				catch (LoginException | InterruptedException e1) {
+				catch (LoginException e1) {
 					e1.printStackTrace();
 					return;
 				}
-				//start();
 			}
 			
 			public void onResume(ResumedEvent e)
 			{
 				System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.loginAsync.[anon]ListenerAdapter.onResume || BOT" + getLocalIndex() + " resume detected...");
 				closeJDA();
-				botbuilder = null;
-				botcore = null;
+				botcore.set(null);
+				botbuilder.set(null);
 				try 
 				{
-					loginBlock();
+					loginAsync();
 				} 
-				catch (LoginException | InterruptedException e1) {
+				catch (LoginException e1) {
 					e1.printStackTrace();
 					return;
 				}
-				start();
 			}
 			
 		};
@@ -762,7 +761,7 @@ public abstract class AbstractBot implements Bot{
 		loginBlock.set(true);
 		
 		JDABuilder builder = new JDABuilder(AccountType.BOT);
-		builder.setAutoReconnect(true);
+		builder.setAutoReconnect(false);
 		builder.setToken(sToken);
 		addListeners(builder);
 		builder.addEventListener(l);

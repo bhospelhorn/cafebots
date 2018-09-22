@@ -16,7 +16,7 @@ public class CafebotRed extends AbstractBot{
 		super.instantiateInternals();
 		super.brain = core;
 		super.setLocalIndex(localIndex);
-		super.addDisconnectListener();
+		//super.addDisconnectListener();
 	}
 	
 	public int getConstructorType() {
