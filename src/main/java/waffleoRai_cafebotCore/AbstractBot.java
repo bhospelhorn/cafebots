@@ -173,6 +173,7 @@ public abstract class AbstractBot implements Bot{
 	public static final int ADMIN_HELP_PARTS = 2;
 	
 	public static final int LOGIN_ASYNC_TIMEOUT_SECS = 15;
+	public static final int LOGIN_RETRY_MAX = 10;
 	
 	/* ----- Instance Variables ----- */
 	
@@ -202,6 +203,7 @@ public abstract class AbstractBot implements Bot{
 	//Login
 	private SyncSet<Long> loginAttempts;
 	private SyncSwitch loginBlock;
+	private SyncObject<Integer> loginCount;
 	
 	/* ----- Instantiation ----- */
 		
@@ -217,6 +219,8 @@ public abstract class AbstractBot implements Bot{
 		beta = new SyncSwitch();
 		loginAttempts = new SyncSet<Long>();
 		loginBlock = new SyncSwitch();
+		loginCount = new SyncObject<Integer>();
+		loginCount.set(0);
 	}
 	
 	/* ----- Threads ----- */
@@ -610,7 +614,7 @@ public abstract class AbstractBot implements Bot{
 		//System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.setBotGameStatus || [DEBUG] BOT " + localIndex + " ready for check.");
 		
 		//Check
-		testForReset();
+		//testForReset(); //This line seems to be an issue as it appears to check before the status change could possibly be visible!
 		brain.signalStatusChange(this); //NOTE: Move before reset check? Do if this becomes a problem!
 	}
 	
@@ -733,10 +737,18 @@ public abstract class AbstractBot implements Bot{
 	 */
 	public void loginAsync() throws LoginException
 	{
+		//Check if login is allowed. (Can't have tried too many times recently)
+		if (loginCount.get() >= LOGIN_RETRY_MAX)
+		{
+			System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.loginAsync || Login async BOT" + localIndex + " - Too many login attempts have been made in too short a timeframe. Login will not proceed.");
+			return;
+		}
+		
 		long attemptID = new GregorianCalendar().getTimeInMillis();
 		System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.loginAsync || Login async called for BOT" + localIndex + "! Attempt ID: 0x" + Long.toUnsignedString(attemptID));
 		LoginListener l = new LoginListener(attemptID);
 		loginAttempts.add(attemptID);
+		loginCount.set(loginCount.get() + 1);
 		
 		//Block until loginBlock is removed...
 		while(loginBlock.get())
@@ -817,8 +829,15 @@ public abstract class AbstractBot implements Bot{
 	 */
 	public void loginBlock() throws LoginException, InterruptedException
 	{
+		if (loginCount.get() >= LOGIN_RETRY_MAX)
+		{
+			System.err.println(Schedule.getErrorStreamDateMarker() + " AbstractBot.loginAsync || Login async BOT" + localIndex + " - Too many login attempts have been made in too short a timeframe. Login will not proceed.");
+			return;
+		}
+		
 		long attemptID = new GregorianCalendar().getTimeInMillis();
 		loginAttempts.add(attemptID);
+		loginCount.set(loginCount.get() + 1);
 		
 		while(loginBlock.get())
 		{
@@ -979,6 +998,11 @@ public abstract class AbstractBot implements Bot{
 		if (brain.amIOnline(this)) return;
 		//If supposed to be online but not, then soft reset
 		softReset();
+	}
+	
+	public void resetLoginCounter()
+	{
+		loginCount.set(0);
 	}
 	
 	/* ----- Complain ----- */

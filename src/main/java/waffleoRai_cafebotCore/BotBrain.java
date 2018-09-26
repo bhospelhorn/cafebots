@@ -20,6 +20,7 @@ import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.MessageChannel;
 import net.dv8tion.jda.core.entities.Role;
 import net.dv8tion.jda.core.entities.User;
+import waffleoRai_Utils.Athread;
 import waffleoRai_Utils.FileBuffer;
 import waffleoRai_Utils.FileBuffer.UnsupportedFileTypeException;
 import waffleoRai_cafebotCommands.BotScheduler;
@@ -45,6 +46,7 @@ public class BotBrain {
 	
 	/* ----- Constants ----- */
 	
+	public static final int LOGIN_RETRY_COUNT_RESET_TIME = 900; //Seconds
 	
 	/* ----- Instance Variables ----- */
 	
@@ -63,6 +65,7 @@ public class BotBrain {
 	
 	private GuildDataAdder userdataThread;
 	private ResetMonitorThread sessionMonitor;
+	private ResetLoginCountThread loginTryMonitor;
 	
 	private boolean on;
 	
@@ -156,6 +159,10 @@ public class BotBrain {
 		sessionMonitor = new ResetMonitorThread();
 		sessionMonitor.start();
 		
+		//Start login retry count monitor
+		loginTryMonitor = new ResetLoginCountThread();
+		loginTryMonitor.start();
+		
 		//Block until bots have logged in.
 		int secondCounter = 0;
 		while (l.getLoginCount() < bcount)
@@ -235,6 +242,9 @@ public class BotBrain {
 		
 		//Kill parser core
 		parser.killParserThread();
+		
+		//Kill the login try monitor
+		loginTryMonitor.kill();
 		
 		//Kill user data manager
 		userdataThread.terminate();
@@ -1089,6 +1099,29 @@ public class BotBrain {
 		public synchronized void interruptMe()
 		{
 			this.interrupt();
+		}
+		
+	}
+	
+	/* ----- Login Spam Monitor ----- */
+	
+	public class ResetLoginCountThread extends Athread
+	{
+		
+		public ResetLoginCountThread()
+		{
+			super.setName("ResetLoginCountDaemon");
+			super.setDaemon(true);
+			super.setInitialDelay_millis(1000 * 60 * BotBrain.LOGIN_RETRY_COUNT_RESET_TIME);
+			super.setSleeptime_millis(1000 * 60 * BotBrain.LOGIN_RETRY_COUNT_RESET_TIME);
+		}
+
+		public void doSomething() 
+		{
+			for (int i = 1; i < bots.length; i++)
+			{
+				if (bots[i] != null) bots[i].resetLoginCounter();
+			}
 		}
 		
 	}
