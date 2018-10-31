@@ -57,6 +57,10 @@ sor default
     Reset all reminders to default on/off settings.
 sor view [etype]
     Get a list of all reminder times for that event type.
+callme "[Name]"
+    Set the name for the bots to refer to you by in the local guild.
+setgender [f/m/n]
+    Set user gender (bots may refer to users by pronouns). Default is n (neutral).
 ```
 
 Event Creation
@@ -96,10 +100,22 @@ Role Management
 ```
 listroles
     Get a list of your assigned roles and deadlines.
-amiaudconf
-    See whether you have been marked as having confirmed audio quality.
 roleinfo [roleID]
     Get details on a specific role.
+amiaudconf
+    See whether you have been marked as having confirmed audio quality.
+setmic "[Mic name]"
+    Set a String name for your microphone. If you wish to include spaces in the name, please surround argument with quotes.
+setiface "[Audio interface name]"
+    Set a String name for your audio interface. If you wish to include spaces in the name, please surround argument with quotes.
+setdaw "[DAW name]"
+    Set a String name for your DAW (audio software). If you wish to include spaces in the name, please surround argument with quotes.
+seemic [user]
+    Get the name of a user's microphone as specified by the user.
+seeiface [user]
+    Get the name of a user's audio interface as specified by the user.
+seedaw [user]
+    Get the name of a user's DAW (audio software) as specified by the user.
 ```
 
 Message Cleaning
@@ -176,6 +192,8 @@ addperm [discordrole]
     Add admin permissions for a Discord role.
 remperm [discordrole]
     Remove admin permissions from a Discord role.
+setname [user] "[Name]"
+    Set name for bots to refer to user by in local guild.
 ```
 
 Message Cleaning
