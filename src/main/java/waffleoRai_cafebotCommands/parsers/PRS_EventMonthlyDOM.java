@@ -18,7 +18,7 @@ public class PRS_EventMonthlyDOM implements Parser{
 	public Command generateCommand(String[] args, MessageReceivedEvent event) 
 	{
 		if (args.length < 6){
-			return new CMD_InsufficientArgs(event.getChannel().getIdLong(), EventType.MONTHLYA, event.getAuthor().getName(), event.getGuild().getIdLong(), event.getMessageIdLong());
+			return new CMD_InsufficientArgs(event.getChannel().getIdLong(), EventType.MONTHLYA, event.getMember(), event.getGuild().getIdLong(), event.getMessageIdLong());
 		}
 		String rawday = args[1];
 		String rawtime = args[2];
@@ -26,7 +26,7 @@ public class PRS_EventMonthlyDOM implements Parser{
 		String rchan = args[4];
 		String tchan = args[5];
 		
-		if (rawday == null) return new CMD_InsufficientArgs(event.getChannel().getIdLong(), EventType.MONTHLYA, event.getAuthor().getName(), event.getGuild().getIdLong(), event.getMessageIdLong());
+		if (rawday == null) return new CMD_InsufficientArgs(event.getChannel().getIdLong(), EventType.MONTHLYA, event.getMember(), event.getGuild().getIdLong(), event.getMessageIdLong());
 		
 		int day = 0;
 		try
@@ -35,12 +35,12 @@ public class PRS_EventMonthlyDOM implements Parser{
 		}
 		catch (NumberFormatException e)
 		{
-			return new CMD_InsufficientArgs(event.getChannel().getIdLong(), EventType.MONTHLYA, event.getAuthor().getName(), event.getGuild().getIdLong(), event.getMessageIdLong());
+			return new CMD_InsufficientArgs(event.getChannel().getIdLong(), EventType.MONTHLYA, event.getMember(), event.getGuild().getIdLong(), event.getMessageIdLong());
 		}
 		
 		String[] time = rawtime.split(":");
 		if (time.length != 2){
-			return new CMD_InsufficientArgs(event.getChannel().getIdLong(), EventType.MONTHLYA, event.getAuthor().getName(), event.getGuild().getIdLong(), event.getMessageIdLong());
+			return new CMD_InsufficientArgs(event.getChannel().getIdLong(), EventType.MONTHLYA, event.getMember(), event.getGuild().getIdLong(), event.getMessageIdLong());
 		}
 		int hr = 0;
 		int min = 0;
@@ -51,7 +51,7 @@ public class PRS_EventMonthlyDOM implements Parser{
 		}
 		catch (NumberFormatException e)
 		{
-			return new CMD_InsufficientArgs(event.getChannel().getIdLong(), EventType.MONTHLYA, event.getAuthor().getName(), event.getGuild().getIdLong(), event.getMessageIdLong());
+			return new CMD_InsufficientArgs(event.getChannel().getIdLong(), EventType.MONTHLYA, event.getMember(), event.getGuild().getIdLong(), event.getMessageIdLong());
 		}
 
 		boolean group = false;

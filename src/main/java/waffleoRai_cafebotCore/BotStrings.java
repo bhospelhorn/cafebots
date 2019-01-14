@@ -1,6 +1,8 @@
 package waffleoRai_cafebotCore;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import waffleoRai_schedulebot.EventType;
@@ -9,8 +11,12 @@ public class BotStrings {
 	
 	public static final String STRINGNOTFOUND_ENG = "[STRING NOT FOUND]";
 	
+	//Common Strings
+	public static final String KEY_MAINGROUP_COMMON = "commonstrings";
+	
 	//Groups
 	public static final String KEY_MAINGROUP_BOTSTRINGS = "botstrings";
+	public static final String KEY_GROUP_FILEINFO = ".fileinfo";
 	public static final String KEY_GROUP_GENERAL = ".generalbotstrings";
 	public static final String KEY_GROUP_USERQUERY = ".userquery";
 	public static final String KEY_GROUP_PERMMANAGE = ".permissionsmanage";
@@ -30,6 +36,17 @@ public class BotStrings {
 	public static final String KEY_GROUP_MONTHLYB = ".event_monthlyb";
 	public static final String KEY_GROUP_CLEANMSG = ".cleanmessages";
 	public static final String KEY_GROUP_GAMESTATUS = ".gameplayingstatus";
+	
+	//Group: File Info
+	public static final String KEY_GSALTFILE_NEUTRAL_REQ = ".genderspecxml_nr";
+	public static final String KEY_GSALTFILE_FEMALE_REQ = ".genderspecxml_fr";
+	public static final String KEY_GSALTFILE_MALE_REQ = ".genderspecxml_mr";
+	public static final String KEY_GSALTFILE_NEUTRAL_TARG = ".genderspecxml_nu";
+	public static final String KEY_GSALTFILE_FEMALE_TARG = ".genderspecxml_fu";
+	public static final String KEY_GSALTFILE_MALE_TARG = ".genderspecxml_mu";
+	public static final String KEY_GSALTFILE_NEUTRALGROUP_TARG = ".genderspecxml_multin";
+	public static final String KEY_GSALTFILE_FEMALEGROUP_TARG = ".genderspecxml_multif";
+	public static final String KEY_GSALTFILE_MALEGROUP_TARG = ".genderspecxml_multim";
 	
 	//Group: General
 	public static final String KEY_SOR_ON = ".soron";
@@ -66,6 +83,8 @@ public class BotStrings {
 	//Group: Greetings
 	public static final String KEY_GREET_CHCHAN_SUCCESS = ".confirm_chset_success";
 	public static final String KEY_GREET_CHCHAN_FAILURE = ".confirm_chset_failure";
+	public static final String KEY_GREET_CHECKCHAN = ".checkch";
+	public static final String KEY_GREET_CHECKCHAN_EMPTY = ".checkchempty";
 	public static final String KEY_GREET_CHECKG_ON = ".checkgsettingon";
 	public static final String KEY_GREET_CHECKG_OFF = ".checkgsettingoff";
 	public static final String KEY_GREET_CHECKGP_ON = ".checkpsettingon";
@@ -74,6 +93,18 @@ public class BotStrings {
 	public static final String KEY_GREET_CHECKF_OFF = ".checkfsettingoff";
 	public static final String KEY_GREET_CHECKFP_ON = ".checkfpsettingon";
 	public static final String KEY_GREET_CHECKFP_OFF = ".checkfpsettingoff";
+	public static final String KEY_GREET_SWITCH_ON = ".setgreeton";
+	public static final String KEY_GREET_SWITCH_OFF = ".setgreetoff";
+	public static final String KEY_GREET_SWITCH_FAIL = ".setgreetfail";
+	public static final String KEY_GREET_SWITCHGP_ON = ".setgreetpingon";
+	public static final String KEY_GREET_SWITCHGP_OFF = ".setgreetpingoff";
+	public static final String KEY_GREET_SWITCHGP_FAIL = ".setgreetpingfail";
+	public static final String KEY_GREET_FSWITCH_ON = ".setfarewellon";
+	public static final String KEY_GREET_FSWITCH_OFF = ".setfarewelloff";
+	public static final String KEY_GREET_FSWITCH_FAIL = ".setfarewellfail";
+	public static final String KEY_GREET_SWITCHFP_ON = ".setfarewellpingon";
+	public static final String KEY_GREET_SWITCHFP_OFF = ".setfarewellpingoff";
+	public static final String KEY_GREET_SWITCHFP_FAIL = ".setfarewellpingfail";
 	
 	//Group: Event Manage
 	public static final String KEY_VIEWEVENTS_ALLUSER = ".viewuserevents";
@@ -97,6 +128,15 @@ public class BotStrings {
 	public static final String KEY_GETTZ = ".gettz";
 	public static final String KEY_SETTZ_SUCCESS = ".changetz_success";
 	public static final String KEY_SETTZ_FAIL = ".changetz_fail";
+	
+	//Group: Birthday
+	public static final String KEY_BIRTHDAY_WISH_STEM = ".birthdaywish";
+	public static final String KEY_BIRTHDAY_CHSET_FAIL = ".confirm_chset_failure";
+	public static final String KEY_BIRTHDAY_CHSET_SUCCESS = ".confirm_chset_success";
+	public static final String KEY_BIRTHDAY_CHECKCHANNEL = ".checkch";
+	public static final String KEY_BIRTHDAY_CHECKCHANNEL_EMPTY = ".checkchempty";
+	public static final String KEY_BIRTHDAY_CONFIRM_FAILURE = ".confirm_success";
+	public static final String KEY_BIRTHDAY_CONFIRM_SUCCESS = ".confirm_failure";
 	
 	//Group: (Event)
 	public static final String KEY_CONFIRMCREATE_STEM = ".confirmcreate";
@@ -227,6 +267,125 @@ public class BotStrings {
 	public static String getInternalErrorKey()
 	{
 		return KEY_MAINGROUP_BOTSTRINGS + KEY_GROUP_GENERAL + KEY_INTERNALERROR;
+	}
+	
+	public static List<String> parseStringList(String in)
+	{
+		if (in == null) return null;
+		int commacount = 0;
+		int slen = in.length();
+		for(int i = 0; i < slen; i++)
+		{
+			if (in.charAt(i) == ',') commacount++;
+		}
+		List<String> list = new ArrayList<String>(commacount+1);
+		
+		int pos = 0;
+		boolean inword = false;
+		boolean escape = false;
+		StringBuilder sb = null;
+		while(pos < slen)
+		{
+			char c = in.charAt(pos);
+			if (c == '\\')
+			{
+				escape = true;
+				pos++;
+				continue;
+			}
+			if(!inword)
+			{
+				//Check to see if c is a double quote
+				if (!escape && c == '\"')
+				{
+					inword = true;
+					sb = new StringBuilder();
+				}
+				//Otherwise, the character is discarded
+			}
+			else
+			{
+				//Check to see if c is a double quote
+				if (!escape && c == '\"')
+				{
+					inword = false;
+					list.add(sb.toString());
+					sb = null;
+				}
+				else
+				{
+					//Add character to string
+					sb.append(c);
+				}
+			}
+			escape = false;
+			pos++;
+		}
+		
+		return list;
+	}
+	
+	public static String getGenderStringFileNameKey_Req(int gender)
+	{
+		String base = KEY_MAINGROUP_BOTSTRINGS + KEY_GROUP_FILEINFO;
+		switch(gender)
+		{
+		case ActorUser.ACTOR_GENDER_FEMALE:
+			return base + KEY_GSALTFILE_FEMALE_REQ;
+		case ActorUser.ACTOR_GENDER_MALE:
+			return base + KEY_GSALTFILE_MALE_REQ;
+		default:
+			return base + KEY_GSALTFILE_NEUTRAL_REQ;
+		}
+	}
+	
+	public static String getGenderStringFileNameKey_Targ(int gender)
+	{
+		String base = KEY_MAINGROUP_BOTSTRINGS + KEY_GROUP_FILEINFO;
+		switch(gender)
+		{
+		case ActorUser.ACTOR_GENDER_FEMALE:
+			return base + KEY_GSALTFILE_FEMALE_TARG;
+		case ActorUser.ACTOR_GENDER_MALE:
+			return base + KEY_GSALTFILE_MALE_TARG;
+		case ActorUser.ACTOR_GENDER_MULTIPLE_MIXED:
+			return base + KEY_GSALTFILE_NEUTRALGROUP_TARG;
+		case ActorUser.ACTOR_GENDER_MULTIPLE_ALLFEM:
+			return base + KEY_GSALTFILE_FEMALEGROUP_TARG;
+		case ActorUser.ACTOR_GENDER_MULTIPLE_ALLMEN:
+			return base + KEY_GSALTFILE_MALEGROUP_TARG;
+		default:
+			return base + KEY_GSALTFILE_NEUTRAL_TARG;
+		}
+	}
+
+	public static String getGenderPronounCommonKeyStem(int gender)
+	{
+		String base = KEY_MAINGROUP_COMMON + "pronoun";
+		switch(gender)
+		{
+		case ActorUser.ACTOR_GENDER_FEMALE:
+			return base + ".feminine";
+		case ActorUser.ACTOR_GENDER_MALE:
+			return base + ".masculine";
+		case ActorUser.ACTOR_GENDER_MULTIPLE_MIXED:
+			return base + ".multi_n";
+		case ActorUser.ACTOR_GENDER_MULTIPLE_ALLFEM:
+			return base + ".multi_f";
+		case ActorUser.ACTOR_GENDER_MULTIPLE_ALLMEN:
+			return base + ".multi_m";
+		default:
+			return base + ".neutral";
+		}
+	}
+	
+	public static String capitalizeFirstLetter(String in)
+	{
+		if (in == null || in.isEmpty()) return "";
+		if (in.length() == 1) return in.toUpperCase();
+		String first = in.substring(0, 1).toUpperCase();
+		String rest = in.substring(1);
+		return first + rest;
 	}
 	
 }

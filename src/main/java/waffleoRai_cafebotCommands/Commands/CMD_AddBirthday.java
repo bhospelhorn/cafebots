@@ -25,14 +25,14 @@ import waffleoRai_cafebotCore.AbstractBot;
  * <br><br><b>Standard Command:</b>
  * <br>birthday mm dd
  * @author Blythe Hospelhorn
- * @version 1.2.0
- * @since August 11, 2018
+ * @version 1.3.0
+ * @since January 14, 2019
  */
 public class CMD_AddBirthday extends CommandAdapter{
 
 	private int month;
 	private int day;
-	private Member user;
+	//private Member user;
 	private long replyChannel;
 
 	/**
@@ -47,7 +47,8 @@ public class CMD_AddBirthday extends CommandAdapter{
 	{
 		month = m;
 		day = d;
-		user = u;
+		//user = u;
+		super.requestingUser = u;
 		replyChannel = chID;
 		MessageID cmdmsg = new MessageID(cmdID, chID);
 		super.setCommandMessageID(cmdmsg);
@@ -59,18 +60,13 @@ public class CMD_AddBirthday extends CommandAdapter{
 		return replyChannel;
 	}
 	
-	public long getUserID()
-	{
-		return user.getUser().getIdLong();
-	}
-	
 	@Override
 	/**
 	 * @throws NullPointerException If bot is null.
 	 */
-	public void execute(AbstractBot bot) 
+	public void execute(AbstractBot bot) throws InterruptedException 
 	{
-		bot.setBirthday(user, month, day, replyChannel);
+		bot.setBirthday(super.requestingUser, month, day, replyChannel);
 		cleanAfterMyself(bot);
 	}
 
@@ -80,9 +76,4 @@ public class CMD_AddBirthday extends CommandAdapter{
 		return "birthday";
 	}
 	
-	public long getGuildID()
-	{
-		return user.getGuild().getIdLong();
-	}
-
 }

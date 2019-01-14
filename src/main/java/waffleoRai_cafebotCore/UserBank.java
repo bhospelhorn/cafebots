@@ -9,40 +9,40 @@ import java.util.TimeZone;
 
 public class UserBank {
 	
-	private Map<Long, ActorUser> users;
+	private Map<Long, GuildUser> users;
 	
 	public UserBank()
 	{
-		users = new HashMap<Long, ActorUser>();
+		users = new HashMap<Long, GuildUser>();
 	}
 	
-	public synchronized ActorUser getUser(long uid)
+	public synchronized GuildUser getUser(long uid)
 	{
 		return users.get(uid);
 	}
 	
-	public synchronized List<ActorUser> getAllUsers()
+	public synchronized List<GuildUser> getAllUsers()
 	{
-		List<ActorUser> all = new ArrayList<ActorUser>(users.size());
+		List<GuildUser> all = new ArrayList<GuildUser>(users.size());
 		Set<Long> keyset = users.keySet();
 		
 		for (Long l : keyset)
 		{
-			ActorUser u = users.get(l);
+			GuildUser u = users.get(l);
 			if (u != null) all.add(u);
 		}
 		
 		return all;
 	}
 	
-	public synchronized List<ActorUser> getAllUsersWithGreetingPing()
+	public synchronized List<GuildUser> getAllUsersWithGreetingPing()
 	{
-		List<ActorUser> all = new ArrayList<ActorUser>(users.size());
+		List<GuildUser> all = new ArrayList<GuildUser>(users.size());
 		Set<Long> keyset = users.keySet();
 		
 		for (Long l : keyset)
 		{
-			ActorUser u = users.get(l);
+			GuildUser u = users.get(l);
 			if (u != null){
 				if (u.pingGreetingsOn()) all.add(u);
 			}
@@ -51,14 +51,14 @@ public class UserBank {
 		return all;
 	}
 	
-	public synchronized List<ActorUser> getAllUsersWithFarewellPing()
+	public synchronized List<GuildUser> getAllUsersWithFarewellPing()
 	{
-		List<ActorUser> all = new ArrayList<ActorUser>(users.size());
+		List<GuildUser> all = new ArrayList<GuildUser>(users.size());
 		Set<Long> keyset = users.keySet();
 		
 		for (Long l : keyset)
 		{
-			ActorUser u = users.get(l);
+			GuildUser u = users.get(l);
 			if (u != null){
 				if (u.pingFarewellsOn()) all.add(u);
 			}
@@ -67,17 +67,17 @@ public class UserBank {
 		return all;
 	}
 	
-	public synchronized void addUser(ActorUser u)
+	public synchronized void addUser(GuildUser u)
 	{
-		long uid = u.getUID();
+		long uid = u.getUserProfile().getUID();
 		users.put(uid, u);
 	}
 	
 	public synchronized TimeZone getUserTimeZone(long uid)
 	{
-		ActorUser u = users.get(uid);
+		GuildUser u = users.get(uid);
 		if (u == null) return null;
-		return u.getTimeZone();
+		return u.getUserProfile().getTimeZone();
 	}
 
 	

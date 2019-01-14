@@ -23,6 +23,9 @@ import waffleoRai_schedulebot.Schedule;
  * 
  * 1.1.0 -> 1.1.1 | August 11, 2018
  * 	MessageID update
+ *
+ * 1.1.1 -> 1.1.2 | November 1, 2018
+ * 	Added a method to push a request back on top of the queue.
  * 
  */
 
@@ -43,8 +46,8 @@ import waffleoRai_schedulebot.Schedule;
  * <br><br><i>Outstanding Issues:</i>
  * <br>
  * @author Blythe Hospelhorn
- * @version 1.1.1
- * @since August 11, 2018
+ * @version 1.1.2
+ * @since November 1, 2018
  */
 public class ResponseQueue {
 	
@@ -210,6 +213,16 @@ public class ResponseQueue {
 		{
 			return null;
 		}
+	}
+	
+	/**
+	 * Push a request back on top of the stack (at the head of the queue).
+	 * This should be used when execution is interrupted to re-queue the request.
+	 * @param r Response to push back.
+	 */
+	public synchronized void pushRequest(Response r)
+	{
+		if (r != null) queue.push(r);
 	}
 	
 	/**

@@ -17,8 +17,8 @@ import waffleoRai_cafebotCore.AbstractBot;
  * that the parser is blocked and their commands will be ignored.
  * <br>This event cannot be induced via command line. It is internal only.
  * @author Blythe Hospelhorn
- * @version 1.0.0
- * @since July 1, 2018
+ * @version 1.0.1
+ * @since January 14, 2019
  */
 public class CMD_ParserBlockWarn extends CommandAdapter{
 
@@ -37,11 +37,6 @@ public class CMD_ParserBlockWarn extends CommandAdapter{
 	public long getChannelID()
 	{
 		return channel;
-	}
-	
-	public long getUserID()
-	{
-		return -1;
 	}
 	
 	@Override

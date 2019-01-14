@@ -17,13 +17,15 @@ import waffleoRai_cafebotCore.AbstractBot;
  * 1.1.0 -> 1.1.1 | August 11, 2018
  * 	MessageID update (long -> MessageID)
  * 
+ * 1.1.1 -> 1.2.0 | November 1, 2018
+ * 	Added framework for interrupt handling
  */
 
 /**
  * An object containing information on a user response to a bot command prompt.
  * @author Blythe Hospelhorn
- * @version 1.1.1
- * @since August 11, 2018
+ * @version 1.2.0
+ * @since November 1, 2018
  */
 public class Response {
 	
@@ -57,9 +59,10 @@ public class Response {
  	/**
  	 * Execute the appropriate response using the given bot.
  	 * @param bot Bot to execute command response.
+ 	 * @throws InterruptedException If the command execution is interrupted.
  	 * @throws NullPointerException If bot is null.
  	 */
-	public void execute(AbstractBot bot)
+	public void execute(AbstractBot bot) throws InterruptedException
 	{
 		switch(response)
 		{
@@ -118,4 +121,14 @@ public class Response {
 		return messageID;
 	}
 	
+	/** If the execution of this response throws an InterruptedException, this method
+	 * tells an bot execution thread exception handler whether or not the response should
+	 * be re-queued and execution re-attempted from the beginning.
+	 * @return True if response should be pushed back to the top of the queue if interrupted.
+	 * False if it should be tossed.
+	 */
+	public boolean requeueIfInterrupted()
+	{
+		return cmd.requeueIfInterrupted();
+	}
 }

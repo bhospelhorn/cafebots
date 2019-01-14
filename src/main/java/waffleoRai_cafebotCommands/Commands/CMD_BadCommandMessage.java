@@ -1,6 +1,7 @@
 package waffleoRai_cafebotCommands.Commands;
 
 import net.dv8tion.jda.core.entities.Guild;
+import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.MessageChannel;
 import waffleoRai_cafebotCommands.CommandAdapter;
 import waffleoRai_cafebotCommands.MessageID;
@@ -25,13 +26,14 @@ import waffleoRai_cafebotCore.AbstractBot;
  * "command was not understood" message to the requested channel.
  * <br>This event cannot be induced via command line. It is internal only.
  * @author Blythe Hospelhorn
- * @version 1.3.0
- * @since August 11, 2018
+ * @version 1.4.0
+ * @since January 14, 2019
  */
 public class CMD_BadCommandMessage extends CommandAdapter {
 
 	private MessageChannel channel;
-	private Guild guild;
+	//private Guild guild;
+	private Member user;
 
 	/**
 	 * Construct a BadCommandMessage command by providing the channel to send
@@ -40,10 +42,11 @@ public class CMD_BadCommandMessage extends CommandAdapter {
 	 * the bad command was received on and the bot reply should be sent to.
 	 * @param cmdID ID of the message the command was sent in.
 	 */
-	public CMD_BadCommandMessage(MessageChannel ch, Guild g, long cmdID)
+	public CMD_BadCommandMessage(MessageChannel ch, Member m, long cmdID)
 	{
 		channel = ch;
-		guild = g;
+		//guild = g;
+		user = m;
 		MessageID cmdmsg = new MessageID(cmdID, ch.getIdLong());
 		super.setCommandMessageID(cmdmsg);
 	}
@@ -63,7 +66,7 @@ public class CMD_BadCommandMessage extends CommandAdapter {
 	/**
 	 * @throws NullPointerException If bot is null.
 	 */
-	public void execute(AbstractBot bot) {
+	public void execute(AbstractBot bot) throws InterruptedException {
 		bot.displayBadCommandMessage(channel.getIdLong());
 		cleanAfterMyself(bot);
 	}
@@ -76,7 +79,19 @@ public class CMD_BadCommandMessage extends CommandAdapter {
 	
 	public long getGuildID()
 	{
-		return guild.getIdLong();
+		return user.getGuild().getIdLong();
+	}
+
+	@Override
+	public Member getRequestingMember() 
+	{
+		return user;
+	}
+
+	@Override
+	public Guild getGuild() 
+	{
+		return user.getGuild();
 	}
 	
 }

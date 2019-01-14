@@ -10,7 +10,7 @@ import waffleoRai_schedulebot.CalendarEvent;
 public class CMD_CheckRSVP extends CommandAdapter{
 	
 	private MessageChannel channel;
-	private Member member;
+	//private Member member;
 	private long eventID;
 	
 	private CalendarEvent event;
@@ -18,7 +18,8 @@ public class CMD_CheckRSVP extends CommandAdapter{
 	public CMD_CheckRSVP(MessageChannel c, Member m, long e, long cmdID)
 	{
 		channel = c;
-		member = m;
+		//member = m;
+		super.requestingUser = m;
 		eventID = e;
 		MessageID cmdmsg = new MessageID(cmdID, c.getIdLong());
 		super.setCommandMessageID(cmdmsg);
@@ -31,25 +32,20 @@ public class CMD_CheckRSVP extends CommandAdapter{
 		return channel.getIdLong();
 	}
 	
-	public long getUserID()
-	{
-		return member.getUser().getIdLong();
-	}
-	
 	@Override
 	/**
 	 * @throws NullPointerException If bot is null.
 	 */
-	public void execute(AbstractBot bot) {
+	public void execute(AbstractBot bot) throws InterruptedException {
 		if (event == null)
 		{
-			event = bot.retrieveEvent(eventID, member.getGuild().getIdLong());
+			event = bot.retrieveEvent(eventID, getGuildID());
 			bot.redirectEventCommand(this, event.getType());
 			super.cleanAfterMyself(bot);
 		}
 		else
 		{
-			bot.checkRSVP(getChannelID(), member, event);
+			bot.checkRSVP(getChannelID(), super.requestingUser, event);
 		}
 	}
 	
@@ -59,9 +55,4 @@ public class CMD_CheckRSVP extends CommandAdapter{
 		return "checkrsvp";
 	}
 	
-	public long getGuildID()
-	{
-		return member.getGuild().getIdLong();
-	}
-
 }

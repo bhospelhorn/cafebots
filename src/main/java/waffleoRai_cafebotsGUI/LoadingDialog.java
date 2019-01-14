@@ -37,6 +37,7 @@ public class LoadingDialog extends JDialog implements ActionListener{
 		
 		timer = new Athread(){
 
+			
 			@Override
 			public void doSomething() {
 				if (dotCount >= MAXDOTS)

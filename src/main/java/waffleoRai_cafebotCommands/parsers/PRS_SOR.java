@@ -10,8 +10,8 @@ import waffleoRai_schedulebot.EventType;
 /**
  * Switch on/off reminder(s) (sor) parser
  * @author Blythe Hospelhorn
- * @version 1.2.0
- * @since August 5, 2018
+ * @version 1.3.0
+ * @since Jnuary 14, 2019
  */
 public class PRS_SOR implements Parser{
 	
@@ -23,7 +23,7 @@ public class PRS_SOR implements Parser{
 
 	@Override
 	public Command generateCommand(String[] args, MessageReceivedEvent event) {
-		if (args.length < 2) return new CMD_BadCommandMessage(event.getChannel(), event.getGuild(), event.getMessageIdLong());
+		if (args.length < 2) return new CMD_BadCommandMessage(event.getChannel(), event.getMember(), event.getMessageIdLong());
 		
 		if (args[1].equals(ALLOFF))
 		{
@@ -39,19 +39,19 @@ public class PRS_SOR implements Parser{
 		}
 		else if (args[1].equals(VIEW))
 		{
-			if (args.length < 3) return new CMD_BadCommandMessage(event.getChannel(), event.getGuild(), event.getMessageIdLong());
+			if (args.length < 3) return new CMD_BadCommandMessage(event.getChannel(), event.getMember(), event.getMessageIdLong());
 			EventType t = EventType.getEventType(args[2]);
 			return new CMD_SOR(event.getChannel(), event.getGuild(), t, event.getMessageIdLong());
 		}
 		else
 		{
 			//Type Level
-			if (args.length < 3) return new CMD_BadCommandMessage(event.getChannel(), event.getGuild(), event.getMessageIdLong());
+			if (args.length < 3) return new CMD_BadCommandMessage(event.getChannel(), event.getMember(), event.getMessageIdLong());
 			EventType t = EventType.getEventType(args[1]);
-			if (t == null) return new CMD_BadCommandMessage(event.getChannel(), event.getGuild(), event.getMessageIdLong());
+			if (t == null) return new CMD_BadCommandMessage(event.getChannel(), event.getMember(), event.getMessageIdLong());
 			int l = -1;
 			try{l = Integer.parseInt(args[2]);}
-			catch(NumberFormatException e){return new CMD_BadCommandMessage(event.getChannel(), event.getGuild(), event.getMessageIdLong());}
+			catch(NumberFormatException e){return new CMD_BadCommandMessage(event.getChannel(), event.getMember(), event.getMessageIdLong());}
 			return new CMD_SOR(event.getChannel(), event.getMember(), t, l, event.getMessageIdLong());
 		}
 		

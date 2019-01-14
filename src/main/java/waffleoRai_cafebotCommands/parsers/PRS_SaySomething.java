@@ -8,14 +8,14 @@ import waffleoRai_cafebotCommands.Commands.CMD_SaySomething;
 /**
  * Say something command (saysomething) parser
  * @author Blythe Hospelhorn
- * @version 1.0.1
- * @since July 20, 2018
+ * @version 1.1.0
+ * @since January 14, 2019
  */
 public class PRS_SaySomething implements Parser{
 	
 	public Command generateCommand(String[] args, MessageReceivedEvent event)
 	{
-		return new CMD_SaySomething(event.getChannel(), event.getGuild(), event.getMessageIdLong());
+		return new CMD_SaySomething(event.getChannel(), event.getMember(), event.getMessageIdLong());
 	}
 
 }

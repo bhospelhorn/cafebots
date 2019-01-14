@@ -25,7 +25,7 @@ public class PRS_EventWeekly implements Parser{
 		//Min args - 6
 		if (args.length < 6){
 			//System.err.println(Thread.currentThread().getName() + " || PRS_EventWeekly.generateCommand || DEBUG - Rejecting command [Insufficient Args]");
-			return new CMD_InsufficientArgs(event.getChannel().getIdLong(), EventType.WEEKLY, event.getAuthor().getName(), event.getGuild().getIdLong(), event.getMessageIdLong());
+			return new CMD_InsufficientArgs(event.getChannel().getIdLong(), EventType.WEEKLY, event.getMember(), event.getGuild().getIdLong(), event.getMessageIdLong());
 		}
 		String rawdow = args[1];
 		String rawtime = args[2];
@@ -34,13 +34,13 @@ public class PRS_EventWeekly implements Parser{
 		String tchan = args[5];
 		
 		int dow = Schedule.getDayOfWeek(rawdow);
-		if (dow < 1) return new CMD_InsufficientArgs(event.getChannel().getIdLong(), EventType.WEEKLY, event.getAuthor().getName(), event.getGuild().getIdLong(), event.getMessageIdLong());
+		if (dow < 1) return new CMD_InsufficientArgs(event.getChannel().getIdLong(), EventType.WEEKLY, event.getMember(), event.getGuild().getIdLong(), event.getMessageIdLong());
 		//System.err.println(Thread.currentThread().getName() + " || PRS_EventWeekly.generateCommand || Day of Week Detected: " + dow);
 		
 		String[] time = rawtime.split(":");
 		if (time.length != 2){
 			//System.err.println(Thread.currentThread().getName() + " || PRS_EventWeekly.generateCommand || DEBUG - Rejecting command [Time arg formatted incorrectly]");
-			return new CMD_InsufficientArgs(event.getChannel().getIdLong(), EventType.WEEKLY, event.getAuthor().getName(), event.getGuild().getIdLong(), event.getMessageIdLong());
+			return new CMD_InsufficientArgs(event.getChannel().getIdLong(), EventType.WEEKLY, event.getMember(), event.getGuild().getIdLong(), event.getMessageIdLong());
 		}
 		int hr = 0;
 		int min = 0;
@@ -52,7 +52,7 @@ public class PRS_EventWeekly implements Parser{
 		catch (NumberFormatException e)
 		{
 			//System.err.println(Thread.currentThread().getName() + " || PRS_EventWeekly.generateCommand || DEBUG - Rejecting command [Could not parse time arg]");
-			return new CMD_InsufficientArgs(event.getChannel().getIdLong(), EventType.WEEKLY, event.getAuthor().getName(), event.getGuild().getIdLong(), event.getMessageIdLong());
+			return new CMD_InsufficientArgs(event.getChannel().getIdLong(), EventType.WEEKLY, event.getMember(), event.getGuild().getIdLong(), event.getMessageIdLong());
 		}
 		//System.err.println(Thread.currentThread().getName() + " || PRS_EventWeekly.generateCommand || Hour Detected: " + hr);
 		//System.err.println(Thread.currentThread().getName() + " || PRS_EventWeekly.generateCommand || Minute Detected: " + min);

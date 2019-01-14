@@ -25,13 +25,13 @@ import waffleoRai_cafebotCore.AbstractBot;
  * <br><br><b>Standard Command:</b>
  * <br>changetz [timezone]
  * @author Blythe Hospelhorn
- * @version 1.1.1
- * @since August 11, 2018
+ * @version 1.2.0
+ * @since January 14, 2019
  */
 public class CMD_SetTZ extends CommandAdapter {
 
 	private MessageChannel ch;
-	private Member user;
+	//private Member user;
 	private String tz;
 	
 	/**
@@ -44,7 +44,8 @@ public class CMD_SetTZ extends CommandAdapter {
 	public CMD_SetTZ(MessageChannel c, Member u, String tzcode, long cmdID)
 	{
 		ch = c;
-		user = u;
+		//user = u;
+		super.requestingUser = u;
 		tz = tzcode;
 		MessageID cmdmsg = new MessageID(cmdID, ch.getIdLong());
 		super.setCommandMessageID(cmdmsg);
@@ -56,17 +57,12 @@ public class CMD_SetTZ extends CommandAdapter {
 		return ch.getIdLong();
 	}
 	
-	public long getUserID()
-	{
-		return user.getUser().getIdLong();
-	}
-	
 	@Override
 	/**
 	 * @throws NullPointerException If bot is null.
 	 */
-	public void execute(AbstractBot bot) {
-		bot.setUserTimezone(ch.getIdLong(), user, tz);
+	public void execute(AbstractBot bot) throws InterruptedException {
+		bot.setUserTimezone(ch.getIdLong(), super.requestingUser, tz);
 		super.cleanAfterMyself(bot);
 	}
 
@@ -76,8 +72,4 @@ public class CMD_SetTZ extends CommandAdapter {
 		return "changetz";
 	}
 	
-	public long getGuildID()
-	{
-		return user.getGuild().getIdLong();
-	}
 }

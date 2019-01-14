@@ -96,6 +96,16 @@ public interface Parser {
 		pmap.put("eventinfo", new PRS_EventInfo());
 		pmap.put("roleinfo", null);
 		
+		pmap.put("callme", null);
+		pmap.put("setname", null);
+		pmap.put("setgender", null);
+		pmap.put("setmic", null);
+		pmap.put("setiface", null);
+		pmap.put("setdaw", null);
+		pmap.put("seemic", null);
+		pmap.put("seeiface", null);
+		pmap.put("seedaw", null);
+		
 		pmap.put("checkperm", new PRS_CheckAdminRoles());
 		pmap.put("addperm", new PRS_ChangeRoleAdmin(true));
 		pmap.put("remperm", new PRS_ChangeRoleAdmin(false));

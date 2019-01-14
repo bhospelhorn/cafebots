@@ -2,6 +2,7 @@ package waffleoRai_cafebotCore;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.OffsetDateTime;
 import java.util.Deque;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
@@ -10,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.TimeZone;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.security.auth.login.LoginException;
 
@@ -47,6 +49,7 @@ public class BotBrain {
 	/* ----- Constants ----- */
 	
 	public static final int LOGIN_RETRY_COUNT_RESET_TIME = 900; //Seconds
+	public static final int SESSION_MONITOR_LOOP_MINUTES = 30;
 	
 	/* ----- Instance Variables ----- */
 	
@@ -61,8 +64,7 @@ public class BotBrain {
 	private ParseCore parser;
 	
 	private StringMap commonStrings;
-	//private ReminderMap remindertimes;
-	
+
 	private GuildDataAdder userdataThread;
 	private ResetMonitorThread sessionMonitor;
 	private ResetLoginCountThread loginTryMonitor;
@@ -90,7 +92,7 @@ public class BotBrain {
 	
 	/* ----- Boot/Shutdown ----- */
 	
-	public void start(boolean verbose) throws LoginException
+	public void start(boolean verbose) throws LoginException, InterruptedException
 	{
 		if (bots[1] == null){
 			System.err.println("BotBrain.start || ERROR: Master bot (index 1) required."); 
@@ -260,13 +262,92 @@ public class BotBrain {
 		parser.command_SessionCheck();
 	}
 	
+	public void forceHardReset() throws LoginException
+	{
+		System.err.println(Schedule.getErrorStreamDateMarker() + " BotBarin.forceHardReset || Hard resetting all bots...");
+		int bcount = bots.length;
+		for (int i = 1; i < bcount; i++)
+		{
+			if (bots[i] != null)
+			{
+				bots[i].forceKill();
+			}
+		}
+		
+		//Wait a couple seconds before sending command to reboot...
+		try 
+		{
+			Thread.sleep(5000);
+		} 
+		catch (InterruptedException e) 
+		{
+			System.err.println(Schedule.getErrorStreamDateMarker() + " BotBarin.forceHardReset || Wait sleep interrupted! Premature login...");
+			e.printStackTrace();
+		}
+		
+		//Login
+		LoginListener l = new LoginListener();
+		int bin = 0;
+		for (int i = 1; i < 10; i++)
+		{
+			if (bots[i] != null)
+			{
+				bin++;
+				bots[i].addListener(l);
+				bots[i].loginAsync();
+			}
+		}
+		
+
+		//Block until bots have logged in.
+		int secondCounter = 0;
+		while (l.getLoginCount() < bin)
+		{
+			//Wait
+			try 
+			{
+				Thread.sleep(1000);
+			} 
+			catch (InterruptedException e) 
+			{
+				System.err.println(Schedule.getErrorStreamDateMarker() + " BotBrain.forceHardReset || Thread start wait sleep interrupted... Rechecking bot status...");
+				e.printStackTrace();
+			}
+			secondCounter++;
+			if (secondCounter % 60 == 0)
+			{
+				System.out.println(Schedule.getErrorStreamDateMarker() + " BotBrain.forceHardReset || There appears to be one or more hanging logins... (" + secondCounter + " seconds since login check started.)");
+				for (int i = 1; i < 10; i++)
+				{
+					if (bots[i] != null)
+					{
+						if (!bots[i].isOn())
+						{
+							System.err.println(Schedule.getErrorStreamDateMarker() + " BotBrain.forceHardReset || BOT" + i + " is not online. Attempting to restart login...");
+							JDA botcore = bots[i].getJDA();
+							if (botcore != null) botcore.shutdownNow();
+							bots[i].loginAsync();
+						}
+					}
+				}
+			}
+		}
+		l.resetLoginCounter();
+		System.out.println(Schedule.getErrorStreamDateMarker() + " BotBrain.forceHardReset || All bots have logged in!");
+	}
+	
 	/* ----- Bot Status ----- */
 	
-	protected boolean amIOnline(AbstractBot bot)
+	protected boolean amIOnline(AbstractBot bot) throws InterruptedException
 	{
+		//TODO: Wait loops are infinite hang traps/CPU eaters.
+		//	They need to be able to accept interrupts and process thread kill requests!
+		
 		if (bot == null) return false;
+		
 		//Get bot index
 		int boti = bot.getLocalIndex();
+		
 		//Pick a bot that isn't that bot
 		AbstractBot checker = null;
 		for (int i = 1; i < bots.length; i++)
@@ -281,14 +362,7 @@ public class BotBrain {
 		//Wait for check bot to be on
 		while (!checker.isOn())
 		{
-			try 
-			{
-				Thread.sleep(10);
-			} 
-			catch (InterruptedException e) 
-			{
-				e.printStackTrace();
-			}
+			Thread.sleep(10);
 		}
 		//System.err.println(Schedule.getErrorStreamDateMarker() + " BotBrain.amIOnline || BOT" + checker.getLocalIndex() + " is online!");
 		//Check the JDA for checker
@@ -297,14 +371,7 @@ public class BotBrain {
 		//Wait for target bot to be on
 		while (!bot.isOn())
 		{
-			try 
-			{
-				Thread.sleep(10);
-			} 
-			catch (InterruptedException e) 
-			{
-				e.printStackTrace();
-			}
+			Thread.sleep(10);
 		}
 		//System.err.println(Schedule.getErrorStreamDateMarker() + " BotBrain.amIOnline || BOT" + bot.getLocalIndex() + " is online!");
 		//Get UID of bot to check
@@ -407,6 +474,24 @@ public class BotBrain {
 		return this.getCommonString(key);
 	}
 	
+	public String getSubjectivePronoun(int gender)
+	{
+		String key = BotStrings.getGenderPronounCommonKeyStem(gender);
+		return getCommonString(key + "_subject");
+	}
+	
+	public String getObjectivePronoun(int gender)
+	{
+		String key = BotStrings.getGenderPronounCommonKeyStem(gender);
+		return getCommonString(key + "_object");
+	}
+	
+	public String getPossessivePronoun(int gender)
+	{
+		String key = BotStrings.getGenderPronounCommonKeyStem(gender);
+		return getCommonString(key + "_possess");
+	}
+	
 	public AbstractBot[] getBots()
 	{
 		AbstractBot[] arr = new AbstractBot[10];
@@ -433,8 +518,9 @@ public class BotBrain {
 		//See if already has that guild.
 		GuildSettings gs = userdata.getGuildSettings(g.getIdLong());
 		if (gs != null) return;
-		userdata.newGuild(g, parser, programDirectory + File.separator + LaunchCore.DIR_USERDATA);
-		if (on){
+		userdata.newGuild(g, parser);
+		if (on)
+		{
 			gs = userdata.getGuildSettings(g.getIdLong());
 			gs.startBackupThread();
 			gs.startScheduleThreads();
@@ -442,32 +528,40 @@ public class BotBrain {
 		
 	}
 	
-	public void registerNewUser(Member m)
+	public void registerNewMember(Member m)
 	{
-		Guild g = m.getGuild();
-		GuildSettings gs = userdata.getGuildSettings(g.getIdLong());
-		if (gs == null)
+		//boolean added = userdata.newMember(m);
+		boolean added = userdata.newMember(m, parser);
+		if (!added)
 		{
-			System.err.println(Thread.currentThread().getName() + " || BotBrain.registerNewUser || Profile generation for user failed. Guild data could not be found...");
+			System.err.println(Thread.currentThread().getName() + " || BotBrain.registerNewUser || Guild data could not be found... Attempting to generate new guild.");
+			Guild g = m.getGuild();
 			System.err.println(Thread.currentThread().getName() + " || BotBrain.registerNewUser || Guild: " + g.getName() + " | User: " + m.getUser().getName() + " (" + m.getUser().getIdLong() + ")");
-			return;
+			registerNewGuild(g);
 		}
-		gs.newMember(m);
 	}
 	
-	public ActorUser getUser(long guildID, long userID)
+	public void registerNewUser(User u)
 	{
-		GuildSettings gs = userdata.getGuildSettings(guildID);
-		if (gs == null) return null;
-		UserBank eubank = gs.getUserBank();
-		if (eubank == null) return null;
-		return eubank.getUser(userID);
+		userdata.newUser(u);
 	}
 	
-	public GuildSettings getGuild(long guildID)
+	public GuildSettings getGuildData(long guildID)
 	{
 		GuildSettings gs = userdata.getGuildSettings(guildID);
 		return gs;
+	}
+	
+	public ActorUser getUserProfile(long userID)
+	{
+		return userdata.getUserProfile(userID);
+	}
+	
+	public GuildUser getGuildUser(long guildID, long userID)
+	{
+		GuildSettings gs = userdata.getGuildSettings(guildID);
+		if (gs == null) return null;
+		return gs.getUser(userID);
 	}
 	
 	public int getIndexOfBotAtPosition(int pindex)
@@ -764,8 +858,10 @@ public class BotBrain {
 		if (e == null) return null;
 		long eruid = e.getRequestingUser();
 		long uid = m.getUser().getIdLong();
-		ActorUser u = gs.getUserBank().getUser(uid);
-		if (!u.isAdmin() && (eruid != uid)) return null; //Can only delete events you created.
+		//ActorUser u = gs.getUserBank().getUser(uid);
+		//if (!u.isAdmin() && (eruid != uid)) return null; //Can only delete events you created.
+		GuildUser u = gs.getUser(uid);
+		if(!u.isAdmin() && (eruid != uid)) return null;
 		String ename = e.getEventName();
 		if (s.cancelEvent(eventID)) return ename;
 		return null;
@@ -952,6 +1048,8 @@ public class BotBrain {
 			}
 		}
 		
+		private ConcurrentLinkedQueue<User> users;
+		
 		private boolean kill;
 		
 		private GuildQueue guilds;
@@ -980,7 +1078,12 @@ public class BotBrain {
 				while (!members.isEmpty())
 				{
 					Member m = members.pop();
-					registerNewUser(m);
+					registerNewMember(m);
+				}
+				while (!users.isEmpty())
+				{
+					User u = users.poll();
+					registerNewUser(u);
 				}
 				try 
 				{
@@ -1021,6 +1124,10 @@ public class BotBrain {
 			members.add(m);
 		}
 		
+		public void requestUserAddition(User u)
+		{
+			users.add(u);
+		}
 	}
 	
 	public synchronized void requestGuildAddition(Guild g)
@@ -1035,17 +1142,28 @@ public class BotBrain {
 		userdataThread.interruptMe();
 	}
 	
+	public synchronized void requestUserAddition(User u)
+	{
+		userdataThread.requestUserAddition(u);
+		userdataThread.interruptMe();
+	}
+	
 	public synchronized boolean hasGuild(long id)
 	{
-		GuildSettings gs = this.userdata.getGuildSettings(id);
+		GuildSettings gs = userdata.getGuildSettings(id);
 		return (gs != null);
+	}
+	
+	public synchronized boolean hasUser(long uid)
+	{
+		return (userdata.getUserProfile(uid) != null);
 	}
 	
 	public synchronized boolean hasMember(long gid, long uid)
 	{
 		GuildSettings gs = this.userdata.getGuildSettings(gid);
 		if (gs == null) return false;
-		ActorUser u = gs.getUserBank().getUser(uid);
+		GuildUser u = gs.getUser(uid);
 		return (u != null);
 	}
 	
@@ -1054,18 +1172,21 @@ public class BotBrain {
 	public class ResetMonitorThread extends Thread
 	{
 		private boolean killme;
+		private OffsetDateTime lastloop;
 		
 		public ResetMonitorThread()
 		{
 			super.setName("SessionMonitorDaemon");
 			super.setDaemon(true);
+			lastloop = OffsetDateTime.now();
 		}
 		
 		public void run()
 		{
+			lastloop = OffsetDateTime.now();
 			try 
 			{
-				Thread.sleep(1000*60*30);
+				Thread.sleep(1000*60*SESSION_MONITOR_LOOP_MINUTES);
 			} 
 			catch (InterruptedException e) 
 			{
@@ -1073,10 +1194,31 @@ public class BotBrain {
 			}
 			while(!killRequested())
 			{
-				parser.command_SessionCheck();
+				//Check when the last loop was vs. now
+				OffsetDateTime thisloop = OffsetDateTime.now();
+				if (thisloop.getDayOfYear() != lastloop.getDayOfYear())
+				{
+					//We assume a date rollover. Hard reset!
+					try 
+					{
+						forceHardReset();
+					} 
+					catch (LoginException e) 
+					{
+						System.err.println(Schedule.getErrorStreamDateMarker() + " BotBarin.ResetMonitorThread.run || Login exception encountered during hard reset! Reset aborted.");
+						e.printStackTrace();
+					}
+				}
+				else
+				{
+					//Just another loop. Soft reset!
+					parser.command_SessionCheck();
+				}
+				lastloop = thisloop;
+				//Go back to sleep
 				try 
 				{
-					Thread.sleep(1000*60*30);
+					Thread.sleep(1000*60*SESSION_MONITOR_LOOP_MINUTES);
 				} 
 				catch (InterruptedException e) 
 				{
@@ -1112,8 +1254,8 @@ public class BotBrain {
 		{
 			super.setName("ResetLoginCountDaemon");
 			super.setDaemon(true);
-			super.setInitialDelay_millis(1000 * 60 * BotBrain.LOGIN_RETRY_COUNT_RESET_TIME);
-			super.setSleeptime_millis(1000 * 60 * BotBrain.LOGIN_RETRY_COUNT_RESET_TIME);
+			super.setInitialDelay_millis(1000 * BotBrain.LOGIN_RETRY_COUNT_RESET_TIME);
+			super.setSleeptime_millis(1000 * BotBrain.LOGIN_RETRY_COUNT_RESET_TIME);
 		}
 
 		public void doSomething() 

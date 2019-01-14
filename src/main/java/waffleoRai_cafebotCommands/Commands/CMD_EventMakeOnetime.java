@@ -12,7 +12,7 @@ public class CMD_EventMakeOnetime extends CommandAdapter{
 	
 	private MessageChannel comChannel;
 	
-	private Member requestingUser;
+	//private Member requestingUser;
 	
 	private String eventName;
 	private String rChannel;
@@ -180,16 +180,11 @@ public class CMD_EventMakeOnetime extends CommandAdapter{
 		return comChannel.getIdLong();
 	}
 	
-	public long getUserID()
-	{
-		return requestingUser.getUser().getIdLong();
-	}
-	
 	@Override
 	/**
 	 * @throws NullPointerException If bot is null.
 	 */
-	public void execute(AbstractBot bot) 
+	public void execute(AbstractBot bot) throws InterruptedException 
 	{
 		bot.makeOnetimeEvent_prompt(this);
 		super.cleanAfterMyself(bot);
@@ -199,13 +194,13 @@ public class CMD_EventMakeOnetime extends CommandAdapter{
 	/**
 	 * @throws NullPointerException If bot is null.
 	 */
-	public void execute_confirm(AbstractBot bot, MessageID msgid) {
+	public void execute_confirm(AbstractBot bot, MessageID msgid) throws InterruptedException {
 		bot.makeOnetimeEvent_complete(this, true);
 		bot.queueCommandMessageForCleaning(msgid, getGuildID());
 	}
 
 	@Override
-	public void execute_reject(AbstractBot bot, MessageID msgid) {
+	public void execute_reject(AbstractBot bot, MessageID msgid) throws InterruptedException {
 		bot.makeOnetimeEvent_complete(this, false);
 		bot.queueCommandMessageForCleaning(msgid, getGuildID());
 	}
@@ -216,11 +211,6 @@ public class CMD_EventMakeOnetime extends CommandAdapter{
 		return "onetime";
 	}
 
-	public long getGuildID()
-	{
-		return requestingUser.getGuild().getIdLong();
-	}
-	
 	public String getUsername()
 	{
 		return requestingUser.getUser().getName();

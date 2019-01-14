@@ -9,8 +9,8 @@ import waffleoRai_cafebotCommands.Commands.CMD_CancelEvent;
 /**
  * Cancel event (ecancel) command parser.
  * @author Blythe Hospelhorn
- * @version 1.0.1
- * @since July 20, 2018
+ * @version 1.1.0
+ * @since January 14, 2019
  */
 public class PRS_CancelEvent implements Parser{
 
@@ -19,7 +19,7 @@ public class PRS_CancelEvent implements Parser{
 	
 	@Override
 	public Command generateCommand(String[] args, MessageReceivedEvent event) {
-		if (args.length < 2) return new CMD_BadCommandMessage(event.getChannel(), event.getGuild(), event.getMessageIdLong());
+		if (args.length < 2) return new CMD_BadCommandMessage(event.getChannel(), event.getMember(), event.getMessageIdLong());
 		long eid = -1;
 		try
 		{
@@ -27,7 +27,7 @@ public class PRS_CancelEvent implements Parser{
 		}
 		catch (NumberFormatException e)
 		{
-			return new CMD_BadCommandMessage(event.getChannel(), event.getGuild(), event.getMessageIdLong());
+			return new CMD_BadCommandMessage(event.getChannel(), event.getMember(), event.getMessageIdLong());
 		}
 		boolean cancelAll = true;
 		boolean silent = false;

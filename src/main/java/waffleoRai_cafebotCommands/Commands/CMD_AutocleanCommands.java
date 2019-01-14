@@ -7,16 +7,17 @@ import waffleoRai_cafebotCore.AbstractBot;
 
 public class CMD_AutocleanCommands extends CommandAdapter{
 	
+	//private Guild guild;
 	private long guildID;
 	
-	public CMD_AutocleanCommands(Guild g)
+	/*public CMD_AutocleanCommands(Guild g)
 	{
 		guildID = g.getIdLong();
-	}
+	}*/
 	
-	public CMD_AutocleanCommands(long gid)
+	public CMD_AutocleanCommands(long guildID)
 	{
-		guildID = gid;
+		this.guildID = guildID;
 	}
 	
 	public long getChannelID()
@@ -33,7 +34,7 @@ public class CMD_AutocleanCommands extends CommandAdapter{
 	/**
 	 * @throws NullPointerException If bot is null.
 	 */
-	public void execute(AbstractBot bot) {
+	public void execute(AbstractBot bot) throws InterruptedException {
 		bot.cleanCommands(guildID);
 	}
 	
@@ -47,7 +48,11 @@ public class CMD_AutocleanCommands extends CommandAdapter{
 	{
 		return guildID;
 	}
-	
 
+	@Override
+	public Guild getGuild() 
+	{
+		return null;
+	}
 
 }

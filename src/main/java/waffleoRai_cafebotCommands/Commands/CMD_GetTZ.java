@@ -25,13 +25,13 @@ import waffleoRai_cafebotCore.AbstractBot;
  * <br><br><b>Standard Command:</b>
  * <br>gettz
  * @author Blythe Hospelhorn
- * @version 1.1.1
- * @since August 11, 2018
+ * @version 1.2.0
+ * @since January 14, 2019
  */
 public class CMD_GetTZ extends CommandAdapter{
 
 	private MessageChannel channel;
-	private Member user;
+	//private Member user;
 	
 	/**
 	 * Construct a GetTZ (Get TimeZone) command.
@@ -42,7 +42,8 @@ public class CMD_GetTZ extends CommandAdapter{
 	public CMD_GetTZ(MessageChannel c, Member m, long cmdID)
 	{
 		channel = c;
-		user = m;
+		//user = m;
+		super.requestingUser = m;
 		MessageID cmdmsg = new MessageID(cmdID, c.getIdLong());
 		super.setCommandMessageID(cmdmsg);
 	}
@@ -53,17 +54,12 @@ public class CMD_GetTZ extends CommandAdapter{
 		return channel.getIdLong();
 	}
 	
-	public long getUserID()
-	{
-		return user.getUser().getIdLong();
-	}
-	
 	@Override
 	/**
 	 * @throws NullPointerException If bot is null.
 	 */
-	public void execute(AbstractBot bot) {
-		bot.getUserTimezone(channel.getIdLong(), user);
+	public void execute(AbstractBot bot) throws InterruptedException {
+		bot.getUserTimezone(channel.getIdLong(), super.requestingUser);
 		super.cleanAfterMyself(bot);
 	}
 
@@ -71,11 +67,6 @@ public class CMD_GetTZ extends CommandAdapter{
 	public String toString()
 	{
 		return "gettz";
-	}
-	
-	public long getGuildID()
-	{
-		return user.getGuild().getIdLong();
 	}
 	
 }

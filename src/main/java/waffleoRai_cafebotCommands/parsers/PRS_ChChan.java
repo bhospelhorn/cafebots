@@ -9,8 +9,8 @@ import waffleoRai_cafebotCommands.Commands.CMD_ChChan;
 /**
  * Change birthday/greeting channel (chchan) command parser.
  * @author Blythe Hospelhorn
- * @version 1.0.1
- * @since July 20, 2018
+ * @version 1.1.0
+ * @since January 14, 2019
  */
 public class PRS_ChChan implements Parser{
 
@@ -26,11 +26,11 @@ public class PRS_ChChan implements Parser{
 	
 	@Override
 	public Command generateCommand(String[] args, MessageReceivedEvent event) {
-		if (args.length < 3) return new CMD_BadCommandMessage(event.getChannel(), event.getGuild(), event.getMessageIdLong());
+		if (args.length < 3) return new CMD_BadCommandMessage(event.getChannel(), event.getMember(), event.getMessageIdLong());
 		if (args[1].equals(BIRTHDAY)) return new CMD_ChChan(event.getChannel(), event.getMember(), args[2], true, event.getMessageIdLong());
 		else if (args[1].equals(GREETING)) return new CMD_ChChan(event.getChannel(), event.getMember(), args[2], false, event.getMessageIdLong());
 		
-		return new CMD_BadCommandMessage(event.getChannel(), event.getGuild(), event.getMessageIdLong());
+		return new CMD_BadCommandMessage(event.getChannel(), event.getMember(), event.getMessageIdLong());
 	}
 
 }

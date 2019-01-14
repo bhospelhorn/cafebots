@@ -28,13 +28,13 @@ import waffleoRai_cafebotCore.AbstractBot;
  * <br>eventhelp arghelp
  * <br>eventhelp sorhelp
  * @author Blythe Hospelhorn
- * @version 1.1.2
- * @since August 11, 2018
+ * @version 1.2.0
+ * @since January 14, 2019
  */
 public class CMD_Eventhelp extends CommandAdapter{
 
 	private MessageChannel channel;
-	private Member user;
+	//private Member user;
 	private boolean useSOR;
 	
 	/**
@@ -48,8 +48,9 @@ public class CMD_Eventhelp extends CommandAdapter{
 	public CMD_Eventhelp(MessageChannel ch, Member u, boolean sor, long cmdID)
 	{
 		channel = ch;
-		user = u;
+		//user = u;
 		useSOR = sor;
+		super.requestingUser = u;
 		MessageID cmdmsg = new MessageID(cmdID, ch.getIdLong());
 		super.setCommandMessageID(cmdmsg);
 	}
@@ -60,18 +61,13 @@ public class CMD_Eventhelp extends CommandAdapter{
 		return channel.getIdLong();
 	}
 	
-	public long getUserID()
-	{
-		return user.getUser().getIdLong();
-	}
-	
 	@Override
 	/**
 	 * @throws NullPointerException If bot is null.
 	 */
-	public void execute(AbstractBot bot) {
-		if(useSOR) bot.displaySORHelp(channel.getIdLong(), user.getUser().getName());
-		else bot.displayEventArgsHelp(channel.getIdLong(), user.getUser().getName());
+	public void execute(AbstractBot bot) throws InterruptedException {
+		if(useSOR) bot.displaySORHelp(channel.getIdLong(), super.requestingUser);
+		else bot.displayEventArgsHelp(channel.getIdLong(), super.requestingUser.getUser().getName());
 		super.cleanAfterMyself(bot);
 	}
 
@@ -79,11 +75,6 @@ public class CMD_Eventhelp extends CommandAdapter{
 	public String toString()
 	{
 		return "eventhelp";
-	}
-	
-	public long getGuildID()
-	{
-		return user.getGuild().getIdLong();
 	}
 	
 }

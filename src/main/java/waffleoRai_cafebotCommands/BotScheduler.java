@@ -37,6 +37,9 @@ import waffleoRai_schedulebot.Schedule;
  * 1.0.0 -> 1.0.1 | July 15, 2018
  * 	Added some information access methods
  * 
+ * 1.0.1 -> 1.1.0 | January 14, 2019
+ * 	InterruptedException handling added (for online status checking)
+ * 
  */
 
 /*
@@ -67,8 +70,8 @@ import waffleoRai_schedulebot.Schedule;
  * <br><br><i>Outstanding Issues:</i>
  * <br>- Potential inefficient memory use in BotScheduler.Shift
  * @author Blythe Hospelhorn
- * @version 1.0.1
- * @since July 1, 2018
+ * @version 1.1.0
+ * @since January 14, 2019
  */
 public class BotScheduler implements ActionListener{
 	
@@ -727,6 +730,7 @@ public class BotScheduler implements ActionListener{
 		
 		timer = new Timer(minutesPerShift(shifts_per_day) * MILLIS_PER_MINUTE, this);	
 		//System.err.println("DEBUG BotScheduler.<init> || Returning...");
+		
 	}
 
 	/**
@@ -735,6 +739,7 @@ public class BotScheduler implements ActionListener{
 	 * @param permfile Path to the permanent command map file.
 	 * @throws IOException If there is an error accessing either file on disk.
 	 * @throws UnsupportedFileTypeException If there is an error parsing either file.
+	 * @throws InterruptedException 
 	 */
 	public BotScheduler(String schedfile, String permfile) throws IOException, UnsupportedFileTypeException
 	{
@@ -939,9 +944,10 @@ public class BotScheduler implements ActionListener{
 	
 	//This appears to be what's resetting the shifts :) No custom thread needed.
 	@Override
-	public void actionPerformed(ActionEvent e) {
-		setCurrentShift();
+	public void actionPerformed(ActionEvent e) 
+	{
 		System.err.println(Schedule.getErrorStreamDateMarker() + " BotScheduler.actionPerformed || Check for shift change...");
+		setCurrentShift();
 	}
 	
 	/**

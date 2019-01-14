@@ -24,13 +24,13 @@ import waffleoRai_cafebotCore.AbstractBot;
  * <br><br><b>Standard Command:</b>
  * <br>help
  * @author Blythe Hospelhorn
- * @version 1.1.1
- * @since August 11, 2018
+ * @version 1.2.0
+ * @since January 14, 2019
  */
 public class CMD_Help extends CommandAdapter{
 
 	private MessageChannel channel;
-	private Member member;
+	//private Member member;
 	
 	/**
 	 * Construct a Help command.
@@ -41,7 +41,8 @@ public class CMD_Help extends CommandAdapter{
 	public CMD_Help(MessageChannel ch, Member m, long cmdID)
 	{
 		channel = ch;
-		member = m;
+		//member = m;
+		super.requestingUser = m;
 		MessageID cmdmsg = new MessageID(cmdID, ch.getIdLong());
 		super.setCommandMessageID(cmdmsg);
 	}
@@ -52,17 +53,12 @@ public class CMD_Help extends CommandAdapter{
 		return channel.getIdLong();
 	}
 	
-	public long getUserID()
-	{
-		return member.getUser().getIdLong();
-	}
-	
 	@Override
 	/**
 	 * @throws NullPointerException If bot is null.
 	 */
-	public void execute(AbstractBot bot) {
-		bot.displayHelp(getChannelID(), member);
+	public void execute(AbstractBot bot) throws InterruptedException {
+		bot.displayHelp(getChannelID(), super.requestingUser);
 		super.cleanAfterMyself(bot);
 	}
 	
@@ -72,9 +68,4 @@ public class CMD_Help extends CommandAdapter{
 		return "help";
 	}
 
-	public long getGuildID()
-	{
-		return member.getGuild().getIdLong();
-	}
-	
 }

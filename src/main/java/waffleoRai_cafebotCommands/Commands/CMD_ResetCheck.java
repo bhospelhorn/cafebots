@@ -6,7 +6,7 @@ import waffleoRai_cafebotCore.AbstractBot;
 public class CMD_ResetCheck extends CommandAdapter{
 	
 	@Override
-	public void execute(AbstractBot bot) 
+	public void execute(AbstractBot bot) throws InterruptedException 
 	{
 		bot.testForReset();
 	}

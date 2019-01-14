@@ -15,6 +15,7 @@ import java.util.GregorianCalendar;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
 
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Member;
@@ -34,6 +35,9 @@ public class GuildSettings {
 	/* ----- Constants ----- */
 	
 	public static final String INIT_FILENAME = "gsettings.ini";
+	
+	public static final String INIT_GUILDSDIR = "guilds";
+	
 	public static final String INIT_USERDIR = "members";
 	public static final String INIT_SCHEDULEDIR = "events";
 	public static final String INIT_ROLEDIR = "casting";
@@ -44,20 +48,20 @@ public class GuildSettings {
 	
 	public static final int MAX_SAVED_COMMANDS = 50000;
 	
+	/* ----- Static Variables ----- */
+	
+	private static String userDataDirectory;
+	
 	/* ----- Instance Variables ----- */
 	
-	//private Guild guild;
 	private long guild;
 	
-	//private MessageChannel birthdayChannel;
-	//private MessageChannel greetingChannel;
 	private long birthdayChannel;
 	private long greetingChannel;
 	private boolean greetingsOn;
 	private boolean farewellsOn;
 	
 	private boolean auto_cmd_clear;
-	//private LongQueue recentCommands;
 	private MIDQueue recentCommands;
 	
 	private UserBank users;
@@ -71,7 +75,7 @@ public class GuildSettings {
 	
 	/* ----- Construction/Parsing ----- */
 	
-	public GuildSettings(Guild g, ParseCore parser, String gdirPath)
+	public GuildSettings(Guild g, ParseCore parser, ConcurrentHashMap<Long, ActorUser> actorBank)
 	{
 		//Build anew.
 		guild = g.getIdLong();
@@ -84,15 +88,21 @@ public class GuildSettings {
 		schedule = new Schedule(users, guild, parser);
 		//Get all the members in the guild currently and add to user bank
 		List<Member> memlist = g.getMembers();
-		for (Member m : memlist) users.addUser(new ActorUser(m));
-		dataDir = gdirPath;
+		for (Member m : memlist)
+		{
+			long uid = m.getUser().getIdLong();
+			ActorUser au = actorBank.get(uid);
+			GuildUser gu = new GuildUser(m, au);
+			if (au == null) actorBank.putIfAbsent(uid, gu.getUserProfile());
+		}
+		dataDir = GuildSettings.getGuildDirectoryPath(g.getIdLong());
 		adminRoles = new LinkedList<Long>();
 		//recentCommands = new LongQueue(MAX_SAVED_COMMANDS);
 		recentCommands = new MIDQueue(MAX_SAVED_COMMANDS);
 		auto_cmd_clear = false;
 	}
 	
-	public GuildSettings(String gdirPath, ParseCore parser) throws IOException, UnsupportedFileTypeException
+	public GuildSettings(String gdirPath, ParseCore parser, ConcurrentHashMap<Long, ActorUser> actorBank) throws IOException, UnsupportedFileTypeException
 	{
 		//Load from a file.
 		//Find the main guild settings file.
@@ -165,14 +175,14 @@ public class GuildSettings {
 		br.close();
 		fr.close();
 		
-		loadUserInfo(gdirPath);
+		loadUserInfo(gdirPath, actorBank);
 		loadSchedule(gdirPath, parser);
 		loadRoles(gdirPath);
 		
 		
 	}
 	
-	private void loadUserInfo(String gdirPath) throws IOException, UnsupportedFileTypeException
+	private void loadUserInfo(String gdirPath, ConcurrentHashMap<Long, ActorUser> actorBank) throws IOException, UnsupportedFileTypeException
 	{
 		users = new UserBank();
 		String userdir = gdirPath + File.separator + INIT_USERDIR;
@@ -180,15 +190,29 @@ public class GuildSettings {
 		{
 			for (Path f : stream)
 			{
-				if (FileBuffer.fileExists(f.toString()))
+				String strPath = f.toString();
+				if (FileBuffer.fileExists(strPath))
 				{
 					//If it's a file...
 					FileReader fr = new FileReader(f.toString());
 					BufferedReader br = new BufferedReader(fr);
-					ActorUser u = new ActorUser(br);
-					users.addUser(u);
-					br.close();
-					fr.close();
+					try
+					{
+						String fname = f.getFileName().toString();
+						int dot = fname.lastIndexOf('.');
+						if (dot >= 0) fname = fname.substring(0, dot);
+						long uid = Long.parseUnsignedLong(fname);
+						GuildUser u = new GuildUser(br, actorBank.get(uid));
+						users.addUser(u);
+						br.close();
+						fr.close();
+					}
+					catch (Exception e)
+					{
+						e.printStackTrace();
+						br.close();
+						fr.close();
+					}
 				}
 			}
 			stream.close();
@@ -203,6 +227,7 @@ public class GuildSettings {
 			e.printStackTrace();
 			throw e;
 		}
+
 	}
 	
 	private void loadSchedule(String gdirPath, ParseCore parser) throws IOException, UnsupportedFileTypeException
@@ -217,21 +242,6 @@ public class GuildSettings {
 	}
 
 	/* ----- Getters ----- */
-	
-	/*public Guild getGuild()
-	{
-		return guild;
-	}
-	
-	public MessageChannel getBirthdayChannel()
-	{
-		return birthdayChannel;
-	}
-	
-	public MessageChannel getGreetingChannel()
-	{
-		return greetingChannel;
-	}*/
 	
 	public synchronized long getGuildID()
 	{
@@ -263,12 +273,12 @@ public class GuildSettings {
 		return roleManager;
 	}
 	
-	public List<ActorUser> getAllGreetingPingUsers()
+	public List<GuildUser> getAllGreetingPingUsers()
 	{
 		return users.getAllUsersWithGreetingPing();
 	}
 	
-	public List<ActorUser> getAllLeavingPingUsers()
+	public List<GuildUser> getAllLeavingPingUsers()
 	{
 		return users.getAllUsersWithFarewellPing();
 	}
@@ -306,7 +316,7 @@ public class GuildSettings {
 		return auto_cmd_clear;
 	}
 	
-	public ActorUser getUser(long uid)
+	public GuildUser getUser(long uid)
 	{
 		return users.getUser(uid);
 	}
@@ -340,14 +350,15 @@ public class GuildSettings {
 		schedule.linkParserCore(parser);
 	}
 	
-	public void newMember(Member m)
+	public ActorUser newMember(Member m, ActorUser userProfile)
 	{
-		ActorUser u = users.getUser(m.getUser().getIdLong());
-		if (u != null) return;
-		u = new ActorUser(m);
+		GuildUser u = users.getUser(m.getUser().getIdLong());
+		if (u != null) return userProfile;
+		u = new GuildUser(m, userProfile);
 		//Check admin roles to see if this user has admin permissions...
 		if (memberShouldBeAdmin(m)) u.setAdmin(true);
 		users.addUser(u);
+		return u.getUserProfile();
 	}
 	
 	public synchronized void setGreetings(boolean on)
@@ -372,7 +383,7 @@ public class GuildSettings {
 	{
 		//See if any roles are in the admin role list. If so, make member an admin
 		long uid = member.getUser().getIdLong();
-		ActorUser user = users.getUser(uid);
+		GuildUser user = users.getUser(uid);
 		if (user == null) return;
 		if (user.isAdmin()) return;
 		long rid = role.getIdLong();
@@ -389,7 +400,7 @@ public class GuildSettings {
 	public synchronized void updateAdminPermissions_remove(Member member)
 	{
 		long uid = member.getUser().getIdLong();
-		ActorUser user = users.getUser(uid);
+		GuildUser user = users.getUser(uid);
 		if (user == null) return;
 		if (!user.isAdmin()) return;
 		List<Role> mroles = member.getRoles();
@@ -410,7 +421,7 @@ public class GuildSettings {
 		for (Member m : members)
 		{
 			long uid = m.getUser().getIdLong();
-			ActorUser user = users.getUser(uid);
+			GuildUser user = users.getUser(uid);
 			user.setAdmin(true);
 		}
 	}
@@ -436,7 +447,7 @@ public class GuildSettings {
 			if (!exempt)
 			{
 				long uid = m.getUser().getIdLong();
-				ActorUser user = users.getUser(uid);
+				GuildUser user = users.getUser(uid);
 				user.setAdmin(false);	
 			}
 		}
@@ -569,7 +580,7 @@ public class GuildSettings {
 	{
 		return backup.backupRunning();
 	}
-
+	
 	public void startBackupThread()
 	{
 		//Random delay for staggering...
@@ -630,6 +641,24 @@ public class GuildSettings {
 		schedule.killMonitorThreads();
 	}
 	
+	/* ----- Directory Structure ----- */
+	
+	public static void setUserDataDirectory(String dirPath)
+	{
+		userDataDirectory = dirPath;
+	}
+	
+	public static String getUserDataDirectory()
+	{
+		return userDataDirectory;
+	}
+	
+	public static String getGuildDirectoryPath(long guildID)
+	{
+		String gdirPath = userDataDirectory + File.separator + INIT_GUILDSDIR + File.separator + Long.toHexString(guildID);
+		return gdirPath;
+	}
+	
 	/* ----- Serialization ----- */
 	
 	private void writeSettingsFile(String path) throws IOException
@@ -688,10 +717,10 @@ public class GuildSettings {
 			stream.close();
 		}
 		
-		List<ActorUser> allusers = users.getAllUsers();
-		for(ActorUser u : allusers)
+		List<GuildUser> allusers = users.getAllUsers();
+		for(GuildUser u : allusers)
 		{
-			String ufile = userdir + File.separator + Long.toUnsignedString(u.getUID()) + ".user";
+			String ufile = userdir + File.separator + Long.toUnsignedString(u.getUserProfile().getUID()) + ".guser";
 			FileWriter fw = new FileWriter(ufile);
 			BufferedWriter bw = new BufferedWriter(fw);
 			

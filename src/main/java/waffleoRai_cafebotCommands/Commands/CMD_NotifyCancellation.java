@@ -41,7 +41,7 @@ public class CMD_NotifyCancellation extends CommandAdapter{
 	/**
 	 * @throws NullPointerException If bot is null.
 	 */
-	public void execute(AbstractBot bot) {
+	public void execute(AbstractBot bot) throws InterruptedException {
 		bot.notifyCancellation(event, instanceOnly, guildID);
 	}
 

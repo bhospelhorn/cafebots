@@ -9,6 +9,9 @@ import java.util.LinkedList;
  * Creation | June 9, 2018
  * Version 1.0.0 Documentation | July 1, 2018
  * 
+ * 1.0.0 -> 1.0.1 | November 1, 2018
+ * 	Added method to push command back to top of queue
+ * 
  */
 
 /**
@@ -16,8 +19,8 @@ import java.util.LinkedList;
  * synchronized so as to reduce the potential for concurrency errors. This object
  * is designed to be safe for access by multiple threads.
  * @author Blythe Hospelhorn
- * @version 1.0.0
- * @since July 1, 2018
+ * @version 1.0.1
+ * @since November 1, 2018
  *
  */
 public class CommandQueue {
@@ -58,6 +61,15 @@ public class CommandQueue {
 		{
 			return null;
 		}
+	}
+	
+	/**
+	 * Push a command back to the top of the stack (front of queue).
+	 * @param c Command to push.
+	 */
+	public synchronized void pushCommand(Command c)
+	{
+		if (c != null) queue.push(c);
 	}
 	
 	/**

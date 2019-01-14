@@ -12,7 +12,7 @@ public class CMD_EventMakeWeekly extends CommandAdapter{
 	
 	private MessageChannel comChannel;
 	
-	private Member requestingUser;
+	//private Member requestingUser;
 	
 	private int DOW;
 	private String eventName;
@@ -159,16 +159,11 @@ public class CMD_EventMakeWeekly extends CommandAdapter{
 		return comChannel.getIdLong();
 	}
 	
-	public long getUserID()
-	{
-		return requestingUser.getUser().getIdLong();
-	}
-	
 	@Override
 	/**
 	 * @throws NullPointerException If bot is null.
 	 */
-	public void execute(AbstractBot bot) 
+	public void execute(AbstractBot bot) throws InterruptedException 
 	{
 		bot.makeWeeklyEvent_prompt(this);
 		super.cleanAfterMyself(bot);
@@ -178,13 +173,13 @@ public class CMD_EventMakeWeekly extends CommandAdapter{
 	/**
 	 * @throws NullPointerException If bot is null.
 	 */
-	public void execute_confirm(AbstractBot bot, MessageID msgid) {
+	public void execute_confirm(AbstractBot bot, MessageID msgid) throws InterruptedException {
 		bot.makeWeeklyEvent_complete(this, true);
 		bot.queueCommandMessageForCleaning(msgid, getGuildID());
 	}
 
 	@Override
-	public void execute_reject(AbstractBot bot, MessageID msgid) {
+	public void execute_reject(AbstractBot bot, MessageID msgid) throws InterruptedException {
 		bot.makeWeeklyEvent_complete(this, false);
 		bot.queueCommandMessageForCleaning(msgid, getGuildID());
 	}
@@ -195,9 +190,4 @@ public class CMD_EventMakeWeekly extends CommandAdapter{
 		return "weekly";
 	}
 
-	public long getGuildID()
-	{
-		return requestingUser.getGuild().getIdLong();
-	}
-	
 }

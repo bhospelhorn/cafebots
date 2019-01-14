@@ -9,14 +9,15 @@ import waffleoRai_cafebotCore.AbstractBot;
 public class CMD_CheckGreetingStatus extends CommandAdapter{
 	
 	private MessageChannel channel;
-	private Member member;
+	//private Member member;
 	private boolean farewell;
 	private boolean ping;
 	
 	public CMD_CheckGreetingStatus(MessageChannel c, Member m, boolean f, boolean p, long cmdID)
 	{
 		channel = c;
-		member = m;
+		//member = m;
+		super.requestingUser = m;
 		farewell = f;
 		ping = p;
 		MessageID cmdmsg = new MessageID(cmdID, c.getIdLong());
@@ -28,24 +29,19 @@ public class CMD_CheckGreetingStatus extends CommandAdapter{
 		return channel.getIdLong();
 	}
 
-	public long getUserID()
-	{
-		return member.getUser().getIdLong();
-	}
-	
 	@Override
 	/**
 	 * @throws NullPointerException If bot is null.
 	 */
-	public void execute(AbstractBot bot) 
+	public void execute(AbstractBot bot) throws InterruptedException 
 	{
 		if (ping)
 		{
-			bot.checkGreetingPingStatus(channel.getIdLong(), member, farewell);
+			bot.checkGreetingPingStatus(channel.getIdLong(), super.requestingUser, farewell);
 		}
 		else
 		{
-			bot.checkGreetingStatus(channel.getIdLong(), member.getGuild(), farewell);
+			bot.checkGreetingStatus(channel.getIdLong(), getGuild(), farewell);
 		}
 		super.cleanAfterMyself(bot);
 	}
@@ -54,11 +50,6 @@ public class CMD_CheckGreetingStatus extends CommandAdapter{
 	public String toString()
 	{
 		return "checkg";
-	}
-	
-	public long getGuildID()
-	{
-		return member.getGuild().getIdLong();
 	}
 	
 

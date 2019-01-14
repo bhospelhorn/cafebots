@@ -19,7 +19,7 @@ public class PRS_EventMonthlyDOW implements Parser{
 	public Command generateCommand(String[] args, MessageReceivedEvent event) 
 	{
 		if (args.length < 6){
-			return new CMD_InsufficientArgs(event.getChannel().getIdLong(), EventType.MONTHLYB, event.getAuthor().getName(), event.getGuild().getIdLong(), event.getMessageIdLong());
+			return new CMD_InsufficientArgs(event.getChannel().getIdLong(), EventType.MONTHLYB, event.getMember(), event.getGuild().getIdLong(), event.getMessageIdLong());
 		}
 		String rawdow = args[1];
 		String rawweek = args[2];
@@ -29,7 +29,7 @@ public class PRS_EventMonthlyDOW implements Parser{
 		String tchan = args[6];
 		
 		int dow = Schedule.getDayOfWeek(rawdow);
-		if (dow < 0) return new CMD_InsufficientArgs(event.getChannel().getIdLong(), EventType.MONTHLYB, event.getAuthor().getName(), event.getGuild().getIdLong(), event.getMessageIdLong());
+		if (dow < 0) return new CMD_InsufficientArgs(event.getChannel().getIdLong(), EventType.MONTHLYB, event.getMember(), event.getGuild().getIdLong(), event.getMessageIdLong());
 		
 		int week = 1;
 		try
@@ -38,12 +38,12 @@ public class PRS_EventMonthlyDOW implements Parser{
 		}
 		catch (NumberFormatException e)
 		{
-			return new CMD_InsufficientArgs(event.getChannel().getIdLong(), EventType.MONTHLYB, event.getAuthor().getName(), event.getGuild().getIdLong(), event.getMessageIdLong());
+			return new CMD_InsufficientArgs(event.getChannel().getIdLong(), EventType.MONTHLYB, event.getMember(), event.getGuild().getIdLong(), event.getMessageIdLong());
 		}
 		
 		String[] time = rawtime.split(":");
 		if (time.length != 2){
-			return new CMD_InsufficientArgs(event.getChannel().getIdLong(), EventType.MONTHLYB, event.getAuthor().getName(), event.getGuild().getIdLong(), event.getMessageIdLong());
+			return new CMD_InsufficientArgs(event.getChannel().getIdLong(), EventType.MONTHLYB, event.getMember(), event.getGuild().getIdLong(), event.getMessageIdLong());
 		}
 		int hr = 0;
 		int min = 0;
@@ -54,7 +54,7 @@ public class PRS_EventMonthlyDOW implements Parser{
 		}
 		catch (NumberFormatException e)
 		{
-			return new CMD_InsufficientArgs(event.getChannel().getIdLong(), EventType.MONTHLYB, event.getAuthor().getName(), event.getGuild().getIdLong(), event.getMessageIdLong());
+			return new CMD_InsufficientArgs(event.getChannel().getIdLong(), EventType.MONTHLYB, event.getMember(), event.getGuild().getIdLong(), event.getMessageIdLong());
 		}
 
 		boolean group = false;

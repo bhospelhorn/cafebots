@@ -26,13 +26,13 @@ import waffleoRai_cafebotCore.AbstractBot;
  * <br><br><i>Admin Only:</i>
  * <br>cleanday
  * @author Blythe Hospelhorn
- * @version 1.2.0
- * @since August 11, 2018
+ * @version 1.3.0
+ * @since January 14, 2019
  */
 public class CMD_CleanMessages extends CommandAdapter{
 
 	private MessageChannel channel;
-	private Member user;
+	//private Member user;
 	private boolean userOnly;
 	private boolean dayOnly;
 
@@ -48,7 +48,8 @@ public class CMD_CleanMessages extends CommandAdapter{
 	public CMD_CleanMessages(MessageChannel ch, Member u, boolean useronly, boolean dayonly, long cmdID)
 	{
 		channel = ch;
-		user = u;
+		//user = u;
+		super.requestingUser = u;
 		userOnly = useronly;
 		dayOnly = dayonly;
 		MessageID cmdmsg = new MessageID(cmdID, ch.getIdLong());
@@ -59,15 +60,15 @@ public class CMD_CleanMessages extends CommandAdapter{
 	/**
 	 * @throws NullPointerException If bot is null.
 	 */
-	public void execute(AbstractBot bot) {
+	public void execute(AbstractBot bot) throws InterruptedException {
 		if (dayOnly)
 		{
-			if (userOnly) bot.cleanChannelMessages_allUserDay_prompt(channel.getIdLong(), user, this);
-			else bot.cleanChannelMessages_allDay_prompt(channel.getIdLong(), user, this);
+			if (userOnly) bot.cleanChannelMessages_allUserDay_prompt(channel.getIdLong(), super.requestingUser, this);
+			else bot.cleanChannelMessages_allDay_prompt(channel.getIdLong(), super.requestingUser, this);
 		}
 		else
 		{
-			if (userOnly) bot.cleanChannelMessages_allUser_prompt(channel.getIdLong(), user, this);
+			if (userOnly) bot.cleanChannelMessages_allUser_prompt(channel.getIdLong(), super.requestingUser, this);
 		}
 		super.cleanAfterMyself(bot);
 		
@@ -79,24 +80,19 @@ public class CMD_CleanMessages extends CommandAdapter{
 		return channel.getIdLong();
 	}
 	
-	public long getUserID()
-	{
-		return user.getUser().getIdLong();
-	}
-	
 	@Override
 	/**
 	 * @throws NullPointerException If bot is null.
 	 */
-	public void execute_confirm(AbstractBot bot, MessageID msgid) {
+	public void execute_confirm(AbstractBot bot, MessageID msgid) throws InterruptedException {
 		if (dayOnly)
 		{
-			if (userOnly) bot.cleanChannelMessages_allUserDay(channel.getIdLong(), user);
-			else bot.cleanChannelMessages_allDay(channel.getIdLong(), user);
+			if (userOnly) bot.cleanChannelMessages_allUserDay(channel.getIdLong(), super.requestingUser);
+			else bot.cleanChannelMessages_allDay(channel.getIdLong(), super.requestingUser);
 		}
 		else
 		{
-			if (userOnly) bot.cleanChannelMessages_allUser(channel.getIdLong(), user);
+			if (userOnly) bot.cleanChannelMessages_allUser(channel.getIdLong(), super.requestingUser);
 		}
 		bot.queueCommandMessageForCleaning(msgid, getGuildID());
 	}
@@ -105,8 +101,8 @@ public class CMD_CleanMessages extends CommandAdapter{
 	/**
 	 * @throws NullPointerException If bot is null.
 	 */
-	public void execute_reject(AbstractBot bot, MessageID msgid) {
-		bot.displayGeneralCancel(getChannelID(), user.getUser().getName());
+	public void execute_reject(AbstractBot bot, MessageID msgid) throws InterruptedException {
+		bot.displayGeneralCancel(getChannelID(), super.requestingUser);
 		bot.queueCommandMessageForCleaning(msgid, getGuildID());
 	}
 
@@ -119,9 +115,4 @@ public class CMD_CleanMessages extends CommandAdapter{
 		return "";
 	}
 
-	public long getGuildID()
-	{
-		return user.getGuild().getIdLong();
-	}
-	
 }

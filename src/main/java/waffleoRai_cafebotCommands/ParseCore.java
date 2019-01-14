@@ -51,6 +51,8 @@ import waffleoRai_schedulebot.Schedule;
  * 	Added command ID passing for responses
  * 1.2.1 -> 1.2.2 | August 11, 2018
  * Updated command ID to MessageID object
+ * 1.2.2 -> 1.3.0 | January 14, 2019
+ * Update for JDA/ ability to interrupt commands, waits for bot status checks
  */
 
 /**
@@ -62,10 +64,11 @@ import waffleoRai_schedulebot.Schedule;
  * <br><br><b>I/O Options:</b>
  * <br>[None]
  * <br><br><i>Outstanding Issues:</i>
- * <br>
+ * <br> - Should ideally be multithreaded
+ * <br> - Should ideally have a more tightly managed queue size
  * @author Blythe Hospelhorn
- * @version 1.2.2
- * @since August 11, 2018
+ * @version 1.3.0
+ * @since January 14, 2019
  */
 public class ParseCore {
 	
@@ -581,7 +584,9 @@ public class ParseCore {
 			String[] args = splitArgs(command);
 			Parser p = parserMap.get(args[0]);
 			Command c = null;
-			if (p == null) c = new CMD_BadCommandMessage(event.getChannel(), event.getGuild(), event.getMessageIdLong());
+			if (p == null){
+				c = new CMD_BadCommandMessage(event.getChannel(), event.getMember(), event.getMessageIdLong());
+			}
 			else c = p.generateCommand(args, event);
 			//Determine which bot(s) to send command to.
 			if (!mentioned.isEmpty())
@@ -614,7 +619,7 @@ public class ParseCore {
 							{
 								//System.err.println(Thread.currentThread().getName() + " || ParseCore.parseMessage || DEBUG - Sending command to bot " + i);
 								//mybots[i].getCommandQueue().addCommand(new CMD_OtherBotHandledMessage(event.getChannel()));
-								mybots[bot].submitCommand(new CMD_OtherBotHandledMessage(event.getChannel()));
+								mybots[bot].submitCommand(new CMD_OtherBotHandledMessage(event.getChannel(), event.getMember()));
 							}
 						}
 					}
@@ -638,7 +643,7 @@ public class ParseCore {
 					else
 					{
 						//mybots[i].getCommandQueue().addCommand(new CMD_OtherBotHandledMessage(event.getChannel()));
-						mybots[bot].submitCommand(new CMD_OtherBotHandledMessage(event.getChannel()));
+						mybots[bot].submitCommand(new CMD_OtherBotHandledMessage(event.getChannel(), event.getMember()));
 					}
 				}
 			}
@@ -666,7 +671,8 @@ public class ParseCore {
 		//Ping greeting channel if set.
 		//Ping admin users that request notification.
 		//Bot command should do both.
-		Command c = new CMD_NewMemberNotify(e.getGuild(), e.getMember());
+		//Command c = new CMD_NewMemberNotify(e.getGuild(), e.getMember());
+		Command c = new CMD_NewMemberNotify(e.getMember());
 		int bot = scheduler.sendCommandTo(CMD_GREETNEWMEMBER);
 		if (bot < 0) return;
 		if (bot >= mybots.length) return;
@@ -885,12 +891,22 @@ public class ParseCore {
 			if (b == null) continue;
 			if (!bset)
 			{
-				if (b.visiblyOnline()){
-					b.setBeta(true);
-					bset = true;
-					System.err.println(Schedule.getErrorStreamDateMarker() + " ParseCore.setBetaBot || BOT" + i + " set to beta bot!");
+				try
+				{
+					if (b.visiblyOnline()){
+						b.setBeta(true);
+						bset = true;
+						System.err.println(Schedule.getErrorStreamDateMarker() + " ParseCore.setBetaBot || BOT" + i + " set to beta bot!");
+					}
+					else b.setBeta(false);
 				}
-				else b.setBeta(false);
+				catch (InterruptedException e)
+				{
+					//If it can't check to see if its online for whatever reason, 
+					//	just assume it isn't.
+					b.setBeta(false);
+					System.err.println(Schedule.getErrorStreamDateMarker() + " ParseCore.setBetaBot || BOT" + i + " was interrupted before it could check online status. Assuming offline...");
+				}
 			}
 			else
 			{

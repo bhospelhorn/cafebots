@@ -18,7 +18,7 @@ public class PRS_ChangeRoleAdmin implements Parser{
 	@Override
 	public Command generateCommand(String[] args, MessageReceivedEvent event) 
 	{
-		if (args.length < 2) return new CMD_BadCommandMessage(event.getChannel(), event.getGuild(), event.getMessageIdLong());
+		if (args.length < 2) return new CMD_BadCommandMessage(event.getChannel(), event.getMember(), event.getMessageIdLong());
 		return new CMD_ChangeRoleAdmin(event.getChannel(), event.getMember(), args[1], dir, event.getMessageIdLong());
 	}
 

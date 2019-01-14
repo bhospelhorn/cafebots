@@ -26,13 +26,13 @@ import waffleoRai_cafebotCore.AbstractBot;
  * <br><br><b>Standard Command:</b>
  * <br>seealltz
  * @author Blythe Hospelhorn
- * @version 1.1.2
- * @since August 11, 2018
+ * @version 1.2.0
+ * @since January 14, 2019
  */
 public class CMD_SeeTZ extends CommandAdapter{
 
 	private MessageChannel ch;
-	private Member user;
+	//private Member user;
 	
 	/**
 	 * Construct a SeeTZ (See All Timezones) command.
@@ -43,7 +43,8 @@ public class CMD_SeeTZ extends CommandAdapter{
 	public CMD_SeeTZ(MessageChannel channel, Member u, long cmdID)
 	{
 		ch = channel;
-		user = u;
+		//user = u;
+		super.requestingUser = u;
 		MessageID cmdmsg = new MessageID(cmdID, ch.getIdLong());
 		super.setCommandMessageID(cmdmsg);
 	}
@@ -54,17 +55,12 @@ public class CMD_SeeTZ extends CommandAdapter{
 		return ch.getIdLong();
 	}
 	
-	public long getUserID()
-	{
-		return user.getUser().getIdLong();
-	}
-	
 	@Override
 	/**
 	 * @throws NullPointerException If bot is null.
 	 */
-	public void execute(AbstractBot bot) {
-		bot.postTimezoneList(ch.getIdLong(), user.getUser().getName());
+	public void execute(AbstractBot bot) throws InterruptedException {
+		bot.postTimezoneList(ch.getIdLong(), super.requestingUser);
 		super.cleanAfterMyself(bot);
 	}
 	
@@ -74,9 +70,4 @@ public class CMD_SeeTZ extends CommandAdapter{
 		return "seealltz";
 	}
 	
-	public long getGuildID()
-	{
-		return user.getGuild().getIdLong();
-	}
-
 }

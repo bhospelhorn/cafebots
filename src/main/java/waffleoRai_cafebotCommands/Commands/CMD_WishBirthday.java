@@ -25,8 +25,8 @@ import waffleoRai_schedulebot.Birthday;
  * guild's (server's) birthday wishes channel.
  * <br>This event cannot be induced via command line. It is internal only.
  * @author Blythe Hospelhorn
- * @version 1.0.1
- * @since August 11, 2018
+ * @version 1.1.0
+ * @since January 14, 2019
  */
 public class CMD_WishBirthday extends CommandAdapter{
 	
@@ -56,7 +56,7 @@ public class CMD_WishBirthday extends CommandAdapter{
 	/**
 	 * @throws NullPointerException If bot is null.
 	 */
-	public void execute(AbstractBot bot) {	
+	public void execute(AbstractBot bot) throws InterruptedException {	
 		bot.wishBirthday(bday.getRequestingUser(), guild, cointoss);
 	}
 
@@ -64,15 +64,7 @@ public class CMD_WishBirthday extends CommandAdapter{
 	/**
 	 * @throws NullPointerException If bot is null.
 	 */
-	public void execute_timeout(AbstractBot bot) {
-		bot.wishBirthday(bday.getRequestingUser(), guild, cointoss);
-	}
-
-	@Override
-	/**
-	 * @throws NullPointerException If bot is null.
-	 */
-	public void execute_rerequest(AbstractBot bot, MessageID msgid) {
+	public void execute_rerequest(AbstractBot bot, MessageID msgid) throws InterruptedException {
 		bot.wishBirthday(bday.getRequestingUser(), guild, cointoss);
 	}
 	
@@ -86,4 +78,5 @@ public class CMD_WishBirthday extends CommandAdapter{
 	{
 		return guild;
 	}
+
 }

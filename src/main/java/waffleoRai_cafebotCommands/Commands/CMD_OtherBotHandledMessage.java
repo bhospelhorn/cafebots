@@ -1,5 +1,6 @@
 package waffleoRai_cafebotCommands.Commands;
 
+import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.MessageChannel;
 import waffleoRai_cafebotCommands.CommandAdapter;
 import waffleoRai_cafebotCore.AbstractBot;
@@ -17,8 +18,8 @@ import waffleoRai_cafebotCore.AbstractBot;
  * is already handling their command.
  * <br>This event cannot be induced via command line. It is internal only.
  * @author Blythe Hospelhorn
- * @version 1.0.0
- * @since July 1, 2018
+ * @version 1.1.0
+ * @since January 14, 2019
  */
 public class CMD_OtherBotHandledMessage extends CommandAdapter{
 
@@ -28,9 +29,10 @@ public class CMD_OtherBotHandledMessage extends CommandAdapter{
 	 * Construct a new OtherBotHandledMessage command.
 	 * @param ch Channel command was issued on and reply should be sent to.
 	 */
-	public CMD_OtherBotHandledMessage(MessageChannel ch)
+	public CMD_OtherBotHandledMessage(MessageChannel ch, Member m)
 	{
 		channel = ch;
+		super.requestingUser = m;
 	}
 	
 	@Override
@@ -39,17 +41,12 @@ public class CMD_OtherBotHandledMessage extends CommandAdapter{
 		return channel.getIdLong();
 	}
 	
-	public long getUserID()
-	{
-		return -1;
-	}
-	
 	@Override
 	/**
 	 * @throws NullPointerException If bot is null.
 	 */
-	public void execute(AbstractBot bot) {
-		bot.displayCommandHandledMessage(channel.getIdLong());
+	public void execute(AbstractBot bot) throws InterruptedException {
+		bot.displayCommandHandledMessage(channel.getIdLong(), super.requestingUser);
 		
 	}
 

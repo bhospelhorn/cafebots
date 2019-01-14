@@ -31,20 +31,20 @@ import waffleoRai_schedulebot.EventType;
  * <br>sor defo
  * <br>sor view [etype]
  * @author Blythe Hospelhorn
- * @version 1.2.1
- * @since August 11, 2018
+ * @version 1.3.0
+ * @since January 14, 2019
  */
 public class CMD_SOR extends CommandAdapter {
 	
 	private MessageChannel channel;
-	private Member user;
+	//private Member user;
 	private boolean dir;
 	private boolean all;
 	private boolean defo;
 	private EventType type;
 	private int level;
 	
-	private Guild guild;
+	//private Guild guild;
 	
 	/**
 	 * Construct a SOR (Switch on/off Reminders) command that switches all reminders on
@@ -58,7 +58,7 @@ public class CMD_SOR extends CommandAdapter {
 	{
 		//All	
 		channel = ch;
-		user = u;
+		super.requestingUser = u;
 		dir = direction;
 		all = true;
 		type = null;
@@ -81,7 +81,8 @@ public class CMD_SOR extends CommandAdapter {
 	{
 		//One
 		channel = ch;
-		user = u;
+		//user = u;
+		super.requestingUser = u;
 		dir = false;
 		all = false;
 		defo = false;
@@ -102,7 +103,7 @@ public class CMD_SOR extends CommandAdapter {
 	{
 		channel = ch;
 		type = t;
-		guild = g;
+		//guild = g;
 		MessageID cmdmsg = new MessageID(cmdID, ch.getIdLong());
 		super.setCommandMessageID(cmdmsg);
 	}
@@ -113,18 +114,13 @@ public class CMD_SOR extends CommandAdapter {
 		return channel.getIdLong();
 	}
 	
-	public long getUserID()
-	{
-		return user.getUser().getIdLong();
-	}
-
 	@Override
 	/**
 	 * @throws NullPointerException If bot is null.
 	 */
-	public void execute(AbstractBot bot) 
+	public void execute(AbstractBot bot) throws InterruptedException 
 	{
-		if (user == null)
+		if (super.requestingUser == null)
 		{
 			bot.printReminderTimes(channel.getIdLong(), type);
 			super.cleanAfterMyself(bot);
@@ -132,14 +128,14 @@ public class CMD_SOR extends CommandAdapter {
 		}
 		if (all)
 		{
-			if(dir) bot.sorAllOn(channel.getIdLong(), user);
-			else bot.sorAllOff(channel.getIdLong(), user);
+			if(dir) bot.sorAllOn(channel.getIdLong(), super.requestingUser);
+			else bot.sorAllOff(channel.getIdLong(), super.requestingUser);
 		}
 		else if (defo)
 		{
-			bot.sorDefo(channel.getIdLong(), user);
+			bot.sorDefo(channel.getIdLong(), super.requestingUser);
 		}
-		else bot.sor(channel.getIdLong(), user, type, level);
+		else bot.sor(channel.getIdLong(), super.requestingUser, type, level);
 		super.cleanAfterMyself(bot);
 	}
 	
@@ -149,9 +145,4 @@ public class CMD_SOR extends CommandAdapter {
 		return "sor";
 	}
 
-	public long getGuildID()
-	{
-		if (user == null) return guild.getIdLong();
-		return user.getGuild().getIdLong();
-	}
 }

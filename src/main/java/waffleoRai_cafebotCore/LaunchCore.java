@@ -452,7 +452,39 @@ public class LaunchCore {
 			if (bots[i] != null)
 			{
 				StringImporter si = new StringImporter(bdatdir + File.separator + "BOT" + i + File.separator + botstringxml[i]);
-				bots[i].setStringMap(si.getStringMap());	
+				Map<String, String> smap = si.getStringMap();
+				bots[i].loadStringMap(smap);
+
+				//Find and load alternate strings
+				System.out.println("LaunchCore.loadCore || BOT" + i + ": Loading alt strings...");
+				//Req
+				for (int j = 0; j < 3; j++)
+				{
+					String filename = smap.get(BotStrings.getGenderStringFileNameKey_Req(j));
+					String filepath = bdatdir + File.separator + "BOT" + i + File.separator + filename;
+					try{
+						Map<String,String> xmap = mapXMLFile(filepath);
+						bots[i].loadAltStringXML(j, false, xmap);
+					}
+					catch(Exception e)
+					{
+						System.out.println("LaunchCore.loadCore || BOT" + i + ": Alt string XML not found " + filepath + " | No alt strings will be loaded for this case.");
+					}
+				}
+				//Targ
+				for (int j = 0; j < 6; j++)
+				{
+					String filename = smap.get(BotStrings.getGenderStringFileNameKey_Targ(j));
+					String filepath = bdatdir + File.separator + "BOT" + i + File.separator + filename;
+					try{
+						Map<String,String> xmap = mapXMLFile(filepath);
+						bots[i].loadAltStringXML(j, true, xmap);
+					}
+					catch(Exception e)
+					{
+						System.out.println("LaunchCore.loadCore || BOT" + i + ": Alt string XML not found " + filepath + " | No alt strings will be loaded for this case.");
+					}
+				}
 			}
 			System.out.println("LaunchCore.loadCore || BOT" + i + ": Strings loaded.");
 			//if (i == 1) binit1 = binit;

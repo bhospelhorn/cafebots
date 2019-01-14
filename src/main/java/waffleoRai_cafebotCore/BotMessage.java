@@ -56,6 +56,35 @@ public class BotMessage {
 			}
 		}
 		
+		public void substituteStringSeries(ReplaceStringType target, List<String> strings)
+		{
+			if (ismention) return; //Can't split
+			int nstr = strings.size();
+			for (int i = 0; i < nstr; i++)
+			{
+				if (subcomps == null)
+				{				
+					String splitter = target.getString().toString() + i;
+					String[] sarr = str.split(splitter);
+					if (sarr != null && sarr.length > 1)
+					{
+						String s = strings.get(i);
+						subcomps = new ArrayList<MessageComp>(sarr.length + (sarr.length - 1));
+						for (int j = 0; j < sarr.length; j++)
+						{
+							if (j > 0) subcomps.add(new MessageComp(s));
+							subcomps.add(new MessageComp(sarr[j]));
+						}
+					}	
+				}
+				else
+				{
+					for (MessageComp c : subcomps) c.substituteStringSeries(target, strings);
+				}
+			}
+			
+		}
+		
 		public void substituteMention(ReplaceStringType t, IMentionable o)
 		{
 			if (ismention) return; //Can't split
@@ -170,6 +199,12 @@ public class BotMessage {
 	public void substituteString(ReplaceStringType target, String str)
 	{
 		rootcomp.substituteString(target, str);
+	}
+	
+	public void substituteStringSeries(ReplaceStringType target, List<String> strings)
+	{
+		if(strings == null || strings.isEmpty()) return;
+		rootcomp.substituteStringSeries(target, strings);
 	}
 	
 	public void substituteMention(ReplaceStringType target, IMentionable obj)

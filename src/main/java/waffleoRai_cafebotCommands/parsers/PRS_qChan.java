@@ -9,8 +9,8 @@ import waffleoRai_cafebotCommands.Commands.CMD_qChan;
 /**
  * Query channel command (qchan) parser
  * @author Blythe Hospelhorn
- * @version 1.0.1
- * @since July 20, 2018
+ * @version 1.1.0
+ * @since January 14, 2019
  */
 public class PRS_qChan implements Parser{
 	
@@ -19,11 +19,11 @@ public class PRS_qChan implements Parser{
 	
 	@Override
 	public Command generateCommand(String[] args, MessageReceivedEvent event) {
-		if (args.length < 2) return new CMD_BadCommandMessage(event.getChannel(), event.getGuild(), event.getMessageIdLong());
-		if (args[1].equals(BIRTHDAY)) return new CMD_qChan(event.getChannel(), event.getGuild(), true, event.getMessageIdLong());
-		else if (args[1].equals(GREETING)) return new CMD_qChan(event.getChannel(), event.getGuild(), false, event.getMessageIdLong());
+		if (args.length < 2) return new CMD_BadCommandMessage(event.getChannel(), event.getMember(), event.getMessageIdLong());
+		if (args[1].equals(BIRTHDAY)) return new CMD_qChan(event.getChannel(), event.getMember(), true, event.getMessageIdLong());
+		else if (args[1].equals(GREETING)) return new CMD_qChan(event.getChannel(), event.getMember(), false, event.getMessageIdLong());
 		
-		return new CMD_BadCommandMessage(event.getChannel(), event.getGuild(), event.getMessageIdLong());
+		return new CMD_BadCommandMessage(event.getChannel(), event.getMember(), event.getMessageIdLong());
 	}
 
 }

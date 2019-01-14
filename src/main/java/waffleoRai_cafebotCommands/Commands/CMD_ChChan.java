@@ -27,13 +27,13 @@ import waffleoRai_cafebotCore.AbstractBot;
  * <br>chchan greeting [channelName]
  * <br><i>These commands are for guild admins only.</i>
  * @author Blythe Hospelhorn
- * @version 1.1.2
- * @since August 11, 2018
+ * @version 1.2.0
+ * @since January 14, 2019
  */
 public class CMD_ChChan extends CommandAdapter{
 
 	private MessageChannel cmd_channel;
-	private Member user;
+	//private Member user;
 	private String trg_channel;
 	private boolean bday;
 	
@@ -51,7 +51,8 @@ public class CMD_ChChan extends CommandAdapter{
 	public CMD_ChChan(MessageChannel ch, Member u, String tchan, boolean birthday, long cmdID)
 	{
 		cmd_channel = ch;
-		user = u;
+		//user = u;
+		super.requestingUser = u;
 		trg_channel = tchan;
 		bday = birthday;
 		MessageID cmdmsg = new MessageID(cmdID, ch.getIdLong());
@@ -64,18 +65,13 @@ public class CMD_ChChan extends CommandAdapter{
 		return cmd_channel.getIdLong();
 	}
 	
-	public long getUserID()
-	{
-		return user.getUser().getIdLong();
-	}
-	
 	@Override
 	/**
 	 * @throws NullPointerException If bot is null.
 	 */
-	public void execute(AbstractBot bot) {
-		if (bday) bot.setBirthdayChannel(cmd_channel.getIdLong(), trg_channel, user);
-		else bot.setGreetingChannel(cmd_channel.getIdLong(), trg_channel, user);
+	public void execute(AbstractBot bot) throws InterruptedException {
+		if (bday) bot.setBirthdayChannel(cmd_channel.getIdLong(), trg_channel, super.requestingUser);
+		else bot.setGreetingChannel(cmd_channel.getIdLong(), trg_channel, super.requestingUser);
 		super.cleanAfterMyself(bot);
 	}
 	
@@ -85,9 +81,4 @@ public class CMD_ChChan extends CommandAdapter{
 		return "chchan";
 	}
 
-	public long getGuildID()
-	{
-		return user.getGuild().getIdLong();
-	}
-	
 }

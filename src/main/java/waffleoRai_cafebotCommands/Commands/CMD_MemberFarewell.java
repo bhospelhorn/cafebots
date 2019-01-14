@@ -18,12 +18,12 @@ import waffleoRai_cafebotCore.AbstractBot;
  * and pinging requesting admins to alert them to the departure.
  * <br>This event cannot be induced via command line. It is internal only.
  * @author Blythe Hospelhorn
- * @version 1.0.0
- * @since July 1, 2018
+ * @version 1.1.0
+ * @since January 14, 2019
  */
 public class CMD_MemberFarewell extends CommandAdapter{
 
-	private Member user;
+	//private Member user;
 	
 	/**
 	 * Construct a MemberFarewell command.
@@ -31,22 +31,17 @@ public class CMD_MemberFarewell extends CommandAdapter{
 	 */
 	public CMD_MemberFarewell(Member m)
 	{
-		user = m;
-	}
-	
-	@Override
-	public long getUserID()
-	{
-		return user.getUser().getIdLong();
+		//user = m;
+		super.requestingUser = m;
 	}
 	
 	@Override
 	/**
 	 * @throws NullPointerException If bot is null.
 	 */
-	public void execute(AbstractBot bot) {
-		bot.farewellUser(user);
-		bot.pingUserDeparture(user);
+	public void execute(AbstractBot bot) throws InterruptedException {
+		bot.farewellUser(requestingUser);
+		bot.pingUserDeparture(requestingUser);
 	}
 
 	public String toString()
@@ -54,9 +49,4 @@ public class CMD_MemberFarewell extends CommandAdapter{
 		return ParseCore.CMD_FAREWELLMEMBER;
 	}
 
-	public long getGuildID()
-	{
-		return user.getGuild().getIdLong();
-	}
-	
 }

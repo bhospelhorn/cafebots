@@ -10,7 +10,7 @@ public class PRS_CheckAdminRoles implements Parser{
 	@Override
 	public Command generateCommand(String[] args, MessageReceivedEvent event) {
 		
-		return new CMD_ViewAdminRoles(event.getChannel(), event.getGuild(), event.getAuthor(), event.getMessageIdLong());
+		return new CMD_ViewAdminRoles(event.getChannel(), event.getMember(), event.getMessageIdLong());
 	}
 
 }

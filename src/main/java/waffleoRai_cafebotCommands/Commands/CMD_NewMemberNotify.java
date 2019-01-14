@@ -1,6 +1,5 @@
 package waffleoRai_cafebotCommands.Commands;
 
-import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Member;
 import waffleoRai_cafebotCommands.CommandAdapter;
 import waffleoRai_cafebotCommands.ParseCore;
@@ -22,38 +21,34 @@ import waffleoRai_cafebotCore.AbstractBot;
  * and pinging requesting admins to alert them to the new arrival.
  * <br>This event cannot be induced via command line. It is internal only.
  * @author Blythe Hospelhorn
- * @version 1.1.0
- * @since August 6, 2018
+ * @version 1.2.0
+ * @since January 14, 2019
  */
 public class CMD_NewMemberNotify extends CommandAdapter{
 
-	private Guild guild;
-	private Member user;
+	//private Guild guild;
+	//private Member user;
 	
 	/**
 	 * Construct a NewMemberNotify command.
 	 * @param g Guild the new user was detected arriving in.
 	 * @param m User that just arrived, as a JDA Member object.
 	 */
-	public CMD_NewMemberNotify(Guild g, Member m)
+	public CMD_NewMemberNotify(Member m)
 	{
-		guild = g;
-		user = m;
-	}
-	
-	public long getUserID()
-	{
-		return user.getUser().getIdLong();
+		//guild = g;
+		//user = m;
+		super.requestingUser = m;
 	}
 	
 	@Override
 	/**
 	 * @throws NullPointerException If bot is null.
 	 */
-	public void execute(AbstractBot bot) {
-		bot.greetNewUser(guild, user);
-		bot.pingUserArrival(guild, user);
-		bot.newMember(user);
+	public void execute(AbstractBot bot) throws InterruptedException {
+		bot.greetNewUser(getGuild(), super.requestingUser);
+		bot.pingUserArrival(getGuild(), super.requestingUser);
+		bot.newMember(requestingUser);
 	}
 
 	@Override
@@ -62,8 +57,4 @@ public class CMD_NewMemberNotify extends CommandAdapter{
 		return ParseCore.CMD_GREETNEWMEMBER;
 	}
 
-	public long getGuildID()
-	{
-		return guild.getIdLong();
-	}
 }

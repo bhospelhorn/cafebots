@@ -9,7 +9,7 @@ import waffleoRai_cafebotCore.AbstractBot;
 public class CMD_EventInfo extends CommandAdapter{
 	
 	private MessageChannel channel;
-	private Member member;
+	//private Member member;
 	private long eventID;
 	
 	//private CalendarEvent event;
@@ -17,7 +17,8 @@ public class CMD_EventInfo extends CommandAdapter{
 	public CMD_EventInfo(MessageChannel c, Member m, long e, long cmdID)
 	{
 		channel = c;
-		member = m;
+		//member = m;
+		super.requestingUser = m;
 		eventID = e;
 		MessageID cmdmsg = new MessageID(cmdID, c.getIdLong());
 		super.setCommandMessageID(cmdmsg);
@@ -30,16 +31,11 @@ public class CMD_EventInfo extends CommandAdapter{
 		return channel.getIdLong();
 	}
 	
-	public long getUserID()
-	{
-		return member.getUser().getIdLong();
-	}
-	
 	@Override
 	/**
 	 * @throws NullPointerException If bot is null.
 	 */
-	public void execute(AbstractBot bot) {
+	public void execute(AbstractBot bot) throws InterruptedException {
 		bot.displayEventInfo(getChannelID(), getGuildID(), eventID, getUserID());
 		super.cleanAfterMyself(bot);
 	}
@@ -50,9 +46,4 @@ public class CMD_EventInfo extends CommandAdapter{
 		return "eventinfo";
 	}
 	
-	public long getGuildID()
-	{
-		return member.getGuild().getIdLong();
-	}
-
 }

@@ -8,32 +8,29 @@ import waffleoRai_cafebotCore.AbstractBot;
 
 public class CMD_PingMeGreetings extends CommandAdapter{
 	
-	private Member req_user;
+	//private Member req_user;
 	private boolean setting;
 	private MessageChannel channel;
-	//private MessageChannel targetchannel; //Just ping to channel of cmd?
+	private String targetchannel; //Just ping to channel of cmd?
 	
-	public CMD_PingMeGreetings(boolean dir, Member user, MessageChannel ch, long cmdID)
+	public CMD_PingMeGreetings(boolean dir, Member user, MessageChannel ch, long cmdID, String chname)
 	{
-		req_user = user;
+		//req_user = user;
+		super.requestingUser = user;
 		setting = dir;
 		channel = ch;
 		MessageID cmdmsg = new MessageID(cmdID, ch.getIdLong());
 		super.setCommandMessageID(cmdmsg);
-	}
-	
-	public long getUserID()
-	{
-		return req_user.getUser().getIdLong();
+		targetchannel = chname;
 	}
 	
 	@Override
 	/**
 	 * @throws NullPointerException If bot is null.
 	 */
-	public void execute(AbstractBot bot) 
+	public void execute(AbstractBot bot) throws InterruptedException 
 	{
-		bot.setUserPingGreetings(channel.getIdLong(), req_user, setting);
+		bot.setUserPingGreetings(channel.getIdLong(), super.requestingUser, setting, targetchannel);
 		super.cleanAfterMyself(bot);
 	}
 
@@ -49,9 +46,4 @@ public class CMD_PingMeGreetings extends CommandAdapter{
 		return channel.getIdLong();
 	}
 	
-	public long getGuildID()
-	{
-		return req_user.getGuild().getIdLong();
-	}
-
 }

@@ -19,7 +19,7 @@ public class PRS_EventBiweekly implements Parser {
 	public Command generateCommand(String[] args, MessageReceivedEvent event) 
 	{
 		if (args.length < 6){
-			return new CMD_InsufficientArgs(event.getChannel().getIdLong(), EventType.BIWEEKLY, event.getAuthor().getName(), event.getGuild().getIdLong(), event.getMessageIdLong());
+			return new CMD_InsufficientArgs(event.getChannel().getIdLong(), EventType.BIWEEKLY, event.getMember(), event.getGuild().getIdLong(), event.getMessageIdLong());
 		}
 		String rawdow = args[1];
 		String rawtime = args[2];
@@ -28,11 +28,11 @@ public class PRS_EventBiweekly implements Parser {
 		String tchan = args[5];
 		
 		int dow = Schedule.getDayOfWeek(rawdow);
-		if (dow < 0) return new CMD_InsufficientArgs(event.getChannel().getIdLong(), EventType.BIWEEKLY, event.getAuthor().getName(), event.getGuild().getIdLong(), event.getMessageIdLong());
+		if (dow < 0) return new CMD_InsufficientArgs(event.getChannel().getIdLong(), EventType.BIWEEKLY, event.getMember(), event.getGuild().getIdLong(), event.getMessageIdLong());
 		
 		String[] time = rawtime.split(":");
 		if (time.length != 2){
-			return new CMD_InsufficientArgs(event.getChannel().getIdLong(), EventType.BIWEEKLY, event.getAuthor().getName(), event.getGuild().getIdLong(), event.getMessageIdLong());
+			return new CMD_InsufficientArgs(event.getChannel().getIdLong(), EventType.BIWEEKLY, event.getMember(), event.getGuild().getIdLong(), event.getMessageIdLong());
 		}
 		int hr = 0;
 		int min = 0;
@@ -43,7 +43,7 @@ public class PRS_EventBiweekly implements Parser {
 		}
 		catch (NumberFormatException e)
 		{
-			return new CMD_InsufficientArgs(event.getChannel().getIdLong(), EventType.BIWEEKLY, event.getAuthor().getName(), event.getGuild().getIdLong(), event.getMessageIdLong());
+			return new CMD_InsufficientArgs(event.getChannel().getIdLong(), EventType.BIWEEKLY, event.getMember(), event.getGuild().getIdLong(), event.getMessageIdLong());
 		}
 
 		boolean group = false;

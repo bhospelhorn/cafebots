@@ -9,13 +9,14 @@ import waffleoRai_cafebotCore.AbstractBot;
 public class CMD_SetAutocleanCommands extends CommandAdapter{
 	
 	private MessageChannel cmd_channel;
-	private Member user;
+	//private Member user;
 	private boolean setOn;
 	
 	public CMD_SetAutocleanCommands(MessageChannel ch, Member m, boolean on, long cmdID)
 	{
 		cmd_channel = ch;
-		user = m;
+		//user = m;
+		super.requestingUser = m;
 		setOn = on;
 		MessageID msgid = new MessageID(cmdID, ch.getIdLong());
 		super.setCommandMessageID(msgid);
@@ -26,17 +27,12 @@ public class CMD_SetAutocleanCommands extends CommandAdapter{
 		return cmd_channel.getIdLong();
 	}
 	
-	public long getUserID()
-	{
-		return user.getUser().getIdLong();
-	}
-	
 	@Override
 	/**
 	 * @throws NullPointerException If bot is null.
 	 */
-	public void execute(AbstractBot bot) {
-		bot.setAutoCommandClean(getChannelID(), user, setOn);
+	public void execute(AbstractBot bot) throws InterruptedException {
+		bot.setAutoCommandClean(getChannelID(), super.requestingUser, setOn);
 		super.cleanAfterMyself(bot);
 	}
 	
@@ -45,12 +41,5 @@ public class CMD_SetAutocleanCommands extends CommandAdapter{
 	{
 		return "autocmdclean";
 	}
-
-	public long getGuildID()
-	{
-		return user.getGuild().getIdLong();
-	}
-	
-
 
 }

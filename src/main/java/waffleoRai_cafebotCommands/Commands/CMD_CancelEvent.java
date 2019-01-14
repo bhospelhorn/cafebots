@@ -23,13 +23,13 @@ import waffleoRai_cafebotCore.AbstractBot;
  * <br><br><b>Standard Command:</b>
  * <br>ecancel [eventID]
  * @author Blythe Hospelhorn
- * @version 1.2.0
- * @since August 11, 2018
+ * @version 1.3.0
+ * @since January 14, 2019
  */
 public class CMD_CancelEvent extends CommandAdapter{
 	
 	private MessageChannel channel;
-	private Member user;
+	//private Member user;
 	private long event;
 	
 	private boolean silent;
@@ -49,7 +49,8 @@ public class CMD_CancelEvent extends CommandAdapter{
 	public CMD_CancelEvent(MessageChannel ch, Member u, long eventID, long cmdID, boolean s, boolean all)
 	{
 		channel = ch;
-		user = u;
+		//user = u;
+		super.requestingUser = u;
 		event = eventID;
 		silent = s;
 		cancelAll = all;
@@ -61,8 +62,8 @@ public class CMD_CancelEvent extends CommandAdapter{
 	/**
 	 * @throws NullPointerException If bot is null.
 	 */
-	public void execute(AbstractBot bot) {
-		bot.cancelEvent_prompt(channel.getIdLong(), user, event, this);
+	public void execute(AbstractBot bot) throws InterruptedException {
+		bot.cancelEvent_prompt(channel.getIdLong(), super.requestingUser, event, this);
 		cleanAfterMyself(bot);
 	}
 	
@@ -72,17 +73,12 @@ public class CMD_CancelEvent extends CommandAdapter{
 		return channel.getIdLong();
 	}
 	
-	public long getUserID()
-	{
-		return user.getUser().getIdLong();
-	}
-	
 	@Override
 	/**
 	 * @throws NullPointerException If bot is null.
 	 */
-	public void execute_confirm(AbstractBot bot, MessageID msgid) {
-		bot.cancelEvent(channel.getIdLong(), user.getGuild().getIdLong(), event, getUserID(), silent, !cancelAll);
+	public void execute_confirm(AbstractBot bot, MessageID msgid) throws InterruptedException {
+		bot.cancelEvent(channel.getIdLong(), getGuildID(), event, getUserID(), silent, !cancelAll);
 		bot.queueCommandMessageForCleaning(msgid, getGuildID());
 	}
 	
@@ -90,14 +86,9 @@ public class CMD_CancelEvent extends CommandAdapter{
 	/**
 	 * @throws NullPointerException If bot is null.
 	 */
-	public void execute_reject(AbstractBot bot, MessageID msgid) {
-		bot.cancelEvent_cancel(channel.getIdLong(), user.getGuild().getIdLong(), event, getUserID());
+	public void execute_reject(AbstractBot bot, MessageID msgid) throws InterruptedException {
+		bot.cancelEvent_cancel(channel.getIdLong(), getGuildID(), event, getUserID());
 		bot.queueCommandMessageForCleaning(msgid, getGuildID());
-	}
-	
-	public long getGuildID()
-	{
-		return user.getGuild().getIdLong();
 	}
 	
 	@Override
@@ -105,6 +96,6 @@ public class CMD_CancelEvent extends CommandAdapter{
 	{
 		return "ecancel";
 	}
-	
+
 
 }

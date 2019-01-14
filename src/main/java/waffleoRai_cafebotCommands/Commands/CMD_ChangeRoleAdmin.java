@@ -12,7 +12,7 @@ public class CMD_ChangeRoleAdmin extends CommandAdapter{
 	private boolean add;
 	
 	private MessageChannel cmd_channel;
-	private Member user;
+	//private Member user;
 	
 	private String roleArg;
 	private Role role;
@@ -21,7 +21,8 @@ public class CMD_ChangeRoleAdmin extends CommandAdapter{
 	{
 		add = addPerm;
 		cmd_channel = channel;
-		user = requester;
+		//user = requester;
+		super.requestingUser = requester;
 		roleArg = role;
 		MessageID cmdmsg = new MessageID(cmdID, channel.getIdLong());
 		super.setCommandMessageID(cmdmsg);
@@ -30,11 +31,6 @@ public class CMD_ChangeRoleAdmin extends CommandAdapter{
 	public long getChannelID()
 	{
 		return cmd_channel.getIdLong();
-	}
-	
-	public long getUserID()
-	{
-		return user.getUser().getIdLong();
 	}
 	
 	public void resolveRole(Role r)
@@ -46,7 +42,7 @@ public class CMD_ChangeRoleAdmin extends CommandAdapter{
 	/**
 	 * @throws NullPointerException If bot is null.
 	 */
-	public void execute(AbstractBot bot) {
+	public void execute(AbstractBot bot) throws InterruptedException {
 		bot.promptChangeAdminPermission(this);
 		super.cleanAfterMyself(bot);
 	}
@@ -55,15 +51,15 @@ public class CMD_ChangeRoleAdmin extends CommandAdapter{
 	/**
 	 * @throws NullPointerException If bot is null.
 	 */
-	public void execute_confirm(AbstractBot bot, MessageID msgid) {
-		if (add) bot.addAdminPermission(getChannelID(), user.getGuild(), role);
-		else bot.removeAdminPermission(getChannelID(), user.getGuild(), role);
+	public void execute_confirm(AbstractBot bot, MessageID msgid) throws InterruptedException {
+		if (add) bot.addAdminPermission(getChannelID(), getGuild(), role);
+		else bot.removeAdminPermission(getChannelID(), getGuild(), role);
 		bot.queueCommandMessageForCleaning(msgid, getGuildID());
 	}
 
 	@Override
-	public void execute_reject(AbstractBot bot, MessageID msgid) {
-		bot.displayGeneralCancel(getChannelID(), user.getUser().getName());
+	public void execute_reject(AbstractBot bot, MessageID msgid) throws InterruptedException {
+		bot.displayGeneralCancel(getChannelID(), super.requestingUser);
 		bot.queueCommandMessageForCleaning(msgid, getGuildID());
 	}
 	
@@ -79,19 +75,9 @@ public class CMD_ChangeRoleAdmin extends CommandAdapter{
 		return roleArg;
 	}
 
-	public Member getMember()
-	{
-		return user;
-	}
-	
 	public boolean addPerm()
 	{
 		return add;
-	}
-	
-	public long getGuildID()
-	{
-		return user.getGuild().getIdLong();
 	}
 	
 }

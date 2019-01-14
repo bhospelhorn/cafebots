@@ -6,13 +6,13 @@ import waffleoRai_cafebotCore.AbstractBot;
 
 public class CMD_UpdateStatusAtReboot extends CommandAdapter{
 	
-	private String gamename;
-	private boolean isOnline;
+	//private String gamename;
+	//private boolean isOnline;
 	
-	public CMD_UpdateStatusAtReboot(String status, boolean online)
+	public CMD_UpdateStatusAtReboot()
 	{
-		gamename = status;
-		isOnline = online;
+		//gamename = status;
+		//isOnline = online;
 	}
 	
 	public long getUserID()
@@ -26,7 +26,8 @@ public class CMD_UpdateStatusAtReboot extends CommandAdapter{
 	 */
 	public void execute(AbstractBot bot) 
 	{
-		bot.setBotGameStatus(gamename, isOnline);
+		//bot.setBotGameStatus(gamename, isOnline);
+		bot.updateBotGameStatus(false);
 	}
 
 	@Override
@@ -42,7 +43,8 @@ public class CMD_UpdateStatusAtReboot extends CommandAdapter{
 	 * @throws NullPointerException If bot is null.
 	 */
 	public void execute_rerequest(AbstractBot bot, MessageID msgid) {
-		bot.setBotGameStatus(gamename, isOnline);
+		//bot.setBotGameStatus(gamename, isOnline);
+		bot.updateBotGameStatus(false);
 	}
 	
 	@Override

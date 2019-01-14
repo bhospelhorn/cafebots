@@ -24,13 +24,13 @@ import waffleoRai_cafebotCore.AbstractBot;
  * <br><br><b>Standard Command:</b>
  * <br>myevents
  * @author Blythe Hospelhorn
- * @version 1.1.1
- * @since August 11, 2018
+ * @version 1.2.0
+ * @since January 14, 2019
  */
 public class CMD_SeeEvents extends CommandAdapter{
 
 	private MessageChannel channel;
-	private Member user;
+	//private Member user;
 	
 	/**
 	 * Construct a SeeEvents command.
@@ -41,7 +41,8 @@ public class CMD_SeeEvents extends CommandAdapter{
 	public CMD_SeeEvents(MessageChannel ch, Member u, long cmdID)
 	{
 		channel = ch;
-		user = u;
+		//user = u;
+		super.requestingUser = u;
 		MessageID cmdmsg = new MessageID(cmdID, ch.getIdLong());
 		super.setCommandMessageID(cmdmsg);
 	}
@@ -52,17 +53,12 @@ public class CMD_SeeEvents extends CommandAdapter{
 		return channel.getIdLong();
 	}
 	
-	public long getUserID()
-	{
-		return user.getUser().getIdLong();
-	}
-	
 	@Override
 	/**
 	 * @throws NullPointerException If bot is null.
 	 */
-	public void execute(AbstractBot bot) {
-		bot.displayAllUserEvents(channel.getIdLong(), user);
+	public void execute(AbstractBot bot) throws InterruptedException {
+		bot.displayAllUserEvents(channel.getIdLong(), super.requestingUser);
 		super.cleanAfterMyself(bot);
 	}
 	
@@ -72,9 +68,4 @@ public class CMD_SeeEvents extends CommandAdapter{
 		return "myevents";
 	}
 	
-	public long getGuildID()
-	{
-		return user.getGuild().getIdLong();
-	}
-
 }

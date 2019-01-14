@@ -3,75 +3,44 @@ package waffleoRai_cafebotCore;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.Collection;
 import java.util.TimeZone;
 
-import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.User;
 import waffleoRai_Utils.FileBuffer;
 import waffleoRai_Utils.FileBuffer.UnsupportedFileTypeException;
-import waffleoRai_schedulebot.CalendarEvent;
-import waffleoRai_schedulebot.EventType;
 
 public class ActorUser {
 	
+	public static final int ACTOR_GENDER_UNKNOWN = 0;
+	public static final int ACTOR_GENDER_FEMALE = 1;
+	public static final int ACTOR_GENDER_MALE = 2;
+	public static final int ACTOR_GENDER_MULTIPLE_MIXED = 3;
+	public static final int ACTOR_GENDER_MULTIPLE_ALLFEM = 4;
+	public static final int ACTOR_GENDER_MULTIPLE_ALLMEN = 5;
+	
 	private long UID;
-	//private Member userlink;
 	
 	private TimeZone timezone;
 	
-	private Map<EventType, Boolean[]> rswitches;
+	private String microphoneModel;
+	private String interfaceModel;
+	private String DAW;
 	
-	private boolean admin;
-	private boolean pingGreetings;
-	private boolean pingFarewells;
-	private long pingGreetingsChannel;
+	private int gender;
 	
-	private Set<CalendarEvent> requested_events;
-	private Set<CalendarEvent> target_events;
-	
-	//private Birthday birthday;
-	
-	//private Set<ActorRole> dirroles;
-	//private Set<ActorRole> actroles;
-	private boolean audioConfirmed;
-	
-	public ActorUser(Member mem)
+	public ActorUser(User u)
 	{
-		User u = mem.getUser();
+		//User u = mem.getUser();
 		//userlink = mem;
 		UID = u.getIdLong();
 		timezone = TimeZone.getDefault();
 		
-		rswitches = new HashMap<EventType, Boolean[]>();
-		for (int i = 0; i < 7; i++)
-		{
-			int ct = GuildSettings.REMINDER_COUNT;
-			Boolean[] barr = new Boolean[ct];
-			for (int j = 0; j < ct; j++){
-				if (j < 2) barr[j] = true;
-				else barr[j] = false;
-			}
-			rswitches.put(EventType.getEventType(i), barr);
-		}
+		microphoneModel = null;
+		interfaceModel = null;
+		DAW = null;
 		
-		admin = mem.isOwner();
-		pingGreetings = false;
-		pingFarewells = false;
-		pingGreetingsChannel = mem.getDefaultChannel().getIdLong();
-		audioConfirmed = false;
-		
-		requested_events = new HashSet<CalendarEvent>();
-		target_events = new HashSet<CalendarEvent>();
-		
-		//birthday = null;
-		//roles = new HashSet<ActorRole>();
+		gender = ACTOR_GENDER_UNKNOWN;
 	}
 	
 	public ActorUser(BufferedReader userfile) throws UnsupportedFileTypeException
@@ -79,48 +48,22 @@ public class ActorUser {
 		try
 		{
 			String line = userfile.readLine();
-			//UID = Long.parseLong(line);
 			UID = Long.parseUnsignedLong(line);
-			//userlink = guild.getMemberById(UID);
 			timezone = TimeZone.getTimeZone(userfile.readLine());
 			
-			rswitches = new HashMap<EventType, Boolean[]>();
-			for (int i = 0; i < 7; i++)
-			{
-				line = userfile.readLine();
-				int len = line.length();
-				Boolean[] barr = new Boolean[len];
-				for (int j = 0; j < len; j++)
-				{
-					char c = line.charAt(j);
-					if (c == '1') barr[j] = true;
-					else barr[j] = false;
-				}
-				rswitches.put(EventType.getEventType(i), barr);
-			}
-		
 			line = userfile.readLine();
-			if (line.equals("1")) admin = true;
-			else admin = false;
+			if (line.equals("null")) microphoneModel = null;
+			else microphoneModel = line;
 			
 			line = userfile.readLine();
-			if (line.equals("1")) pingGreetings = true;
-			else pingGreetings = false;
-			if (line.equals("1")) pingFarewells = true;
-			else pingFarewells = false;
+			if (line.equals("null")) interfaceModel = null;
+			else interfaceModel = line;
 			
 			line = userfile.readLine();
-			pingGreetingsChannel = Long.parseUnsignedLong(line);
+			if (line.equals("null")) DAW = null;
+			else DAW = line;
 			
-			line = userfile.readLine();
-			if (line.equals("1")) audioConfirmed = true;
-			else audioConfirmed = false;
-			
-			requested_events = new HashSet<CalendarEvent>();
-			target_events = new HashSet<CalendarEvent>();
-			
-			//birthday = null;
-			//roles = new HashSet<ActorRole>();
+			gender = Integer.parseInt(userfile.readLine());
 			
 		}
 		catch(Exception e)
@@ -136,74 +79,29 @@ public class ActorUser {
 		return UID;
 	}
 	
-	/*
-	public Member getMember()
-	{
-		return userlink;
-	}*/
-	
 	public TimeZone getTimeZone()
 	{
 		return timezone;
 	}
-
-	public boolean reminderOn(EventType type, int rlevel)
+	
+	public String getMicrophoneName()
 	{
-		int lv = rlevel - 1;
-		if (lv < 0) return false;
-		Boolean[] barr = rswitches.get(type);
-		if (barr == null) return false;
-		if (lv > barr.length) return false;
-		return barr[lv];
+		return this.microphoneModel;
 	}
 	
-	public boolean isAdmin()
+	public String getInterfaceName()
 	{
-		return admin;
+		return this.interfaceModel;
 	}
 	
-	public boolean pingGreetingsOn()
+	public String getDAWName()
 	{
-		return pingGreetings;
+		return this.DAW;
 	}
 
-	public boolean pingFarewellsOn()
+	public int getGender()
 	{
-		return this.pingFarewells;
-	}
-	
-	public long getPingGreetingsChannel()
-	{
-		return pingGreetingsChannel;
-	}
-	
-	public List<CalendarEvent> getLinkedRequestedEvents()
-	{
-		List<CalendarEvent> elist = new ArrayList<CalendarEvent>(requested_events.size());
-		elist.addAll(requested_events);
-		Collections.sort(elist);
-		return elist;
-	}
-	
-	public List<CalendarEvent> getLinkedTargetEvents()
-	{
-		List<CalendarEvent> elist = new ArrayList<CalendarEvent>(target_events.size());
-		elist.addAll(target_events);
-		Collections.sort(elist);
-		return elist;
-	}
-	
-	/*public List<ActorRole> getLinkedRoles()
-	{
-		List<ActorRole> rlist = new ArrayList<ActorRole>(roles.size());
-		rlist.addAll(roles);
-		Collections.sort(rlist);
-		return rlist;
-	}*/
-	
-	public boolean audioConfirmed()
-	{
-		return audioConfirmed;
+		return gender;
 	}
 	
 	/* ----- Setters ----- */
@@ -213,101 +111,25 @@ public class ActorUser {
 		timezone = TimeZone.getTimeZone(tzID);
 	}
 	
-	public void setReminder(EventType type, int rlevel, boolean on)
+	public void setMicrophoneName(String name)
 	{
-		if (rlevel < 0) return;
-		Boolean[] barr = rswitches.get(type);
-		if (barr == null) return;
-		if (rlevel > barr.length) return;
-		barr[rlevel] = on;
+		this.microphoneModel = name;
 	}
 	
-	public void setAdmin(boolean b)
+	public void setInterfaceName(String name)
 	{
-		admin = b;
+		this.interfaceModel = name;
 	}
 	
-	public void setGreetingPings(boolean b)
+	public void setDAWName(String name)
 	{
-		pingGreetings = b;
+		this.DAW = name;
 	}
 	
-	public void setFarewellPings(boolean b)
+	public void setGender(int gender)
 	{
-		this.pingFarewells = b;
-	}
-	
-	public void setGreetingPingsChannel(long channelID)
-	{
-		pingGreetingsChannel = channelID;
-	}
-	
-	public void setAudioConfirmation(boolean b)
-	{
-		audioConfirmed = b;
-	}
-	
-	public void linkEvent(CalendarEvent e)
-	{
-		//See if requesting user...
-		long r = e.getRequestingUser();
-		if (r == UID)
-		{
-			requested_events.add(e);
-			return;
-		}
-		List<Long> llist = e.getTargetUsers();
-		if (llist.contains(UID))
-		{
-			target_events.add(e);
-			return;
-		}
-	}
-	
-	/*public void linkRole(ActorRole r)
-	{
-		if (r.getActorUser() != UID) return;
-		roles.add(r);
-	}*/
-	
-	public void turnOffAllReminders()
-	{
-		EventType[] all = EventType.values();
-		for (EventType t : all)
-		{
-			Boolean[] switches = rswitches.get(t);
-			if (switches != null)
-			{
-				for (int i = 0; i < switches.length; i++) switches[i] = false;
-			}
-		}
-	}
-	
-	public void turnOnAllReminders()
-	{
-		EventType[] all = EventType.values();
-		for (EventType t : all)
-		{
-			Boolean[] switches = rswitches.get(t);
-			if (switches != null)
-			{
-				for (int i = 0; i < switches.length; i++) switches[i] = true;
-			}
-		}
-	}
-	
-	public void resetRemindersToDefault()
-	{
-		Set<EventType> alltypes = rswitches.keySet();
-		for (EventType t : alltypes)
-		{
-			Boolean[] switches = rswitches.get(t);
-			for (int i = 0; i < switches.length; i++)
-			{
-				if (i < 2) switches[i] = true;
-				else switches[i] = false;
-			}
-		}
+		if (gender < 0 || gender > 2) gender = 0;
+		this.gender = gender;
 	}
 	
 	/* ----- Disk Access ----- */
@@ -316,29 +138,56 @@ public class ActorUser {
 	{
 		bw.write(Long.toUnsignedString(UID) + "\n");
 		bw.write(timezone.getID() + "\n");
-		for (int i = 0; i < 7; i++)
+		bw.write(microphoneModel + "\n");
+		bw.write(interfaceModel + "\n");
+		bw.write(DAW + "\n");
+		bw.write(Integer.toString(gender) + "\n");
+	}
+	
+	/* ----- Misc. ----- */
+	
+	public static int getGroupGender(Collection<ActorUser> users)
+	{
+		if (users == null) return ACTOR_GENDER_UNKNOWN;
+		if (users.size() == 1)
 		{
-			Boolean[] barr = rswitches.get(EventType.getEventType(i));
-			for (int j = 0; j < barr.length; j++)
-			{
-				if (barr[j]) bw.write("1");
-				else bw.write("0");
-			}
-			bw.write("\n");
+			for (ActorUser u : users) return u.getGender();
+		}
+		int fcount = 0;
+		int mcount = 0;
+		for (ActorUser u : users)
+		{
+			int g = u.getGender();
+			if (g == ACTOR_GENDER_UNKNOWN) return ACTOR_GENDER_MULTIPLE_MIXED;
+			else if (g == ACTOR_GENDER_FEMALE) fcount++;
+			else if (g == ACTOR_GENDER_MALE) mcount++;
 		}
 		
-		if (admin) bw.write("1\n");
-		else bw.write("0\n");
+		if (mcount > 0 && fcount == 0) return ACTOR_GENDER_MULTIPLE_ALLMEN;
+		if (fcount > 0 && mcount == 0) return ACTOR_GENDER_MULTIPLE_ALLFEM;
+		return ACTOR_GENDER_MULTIPLE_MIXED;
+	}
+	
+	public static int getGuildUserGroupGender(Collection<GuildUser> users)
+	{
+		if (users == null) return ACTOR_GENDER_UNKNOWN;
+		if (users.size() == 1)
+		{
+			for (GuildUser u : users) return u.getUserProfile().getGender();
+		}
+		int fcount = 0;
+		int mcount = 0;
+		for (GuildUser u : users)
+		{
+			int g = u.getUserProfile().getGender();
+			if (g == ACTOR_GENDER_UNKNOWN) return ACTOR_GENDER_MULTIPLE_MIXED;
+			else if (g == ACTOR_GENDER_FEMALE) fcount++;
+			else if (g == ACTOR_GENDER_MALE) mcount++;
+		}
 		
-		if (pingGreetings) bw.write("1\n");
-		else bw.write("0\n");
-		if (pingFarewells) bw.write("1\n");
-		else bw.write("0\n");
-		
-		bw.write(Long.toUnsignedString(pingGreetingsChannel) + "\n");
-		
-		if (audioConfirmed) bw.write("1\n");
-		else bw.write("0\n");
+		if (mcount > 0 && fcount == 0) return ACTOR_GENDER_MULTIPLE_ALLMEN;
+		if (fcount > 0 && mcount == 0) return ACTOR_GENDER_MULTIPLE_ALLFEM;
+		return ACTOR_GENDER_MULTIPLE_MIXED;
 	}
 	
 }

@@ -11,7 +11,7 @@ import waffleoRai_schedulebot.CalendarEvent;
 public class CMD_DeclineEvent extends CommandAdapter{
 	
 	private MessageChannel channel;
-	private Member member;
+	//private Member member;
 	private long eventID;
 	
 	private CalendarEvent event;
@@ -19,7 +19,8 @@ public class CMD_DeclineEvent extends CommandAdapter{
 	public CMD_DeclineEvent(MessageChannel c, Member m, long e, long cmdID)
 	{
 		channel = c;
-		member = m;
+		//member = m;
+		super.requestingUser = m;
 		eventID = e;
 		MessageID cmdmsg = new MessageID(cmdID, c.getIdLong());
 		super.setCommandMessageID(cmdmsg);
@@ -32,25 +33,20 @@ public class CMD_DeclineEvent extends CommandAdapter{
 		return channel.getIdLong();
 	}
 	
-	public long getUserID()
-	{
-		return member.getUser().getIdLong();
-	}
-	
 	@Override
 	/**
 	 * @throws NullPointerException If bot is null.
 	 */
-	public void execute(AbstractBot bot) {
+	public void execute(AbstractBot bot) throws InterruptedException {
 		if (event == null)
 		{
-			event = bot.retrieveEvent(eventID, member.getGuild().getIdLong());
+			event = bot.retrieveEvent(eventID, super.getGuildID());
 			bot.redirectEventCommand(this, event.getType());
 			super.cleanAfterMyself(bot);
 		}
 		else
 		{
-			bot.RSVPEvent(channel.getIdLong(), member, event, Attendance.NO);
+			bot.RSVPEvent(channel.getIdLong(), super.requestingUser, event, Attendance.NO);
 		}
 	}
 	
@@ -58,11 +54,6 @@ public class CMD_DeclineEvent extends CommandAdapter{
 	public String toString()
 	{
 		return "cantgo";
-	}
-	
-	public long getGuildID()
-	{
-		return member.getGuild().getIdLong();
 	}
 
 }

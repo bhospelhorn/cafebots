@@ -38,8 +38,24 @@ public enum ReplaceStringType {
 	
 	PLACEHOLDER_1("%P1"),
 	PLACEHOLDER_2("%P2"),
-	PLACEHOLDER_3("%P3"),;
+	PLACEHOLDER_3("%P3"),
 	
+	PRONOUN_SUB_REC("%#sr"),
+	PRONOUN_OBJ_REC("%#or"),
+	PRONOUN_POS_REC("%#pr"),
+	PRONOUN_SUB_TARG("%#st"),
+	PRONOUN_OBJ_TARG("%#ot"),
+	PRONOUN_POS_TARG("%#pt"),
+	PRONOUN_SUB_REC_C("%#SR"),
+	PRONOUN_OBJ_REC_C("%#OR"),
+	PRONOUN_POS_REC_C("%#PR"),
+	PRONOUN_SUB_TARG_C("%#ST"),
+	PRONOUN_OBJ_TARG_C("%#OT"),
+	PRONOUN_POS_TARG_C("%#PT"),
+	
+	GENDERSTRING_REQUSER("%#r"),
+	GENDERSTRING_TARGUSER("%#u"),;
+
 	private CharSequence string;
 	
 	private ReplaceStringType(CharSequence s)

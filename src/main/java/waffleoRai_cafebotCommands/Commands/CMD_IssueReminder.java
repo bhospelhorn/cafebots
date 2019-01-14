@@ -18,7 +18,7 @@ public class CMD_IssueReminder extends CommandAdapter{
 	}
 
 	@Override
-	public void execute(AbstractBot bot) 
+	public void execute(AbstractBot bot) throws InterruptedException 
 	{
 		bot.issueEventReminder(event, reminder_level, guildID);
 	}

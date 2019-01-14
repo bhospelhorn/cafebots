@@ -11,7 +11,7 @@ public class PRS_EventInfo implements Parser{
 	@Override
 	public Command generateCommand(String[] args, MessageReceivedEvent event) 
 	{
-		if (args.length < 2) return new CMD_BadCommandMessage(event.getChannel(), event.getGuild(), event.getMessageIdLong());
+		if (args.length < 2) return new CMD_BadCommandMessage(event.getChannel(), event.getMember(), event.getMessageIdLong());
 		//Attempt to long-parse the second argument
 		try
 		{
@@ -20,7 +20,7 @@ public class PRS_EventInfo implements Parser{
 		}
 		catch (Exception e)
 		{
-			return new CMD_BadCommandMessage(event.getChannel(), event.getGuild(), event.getMessageIdLong());
+			return new CMD_BadCommandMessage(event.getChannel(), event.getMember(), event.getMessageIdLong());
 		}
 	}
 

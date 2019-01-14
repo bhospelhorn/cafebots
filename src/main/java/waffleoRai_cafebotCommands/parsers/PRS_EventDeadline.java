@@ -19,7 +19,7 @@ public class PRS_EventDeadline implements Parser{
 	{
 		//System.err.println(Thread.currentThread().getName() + " || PRS_EventDeadline.<init> || DEBUG - Called!");
 		if (args.length < 8){
-			return new CMD_InsufficientArgs(event.getChannel().getIdLong(), EventType.DEADLINE, event.getAuthor().getName(), event.getGuild().getIdLong(), event.getMessageIdLong());
+			return new CMD_InsufficientArgs(event.getChannel().getIdLong(), EventType.DEADLINE, event.getMember(), event.getGuild().getIdLong(), event.getMessageIdLong());
 		}
 		
 		System.err.println(Thread.currentThread().getName() + " || PRS_EventDeadline.<init> || DEBUG - Arguments:");
@@ -46,12 +46,12 @@ public class PRS_EventDeadline implements Parser{
 		}
 		catch (NumberFormatException e)
 		{
-			return new CMD_InsufficientArgs(event.getChannel().getIdLong(), EventType.DEADLINE, event.getAuthor().getName(), event.getGuild().getIdLong(), event.getMessageIdLong());
+			return new CMD_InsufficientArgs(event.getChannel().getIdLong(), EventType.DEADLINE, event.getMember(), event.getGuild().getIdLong(), event.getMessageIdLong());
 		}
 		
 		String[] time = rawtime.split(":");
 		if (time.length != 2){
-			return new CMD_InsufficientArgs(event.getChannel().getIdLong(), EventType.DEADLINE, event.getAuthor().getName(), event.getGuild().getIdLong(), event.getMessageIdLong());
+			return new CMD_InsufficientArgs(event.getChannel().getIdLong(), EventType.DEADLINE, event.getMember(), event.getGuild().getIdLong(), event.getMessageIdLong());
 		}
 		int hr = 0;
 		int min = 0;
@@ -62,7 +62,7 @@ public class PRS_EventDeadline implements Parser{
 		}
 		catch (NumberFormatException e)
 		{
-			return new CMD_InsufficientArgs(event.getChannel().getIdLong(), EventType.DEADLINE, event.getAuthor().getName(), event.getGuild().getIdLong(), event.getMessageIdLong());
+			return new CMD_InsufficientArgs(event.getChannel().getIdLong(), EventType.DEADLINE, event.getMember(), event.getGuild().getIdLong(), event.getMessageIdLong());
 		}
 
 		boolean group = false;
