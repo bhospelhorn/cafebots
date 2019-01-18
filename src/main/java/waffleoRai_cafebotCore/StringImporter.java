@@ -141,7 +141,9 @@ public class StringImporter {
 		
 		
 		//Charset mySet = Charset.forName("UTF8");
+		//System.err.println("DEBUG -- StringImporter.parseStringFile || FilePath = " + filePath);
 		FileBuffer strfile = FileBuffer.createBuffer(filePath);
+		//System.err.println("DEBUG -- StringImporter.parseStringFile || strfile.getFileSize() = " + strfile.getFileSize());
 		String file = strfile.readEncoded_string("UTF8", 0, strfile.getFileSize());
 		
 		String[] sarr = file.split("\n"); //Still not great. Whatever.

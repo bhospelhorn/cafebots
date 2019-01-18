@@ -1917,6 +1917,21 @@ public abstract class AbstractBot implements Bot{
 		return brain.getGuildUser(guildID, userID);
 	}
 	
+	/**
+	 * Have the bot scan all Guilds it is a Member of and create profiles for
+	 * all of those Guilds (and in turn, all of their users).
+	 * <br>This will block the execution thread until it is done.
+	 * @throws InterruptedException If the calling thread is interrupted while waiting
+	 * for Guild profile creation to be completed.
+	 */
+	public void importAllProfiles() throws InterruptedException
+	{
+		JDA myjda = botcore.get();
+		if (myjda == null) return;
+		List<Guild> myguilds = myjda.getGuilds();
+		for (Guild g : myguilds) this.getGuild(g, -1);
+	}
+	
 	/* ----- Commands : Queue ----- */
 	
 	/**

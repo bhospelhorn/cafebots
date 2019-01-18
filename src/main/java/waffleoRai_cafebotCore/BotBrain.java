@@ -31,6 +31,7 @@ import waffleoRai_cafebotCommands.JoinListener;
 import waffleoRai_cafebotCommands.MessageListener;
 import waffleoRai_cafebotCommands.ParseCore;
 import waffleoRai_cafebotCommands.RoleChangeListener;
+import waffleoRai_cafebotCommands.Commands.CMD_SyncGuilds;
 import waffleoRai_schedulebot.Birthday;
 import waffleoRai_schedulebot.BiweeklyEvent;
 import waffleoRai_schedulebot.CalendarEvent;
@@ -199,6 +200,7 @@ public class BotBrain {
 			}
 		}
 		l.resetLoginCounter();
+		bots[1].submitCommand(new CMD_SyncGuilds());
 		System.out.println("BotBrain.start || All bots have logged in!");
 		
 		on = true;
@@ -265,6 +267,7 @@ public class BotBrain {
 	public void forceHardReset() throws LoginException
 	{
 		System.err.println(Schedule.getErrorStreamDateMarker() + " BotBarin.forceHardReset || Hard resetting all bots...");
+		parser.block();
 		int bcount = bots.length;
 		for (int i = 1; i < bcount; i++)
 		{
@@ -333,6 +336,9 @@ public class BotBrain {
 			}
 		}
 		l.resetLoginCounter();
+		
+		bots[1].submitCommand(new CMD_SyncGuilds());
+		parser.unblock();
 		System.out.println(Schedule.getErrorStreamDateMarker() + " BotBrain.forceHardReset || All bots have logged in!");
 	}
 	
@@ -1059,6 +1065,7 @@ public class BotBrain {
 		{
 			guilds = new GuildQueue();
 			members = new MemberQueue();
+			users = new ConcurrentLinkedQueue<User>();
 			kill = false;
 			Random r = new Random();
 			this.setName("UserDataAdderDaemon_" + Integer.toHexString(r.nextInt()));
