@@ -167,6 +167,8 @@ public class GuildMap {
 		GuildSettings gs = new GuildSettings(g, parser, actorMap);
 		pathmap.put(uid, Long.toHexString(uid));
 		guilds.put(uid, gs);
+		gs.startBackupThread();
+		gs.startScheduleThreads();
 	}
 	
 	public GuildSettings removeGuild(long guildUID)
@@ -292,6 +294,7 @@ public class GuildMap {
 		}
 		
 		String upath = installdir + File.separator + USERS_DIRNAME;
+		if (!FileBuffer.directoryExists(upath)) Files.createDirectories(Paths.get(upath));
 		Collection<ActorUser> allUsers = actorMap.values();
 		for(ActorUser u : allUsers)
 		{

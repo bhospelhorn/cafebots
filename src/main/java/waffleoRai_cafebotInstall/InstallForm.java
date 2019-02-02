@@ -8,6 +8,7 @@ import javax.swing.JTextField;
 import waffleoRai_cafebotCore.Bot;
 import waffleoRai_cafebotCore.BotConstructor;
 import waffleoRai_cafebotCore.BotSet;
+import waffleoRai_cafebotCore.GuildMap;
 import waffleoRai_cafebotCore.InitBot;
 import waffleoRai_cafebotCore.Language;
 import waffleoRai_cafebotCore.LaunchCore;
@@ -816,6 +817,21 @@ public class InstallForm extends JFrame{
 			e.printStackTrace();
 			return;
 		}
+		
+		//Generate user data folders...
+		String udatdir = datadir + File.separator + LaunchCore.DIR_USERDATA;
+		try 
+		{
+			Files.createDirectories(Paths.get(udatdir + File.separator + GuildMap.GUILD_DIRNAME));
+			Files.createDirectories(Paths.get(udatdir + File.separator + GuildMap.USERS_DIRNAME));
+		}
+		catch(Exception e)
+		{
+			showError("ERROR: User data directories could not be created! Aborting installation...");
+			e.printStackTrace();
+			return;
+		}
+		
 		System.out.println("InstallForm.install || Installation complete!");
 	}
 	

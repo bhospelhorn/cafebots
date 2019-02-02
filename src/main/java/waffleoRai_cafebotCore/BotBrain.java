@@ -218,6 +218,33 @@ public class BotBrain {
 		}
 		System.out.println("BotBrain.start || All bots have updated their status!");
 		parser.setBetaBot();
+		
+		//Load user data from master bot
+		System.out.println("BotBrain.start || Loading new user data...");
+		JDA masterjda = bots[1].getJDA();
+		List<Guild> guilds = masterjda.getGuilds();
+		for (Guild g : guilds)
+		{
+			//See if already in map
+			if (userdata.getGuildSettings(g.getIdLong()) == null)
+			{
+				userdata.newGuild(g, parser);
+			}
+			else
+			{
+				//Look for new members...
+				List<Member> members = g.getMembers();	
+				for (Member m : members)
+				{
+					GuildUser gu = userdata.getGuildUser(g.getIdLong(), m.getUser().getIdLong());	
+					if (gu == null)
+					{
+						userdata.newMember(m, parser);
+					}
+				}
+			}
+		}
+		
 		parser.unblock();
 		System.out.println("BotBrain.start || Parser has been unblocked!");
 	}

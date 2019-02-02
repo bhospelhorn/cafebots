@@ -54,6 +54,7 @@ public class LaunchCore {
 	public static final String DIR_BOTDATA = "botdata";
 	public static final String DIR_USERDATA = "userdata";
 	public static final String DIR_COREDATA = "commondata";
+
 	//public static final String DIR_BOTCOM = "botcom";
 	
 	public static final String DIR_COREDATA_DATA = "data";
