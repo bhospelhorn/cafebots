@@ -70,6 +70,15 @@ public class GuildUser {
 
 	public GuildUser(BufferedReader gufile, ActorUser userProfile) throws UnsupportedFileTypeException
 	{
+		//UID (Unsigned decimal)
+		//Local Name
+		//Reminder switches (1 line per event type - 7 event types)
+		//Admin bool (0 or 1)
+		//Ping Greetings bool
+		//Ping Farewells bool
+		//Ping Greetings channel (Unsigned decimal)
+		//Audio Confirmed enum
+		
 		if (userProfile == null) throw new IllegalArgumentException();
 		try
 		{
@@ -101,6 +110,7 @@ public class GuildUser {
 			line = gufile.readLine();
 			if (line.equals("1")) pingGreetings = true;
 			else pingGreetings = false;
+			line = gufile.readLine();
 			if (line.equals("1")) pingFarewells = true;
 			else pingFarewells = false;
 			
@@ -259,6 +269,15 @@ public class GuildUser {
 	
 	public void writeToFile(BufferedWriter bw) throws IOException
 	{
+		//UID (Unsigned decimal)
+		//Local Name
+		//Reminder switches (1 line per event type - 7 event types)
+		//Admin bool (0 or 1)
+		//Ping Greetings bool
+		//Ping Farewells bool
+		//Ping Greetings channel (Unsigned decimal)
+		//Audio Confirmed enum
+		
 		bw.write(Long.toUnsignedString(user.getUID()) + "\n");
 		bw.write(localName + "\n");
 		for (int i = 0; i < 7; i++)

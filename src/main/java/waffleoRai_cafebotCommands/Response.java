@@ -19,13 +19,16 @@ import waffleoRai_cafebotCore.AbstractBot;
  * 
  * 1.1.1 -> 1.2.0 | November 1, 2018
  * 	Added framework for interrupt handling
+ * 
+ * 1.2.0 -> 1.2.1 | April 15, 2019
+ * 	Some null handling
  */
 
 /**
  * An object containing information on a user response to a bot command prompt.
  * @author Blythe Hospelhorn
- * @version 1.2.0
- * @since November 1, 2018
+ * @version 1.2.1
+ * @since April 15, 2019
  */
 public class Response {
 	
@@ -111,6 +114,7 @@ public class Response {
 			buildResponseMap(DEFAULT_ENGLISH_YES_STRINGS, DEFAULT_ENGLISH_NO_STRINGS);
 			if (rMap == null) return RESPONSE_INVALID;
 		}
+		if(s == null || s.isEmpty()) return RESPONSE_INVALID;
 		Integer i = rMap.get(s.toLowerCase());
 		if (i == null) return RESPONSE_INVALID;
 		return i;

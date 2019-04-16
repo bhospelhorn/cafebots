@@ -53,6 +53,8 @@ import waffleoRai_schedulebot.Schedule;
  * Updated command ID to MessageID object
  * 1.2.2 -> 1.3.0 | January 14, 2019
  * Update for JDA/ ability to interrupt commands, waits for bot status checks
+ * 1.3.0 -> 1.3.1 | April 15, 2019
+ * Better handling of null and empty input messages?
  */
 
 /**
@@ -67,8 +69,8 @@ import waffleoRai_schedulebot.Schedule;
  * <br> - Should ideally be multithreaded
  * <br> - Should ideally have a more tightly managed queue size
  * @author Blythe Hospelhorn
- * @version 1.3.0
- * @since January 14, 2019
+ * @version 1.3.1
+ * @since April 15, 2019
  */
 public class ParseCore {
 	
@@ -243,6 +245,8 @@ public class ParseCore {
 	{
 		//System.err.println("DEBUG ParseCore.removeMentions || Raw message: " + rawmsg);
 		//System.err.println("DEBUG ParseCore.removeMentions || Number of mentions: " + mentioned.size());
+		if(rawmsg == null) return "";
+		if(rawmsg.isEmpty()) return rawmsg;
 		for (Member u : mentioned)
 		{
 			String mstr = u.getAsMention();
@@ -569,6 +573,7 @@ public class ParseCore {
 		{
 			//System.err.println(Thread.currentThread().getName() + " || ParseCore.parseMessage || DEBUG - No user block.");
 			String command = event.getMessage().getContentRaw();
+			if (command == null || command.isEmpty()) return; //Just... ignore it
 			if (!mentioned.isEmpty())
 			{
 				//Need to clean up command
